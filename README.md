@@ -10,6 +10,8 @@ The current research article (a short version) [is also available.](https://gith
 The code used to produce the figures is available [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/Corona_germany_simple_model.ipynb) (simple model) and [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/Corona_germany_current_forecast_with3scenarios.ipynb) (with change points).
 It is runnable in Google Colab. Requirements are PyMC3 >= 3.7
 
+Some output figures are shown below. The rest are found in the figures folder. We update them regularly.
+
 ## Figures
 
 ### Summary
