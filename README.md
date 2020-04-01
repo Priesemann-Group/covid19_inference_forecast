@@ -16,7 +16,7 @@ It is runnable in Google Colab. Requirements are PyMC3 >= 3.7
 
 <img src="figures/summary_forecast.png" width="600">
 
-### Scenario assuming two changing points
+### Scenario assuming two change points
 
 <img src="figures/Fig_3.png" width="600">
 <img src="figures/Fig_4.png" width="650">
