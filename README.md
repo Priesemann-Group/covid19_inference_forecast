@@ -2,10 +2,9 @@
 
 We attempt to model the spread of Covid-19. 
 
+The current summary (as of 2020-04-02) can be downloaded [from the repo.](https://github.com/Priesemann-Group/covid19_inference_forecast/raw/master/Dehning_etal_Summary.pdf)
 
-The current paper draft (as of 2020-04-01) can be downloaded [from the repo.](https://github.com/Priesemann-Group/covid19_inference_forecast/raw/master/paper_draft_2020-04-01.pdf)
-
-The current research article (a short version) [is also available.](https://github.com/Priesemann-Group/covid19_inference_forecast/raw/master/paper_overview_2020-04-01.pdf)
+The current research article (2020-04-02) [is also available.](https://github.com/Priesemann-Group/covid19_inference_forecast/raw/master/Dehning_etal_ResearchArticle.pdf)
 
 The code used to produce the figures is available [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/Corona_germany_simple_model.ipynb) (simple model) and [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/Corona_germany_current_forecast_with3scenarios.ipynb) (with change points).
 It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
