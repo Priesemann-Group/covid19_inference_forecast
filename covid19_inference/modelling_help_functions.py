@@ -5,14 +5,15 @@ import numpy as np
 
 def _SIR_model(λ, μ, S_begin, I_begin, N):
     new_I_0 = tt.zeros_like(I_begin)
-    def next_day(λ, S_t, I_t, _):
+    def next_day(λ, S_t, I_t, _, μ, N):
         new_I_t = λ/N*I_t*S_t
         S_t = S_t - new_I_t
         I_t = I_t + new_I_t - μ * I_t
-        I_t = tt.nnet.relu(I_t)
+        I_t = tt.clip(I_t, 0, N) # for stability
         return S_t, I_t, new_I_t
     outputs , _  = theano.scan(fn=next_day, sequences=[λ],
-                               outputs_info=[S_begin, I_begin, new_I_0])
+                               outputs_info=[S_begin, I_begin, new_I_0],
+                               non_sequences = [μ, N])
     S_all, I_all, new_I_all = outputs
     return S_all, I_all, new_I_all
 

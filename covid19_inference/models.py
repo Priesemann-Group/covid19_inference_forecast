@@ -106,8 +106,8 @@ def SIR_model_with_change_points(new_cases_obs, change_points_list, date_begin_s
 
 
         # build the time-dependent spreading rate
-        λ_t_list = []
-        λ_step_before = λ_list[0]
+        λ_t_list = [λ_list[0]]
+        λ_step_before = λ_t_list[0]
         for transient_begin, transient_len, λ_step in zip(transient_begin_list,
                                                           transient_len_list,
                                                           λ_list[1:]):
