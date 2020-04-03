@@ -147,7 +147,7 @@ def SIR_model_with_change_points(new_cases_obs, change_points_list, date_begin_s
             "obs",
             nu=4,
             mu=new_cases_inferred[:num_days_data],
-            sigma=(new_cases_inferred[:num_days_data] + 1) ** 0.5 * σ_obs,
+            sigma=tt.abs_(new_cases_inferred[:num_days_data] + 1) ** 0.5 * σ_obs,
             observed=new_cases_obs)
 
         pm.Deterministic('λ_t', λ_t)
