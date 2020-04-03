@@ -14,8 +14,8 @@ def get_jhu_deaths():
     return deaths
 
 def filter_one_country(data_df, country, begin_date, end_date):
-    date_formatted_begin = format_date(begin_date)
-    date_formatted_end = format_date(end_date)
+    date_formatted_begin = _format_date(begin_date)
+    date_formatted_end = _format_date(end_date)
     cases_obs = np.array(data_df.loc[data_df["Country/Region"] == country,
                          date_formatted_begin:date_formatted_end])[0]
     return cases_obs
@@ -26,5 +26,5 @@ def get_last_date(data_df):
     month, day, year = map(int, last_date.split('/'))
     return datetime.datetime(year + 2000, month, day)
 
-format_date = lambda date_py: '{}/{}/{}'.format(date_py.month, date_py.day,
+_format_date = lambda date_py: '{}/{}/{}'.format(date_py.month, date_py.day,
                                                  str(date_py.year)[2:4])

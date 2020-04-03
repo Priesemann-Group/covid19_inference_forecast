@@ -1,13 +1,15 @@
-import numpy as np
 import theano
 import theano.tensor as tt
+import numpy as np
 
-def SIR_model(λ, μ, S_begin, I_begin, N):
+
+def _SIR_model(λ, μ, S_begin, I_begin, N):
     new_I_0 = tt.zeros_like(I_begin)
     def next_day(λ, S_t, I_t, _):
         new_I_t = λ/N*I_t*S_t
         S_t = S_t - new_I_t
         I_t = I_t + new_I_t - μ * I_t
+        I_t = tt.nnet.relu(I_t)
         return S_t, I_t, new_I_t
     outputs , _  = theano.scan(fn=next_day, sequences=[λ],
                                outputs_info=[S_begin, I_begin, new_I_0])
@@ -15,7 +17,7 @@ def SIR_model(λ, μ, S_begin, I_begin, N):
     return S_all, I_all, new_I_all
 
 
-def delay_cases(new_I_t, len_new_I_t, len_new_cases_obs, delay, delay_arr):
+def _delay_cases(new_I_t, len_new_I_t, len_new_cases_obs, delay, delay_arr):
     """
     Delays the input new_I_t by delay and return and array with length len_new_cases_obs
     The initial delay of the output is set by delay_arr.
@@ -26,13 +28,13 @@ def delay_cases(new_I_t, len_new_I_t, len_new_cases_obs, delay, delay_arr):
     Also assure that len_new_I_t is larger then len(new_cases_obs)-delay, otherwise it
     means that the simulated data is not long enough to be fitted to the data.
     """
-    delay_mat = make_delay_matrix(n_rows=len_new_I_t,
+    delay_mat = _make_delay_matrix(n_rows=len_new_I_t,
                                   n_columns=len_new_cases_obs, initial_delay=delay_arr)
-    inferred_cases = interpolate(new_I_t, delay, delay_mat)
+    inferred_cases = _interpolate(new_I_t, delay, delay_mat)
     return inferred_cases
 
 
-def make_delay_matrix(n_rows, n_columns, initial_delay=0):
+def _make_delay_matrix(n_rows, n_columns, initial_delay=0):
     """
     Has in each entry the delay between the input with size n_rows and the output
     with size n_columns
@@ -48,16 +50,12 @@ def make_delay_matrix(n_rows, n_columns, initial_delay=0):
     return mat[:n_rows, :n_columns]
 
 
-def interpolate(array, delay, delay_matrix):
+def _interpolate(array, delay, delay_matrix):
     interp_matrix = tt.maximum(1 - tt.abs_(delay_matrix - delay), 0)
     interpolation = tt.dot(array, interp_matrix)
     return interpolation
 
 
-def smooth_step_function(λ_begin, λ_end, t_begin, t_end, t_total):
+def _smooth_step_function(λ_begin, λ_end, t_begin, t_end, t_total):
     t = np.arange(t_total)
     return tt.clip((t - t_begin) / (t_end - t_begin), 0, 1) * (λ_end - λ_begin) + λ_begin
-
-
-format_date = lambda date_py: '{}/{}/{}'.format(date_py.month, date_py.day,
-                                                str(date_py.year)[2:4])
