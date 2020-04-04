@@ -114,6 +114,7 @@ def SIR_model_with_change_points(new_cases_obs, change_points_list, date_begin_s
             λ_t = _smooth_step_function(λ_begin=0, λ_end=1, t_begin=transient_begin,
                                           t_end=transient_begin + transient_len,
                                           t_total=num_days_sim) * (λ_step - λ_step_before)
+            λ_step_before = λ_step
             λ_t_list.append(λ_t)
         λ_t = sum(λ_t_list)
 
