@@ -62,10 +62,10 @@ def SIR_model_with_change_points(new_cases_obs, change_points_list, date_begin_s
             priors_dic[prior_name] = value
             print('Set {} to default value {}'.format(prior_name, value))
     for prior_name, value in default_priors_change_points.items():
-        for change_point in change_points_list:
+        for i_cp, change_point in enumerate(change_points_list):
             if prior_name not in change_point:
                 change_point[prior_name] = value
-                print('Set {} to default value {}'.format(prior_name, value))
+                print('Set {} of change point {} to default value {}'.format(prior_name, i_cp, value))
 
     if diff_data_sim < priors_dic['prior_median_delay'] + 3*priors_dic['prior_median_delay']*priors_dic['prior_sigma_delay']:
         raise RuntimeError('diff_data_sim is to small compared to the prior delay')
