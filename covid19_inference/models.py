@@ -286,7 +286,7 @@ def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation
 
         σ_random_walk = pm.HalfNormal('σ_random_walk', sigma=priors_dic['prior_σ_random_walk'])
         λ_t_random_walk = pm.distributions.timeseries.GaussianRandomWalk('λ_t_random_walk', mu=0,
-                                                                         sigma=σ_random_walk * tt.ones(num_days_sim),
+                                                                         sigma=σ_random_walk,
                                                                          shape = num_days_sim, init = pm.Normal.dist(sigma=0.001))
         λ_t = sum(λ_t_list) + λ_t_random_walk
 
