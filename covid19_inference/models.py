@@ -164,26 +164,44 @@ def SIR_model_with_change_points(new_cases_obs, change_points_list, date_begin_s
 def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation, num_days_sim, diff_data_sim,
                         priors_dic = None):
     """
-    Returns the model with change points
+    This model includes in addition to the SIR_model_with_change_points 3 extensions:
+        1. The SIR model includes a incubation period where infected persons are not infectious, in the spirit of a
+            SEIR model. In contrast to the SEIR model, the length of incubation period is not exponentially
+            distributed but has a lognormal distribution.
+        2. Persons that are infectious are observed with a delay that is now lognormal distributed. In the
+           SIR_model_with_change_points there is a fixed delay between infection and observation.
+        3. To λ_t a additive Gaussian random walk is added, to fit any deviation to λ_t that is not taken into account by
+            the change points. If the change points are wisely chosen, and the rest of the model captures the dynamics
+            well, one would expect that the amplitude of the random walk is small, that is the posterior distribution
+            of σ_random_walk is small.
     :param
     change_points_list: list of dics. Each dic has to have the following items:
         'prior_mean_date_begin_transient': float, required
-
         'prior_median_λ': float, default: 0.4, median λ of the LogNormal prior to which the change point changes to
         'prior_sigma_λ': float, default: 0.5, standard deviation of the LogNormal prior.
         'prior_sigma_begin_transient':float, Default:3
         'prior_median_transient_len': float, Default:3
-        'prior_sigma_transient_len': flaot, Defaul:0.3
+        'prior_sigma_transient_len': float, Defaul:0.3
     date_begin_simulation: datetime.datetime. The begin of the simulation data
     priors_dic: dictionary with the following entries and default values
         prior_beta_I_begin = 100,
-        prior_median_λ_0 = 0.4,
-        prior_sigma_λ_0 = 0.5,
-        prior_median_μ = 1/8,
-        prior_sigma_μ = 0.2,
-        prior_median_delay = 8,
-        prior_sigma_delay = 0.2,
-        prior_beta_σ_obs = 10
+          prior_beta_E_begin_scale = 10,
+          prior_median_λ_0 = 2,
+          prior_sigma_λ_0 = 0.7,
+          prior_median_μ = 1/3,
+          prior_sigma_μ = 0.3,
+          prior_median_delay = 5,
+          prior_sigma_delay = 0.2,
+          scale_delay = 0.3,
+          prior_beta_σ_obs = 10,
+          prior_σ_random_walk = 0.05,
+          prior_mean_median_incubation = 5, sources: https://www.ncbi.nlm.nih.gov/pubmed/32150748 ,
+                                                     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7014672/
+                                            about -1 day compared to the sources day because persons likely become
+                                            infectious before.
+          prior_sigma_median_incubation = 1, The error from the sources above is smaller, but as the -1 day is a very
+                                             rough estimate, we take here a larger error.
+          sigma_incubation = 0.418, source: https://www.ncbi.nlm.nih.gov/pubmed/32150748
     :return: model
     """
     if priors_dic is None:
@@ -199,9 +217,9 @@ def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation
                           prior_sigma_delay = 0.2,
                           scale_delay = 0.3,
                           prior_beta_σ_obs = 10,
-                          prior_σ_random_walk = 0.01,
-                          prior_mean_median_incubation = 5, #sources: https://www.ncbi.nlm.nih.gov/pubmed/32150748 , https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7014672/
-                                                            #-1 day because persons likely become infectious  before
+                          prior_σ_random_walk = 0.05,
+                          prior_mean_median_incubation = 5, # sources: https://www.ncbi.nlm.nih.gov/pubmed/32150748 , https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7014672/
+                                                            # about -1 day because persons likely become infectious before
                           prior_sigma_median_incubation = 1,
                           sigma_incubation = 0.418) # source: https://www.ncbi.nlm.nih.gov/pubmed/32150748
 
@@ -223,7 +241,7 @@ def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation
     for prior_name, value in default_priors.items():
         if prior_name not in priors_dic:
             priors_dic[prior_name] = value
-            print('{} was to default value {}'.format(prior_name, value))
+            print('{} was set to default value {}'.format(prior_name, value))
     for prior_name, value in default_priors_change_points.items():
         for i_cp, change_point in enumerate(change_points_list):
             if prior_name not in change_point:
