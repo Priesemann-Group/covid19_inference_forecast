@@ -27,6 +27,10 @@ def plot_hist(model, trace, ax, varname, colors = ('tab:blue', 'tab:orange'), bi
     :param bins: number or array, is passed to np.hist
     :return: None
     """
+    if len(trace[varname].shape) >= 2:
+        print('Dimension of {} larger than one, skipping'.format(varname))
+        ax.set_visible(False)
+        return
     ax.hist(trace[varname], bins=bins, density=True, color=colors[1],
             label='Posterior')
     limits = ax.get_xlim()
@@ -148,14 +152,14 @@ def plot_cases(trace, new_cases_obs, date_begin_sim, diff_data_sim, start_date_p
 
     ax.set_ylabel('effective\ngrowth rate $\lambda_t^*$')
 
-    ax.set_xticks([-28, -21, -14, -7, 0, 7, 14, 21, 28])
-    ax.set_ylim(-0.15, 0.45)
-
+    #ax.set_ylim(-0.15, 0.45)
+    ylims = ax.get_ylim()
     ax.hlines(0, start_date_mpl, end_date_mpl, linestyles=':')
     delay = matplotlib.dates.date2num(date_data_end) - np.percentile(trace.delay, q=75)
-    ax.vlines(delay, -10, 10, linestyles='-', colors=['tab:red'])
-    ax.text(delay + 0.5, 0.4, 'unconstrained because\nof reporting delay', color='tab:red', verticalalignment='top')
-    ax.text(delay - 0.5, 0.4, 'constrained\nby data', color='tab:red', horizontalalignment='right',
+    ax.vlines(delay, ylims[0], ylims[1], linestyles='-', colors=['tab:red'])
+    ax.set_ylim(*ylims)
+    ax.text(delay + 0.5, ylims[1] - 0.04*np.diff(ylims), 'unconstrained because\nof reporting delay', color='tab:red', verticalalignment='top')
+    ax.text(delay - 0.5, ylims[1] - 0.04*np.diff(ylims), 'constrained\nby data', color='tab:red', horizontalalignment='right',
             verticalalignment='top')
     ax.xaxis.set_major_locator(matplotlib.dates.WeekdayLocator(interval = week_inter_right, byweekday=matplotlib.dates.SU))
     ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())

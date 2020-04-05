@@ -14,5 +14,5 @@ setup(
     packages=['covid19_inference'],
     url='https://github.com/Priesemann-Group/covid19_inference_forecast',
     python_requires='>=3.6.0',
-    version = '0.0.2'
+    version = '0.0.3'
 )
