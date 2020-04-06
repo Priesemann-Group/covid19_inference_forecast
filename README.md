@@ -9,6 +9,8 @@ It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
 
 Some output figures are shown below. The rest are found in the figures folder. We update them regularly.
 
+Please take notice of our disclaimer [link](disclaimer.md). 
+
 ## Modeling three different scenarios in Germany
 
 ### Summary
