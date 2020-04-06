@@ -6,7 +6,7 @@ import theano.tensor as tt
 
 from .modelling_help_functions import _SIR_model, _smooth_step_function, _delay_cases, _delay_cases_lognormal, _SEIR_model_with_delay
 
-def SIR_model_with_change_points(new_cases_obs, change_points_list, date_begin_simulation, num_days_sim, diff_data_sim,
+def SIR_model_with_change_points(new_cases_obs, change_points_list, date_begin_simulation, num_days_sim, diff_data_sim, n_pop = 83e6,
                                  priors_dic = None):
     """
     Returns the model with change points
@@ -129,14 +129,12 @@ def SIR_model_with_change_points(new_cases_obs, change_points_list, date_begin_s
         # prior of the error of observed cases
         σ_obs = pm.HalfCauchy("σ_obs", beta=priors_dic['prior_beta_σ_obs'])
 
-        N_germany = 83e6
-
         # -------------------------------------------------------------------------- #
         # training the model with loaded data
         # -------------------------------------------------------------------------- #
 
-        S_begin = N_germany - I_begin
-        S, I, new_I = _SIR_model(λ=λ_t, μ=μ, S_begin=S_begin, I_begin=I_begin, N=N_germany)
+        S_begin = n_pop - I_begin
+        S, I, new_I = _SIR_model(λ=λ_t, μ=μ, S_begin=S_begin, I_begin=I_begin, N=n_pop)
 
         new_cases_inferred = _delay_cases(new_I,
                                          len_new_I_t=num_days_sim,
@@ -161,7 +159,7 @@ def SIR_model_with_change_points(new_cases_obs, change_points_list, date_begin_s
 
 
 
-def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation, num_days_sim, diff_data_sim,
+def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation, num_days_sim, diff_data_sim, n_pop = 83e6,
                         priors_dic = None):
     """
     This model includes in addition to the SIR_model_with_change_points 3 extensions:
@@ -317,8 +315,6 @@ def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation
         # prior of the error of observed cases
         σ_obs = pm.HalfCauchy("σ_obs", beta=priors_dic['prior_beta_σ_obs'])
 
-        N_germany = 83e6
-
         # -------------------------------------------------------------------------- #
         # training the model with loaded data
         # -------------------------------------------------------------------------- #
@@ -328,11 +324,11 @@ def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation
         # sources: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7014672/
         #
 
-        S_begin = N_germany - I_begin
+        S_begin = n_pop - I_begin
         S_t, new_E_t, I_t, new_I_t = _SEIR_model_with_delay(λ=λ_t, μ=μ,
                                                             S_begin=S_begin, new_E_begin=new_E_begin,
                                                             I_begin=I_begin,
-                                                            N=N_germany,
+                                                            N=n_pop,
                                                             median_incubation=median_incubation,
                                                             sigma_incubation=0.418) #source: https://www.ncbi.nlm.nih.gov/pubmed/32150748
 
