@@ -3,6 +3,38 @@ import datetime
 import numpy as np
 import pandas as pd
 
+
+def download_data_jhu_global():
+    """
+        Attempts to download the most current data from the online repository of the
+        Coronavirus Visual Dashboard operated by the Johns Hopkins University
+        and falls back to the backup provided with our repo if it fails.
+
+        Returns
+        -------
+        : confirmed_cases
+            panda table with confirmed cases
+
+        : deaths
+            panda table with reported deaths
+    """
+    try:
+        confirmed_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+        deaths_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
+        confirmed_cases = pd.read_csv(confirmed_cases_url, sep=",")
+        deaths = pd.read_csv(deaths_url, sep=",")
+    except Exception as e:
+        print("Failed to download current data, using local copy.")
+        this_dir = os.path.dirname(__file__)
+        confirmed_cases = pd.read_csv(
+            this_dir + "/data/confirmed_global_fallback_2020-03-29.csv", sep=","
+        )
+        deaths = pd.read_csv(
+            this_dir + "/data/confirmed_global_fallback_2020-03-29.csv", sep=","
+        )
+
+    return confirmed_cases, deaths
+
 def get_jhu_confirmed_cases():
     confirmed_cases_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
     confirmed_cases = pd.read_csv(confirmed_cases_url, sep=',')

@@ -46,7 +46,7 @@ def plot_cases(trace, new_cases_obs, date_begin_sim, diff_data_sim, start_date_p
                ylim=None, week_interval=None, colors = ('tab:blue', 'tab:orange')):
     """
     Plots the new cases
-    :param trace: Needs to have the variables new_cases, delay, μ, λ_t
+    :param trace: Needs to have the variables new_cases, delay, μ, lambda_t
     :param new_cases_obs: array, the number of cases each day
     :param date_begin_sim: datetime, the date of the begin of the simulation
     :param diff_data_sim: float, the number of days between the begin of the simulation and the begin of the data
@@ -60,7 +60,7 @@ def plot_cases(trace, new_cases_obs, date_begin_sim, diff_data_sim, start_date_p
         return matplotlib.dates.date2num([datetime.timedelta(days=float(date)) + date_begin_sim for date in arr])
 
     new_cases_sim = trace.new_cases
-    len_sim = trace['λ_t'].shape[1]
+    len_sim = trace['lambda_t'].shape[1]
     if start_date_plot is None:
         start_date_plot = date_begin_sim + datetime.timedelta(days=diff_data_sim)
     if end_date_plot is None:
@@ -141,12 +141,12 @@ def plot_cases(trace, new_cases_obs, date_begin_sim, diff_data_sim, start_date_p
     ax = axes[0][1]
 
     time = np.arange(-diff_to_0 , -diff_to_0 + len_sim )
-    λ_t = trace['λ_t'][:, :]
+    lambda_t = trace['lambda_t'][:, :]
     μ = trace['μ'][:, None]
     mpl_dates = conv_time_to_mpl_dates(time) + diff_data_sim + num_days_data
 
-    ax.plot(mpl_dates, np.median(λ_t - μ, axis=0), color=colors[1], linewidth=2)
-    ax.fill_between(mpl_dates, np.percentile(λ_t - μ, q=2.5, axis=0), np.percentile(λ_t - μ, q=97.5, axis=0),
+    ax.plot(mpl_dates, np.median(lambda_t - μ, axis=0), color=colors[1], linewidth=2)
+    ax.fill_between(mpl_dates, np.percentile(lambda_t - μ, q=2.5, axis=0), np.percentile(lambda_t - μ, q=97.5, axis=0),
                     alpha=0.15,
                     color=colors[1])
 
