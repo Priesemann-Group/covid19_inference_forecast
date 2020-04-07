@@ -160,10 +160,10 @@ def SIR_model_with_change_points(new_cases_obs, change_points_list, date_begin_s
 
 
 def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation, num_days_sim, diff_data_sim, n_pop = 83e6,
-                        priors_dic = None):
+                        priors_dic = None, with_random_walk=True):
     """
     This model includes in addition to the SIR_model_with_change_points 3 extensions:
-        1. The SIR model includes a incubation period where infected persons are not infectious, in the spirit of a
+        1. The SIR model now includes a incubation period where infected persons are not infectious, in the spirit of a
             SEIR model. In contrast to the SEIR model, the length of incubation period is not exponentially
             distributed but has a lognormal distribution.
         2. Persons that are infectious are observed with a delay that is now lognormal distributed. In the
@@ -200,6 +200,7 @@ def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation
           prior_sigma_median_incubation = 1, The error from the sources above is smaller, but as the -1 day is a very
                                              rough estimate, we take here a larger error.
           sigma_incubation = 0.418, source: https://www.ncbi.nlm.nih.gov/pubmed/32150748
+    with_random_walk: boolean, whether to add an additive Gaussian walk. It is computationolly expensive.
     :return: model
     """
     if priors_dic is None:
@@ -220,6 +221,8 @@ def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation
                                                             # about -1 day because persons likely become infectious before
                           prior_sigma_median_incubation = 1,
                           sigma_incubation = 0.418) # source: https://www.ncbi.nlm.nih.gov/pubmed/32150748
+    if not with_random_walk:
+        del default_priors['prior_σ_random_walk']
 
     default_priors_change_points = dict(prior_median_λ = default_priors['prior_median_λ_0'],
                                         prior_sigma_λ = default_priors['prior_sigma_λ_0'],
@@ -289,8 +292,18 @@ def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation
 
 
         # build the time-dependent spreading rate
-        λ_t_list = [λ_list[0] * tt.ones(num_days_sim)]
-        λ_step_before = λ_t_list[0]
+        if with_random_walk:
+            σ_random_walk = pm.HalfNormal('σ_random_walk', sigma=priors_dic['prior_σ_random_walk'])
+            λ_t_random_walk = pm.distributions.timeseries.GaussianRandomWalk('λ_t_random_walk', mu=0,
+                                                                             sigma=σ_random_walk,
+                                                                             shape=num_days_sim,
+                                                                             init=pm.Normal.dist(sigma=priors_dic['prior_σ_random_walk']))
+            λ_base = λ_t_random_walk + λ_list[0]
+        else:
+            λ_base = λ_list[0] * tt.ones(num_days_sim)
+
+        λ_t_list = [λ_base]
+        λ_step_before = λ_list[0]
         for transient_begin, transient_len, λ_step in zip(transient_begin_list,
                                                           transient_len_list,
                                                           λ_list[1:]):
@@ -300,11 +313,7 @@ def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation
             λ_step_before = λ_step
             λ_t_list.append(λ_t)
 
-        σ_random_walk = pm.HalfNormal('σ_random_walk', sigma=priors_dic['prior_σ_random_walk'])
-        λ_t_random_walk = pm.distributions.timeseries.GaussianRandomWalk('λ_t_random_walk', mu=0,
-                                                                         sigma=σ_random_walk,
-                                                                         shape = num_days_sim, init = pm.Normal.dist(sigma=0.001))
-        λ_t = sum(λ_t_list) + λ_t_random_walk
+        λ_t = sum(λ_t_list)
 
         # fraction of people that recover each day, recovery rate mu
         μ = pm.Lognormal('μ', mu=np.log(priors_dic['prior_median_μ']), sigma=priors_dic['prior_sigma_μ'])
@@ -353,5 +362,7 @@ def more_advanced_model(new_cases_obs, change_points_list, date_begin_simulation
         pm.Deterministic('λ_t', λ_t)
         pm.Deterministic('new_cases', new_cases_inferred)
     return model
+
+
 
 
