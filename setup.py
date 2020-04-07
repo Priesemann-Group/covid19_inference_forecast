@@ -1,4 +1,5 @@
 from setuptools import setup
+import re 
 
 # read the contents of your README file
 from os import path
