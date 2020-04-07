@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = 'Bayesian inference and forecast of COVID-19 '
-copyright = '2018, Jonas Dehning, Johannes Zierenberg, F. Paul Spitzner, Michael Wibral, Joao Pinheiro Neto, Michael Wilczek, Viola Priesemann'
+copyright = '2020, Jonas Dehning, Johannes Zierenberg, F. Paul Spitzner, Michael Wibral, Joao Pinheiro Neto, Michael Wilczek, Viola Priesemann'
 author = 'Jonas Dehning, Johannes Zierenberg, F. Paul Spitzner, Michael Wibral, Joao Pinheiro Neto, Michael Wilczek, Viola Priesemann'
 
 verstr = "unknown"
@@ -63,6 +63,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'm2r',
+    'sphinx.ext.autosectionlabel',
     # 'sphinx_autorun'
 ]
 
@@ -73,7 +74,6 @@ autodoc_mock_imports = [
     'matplotlib',
     'matplotlib.pyplot',
     'scipy',
-    'neo',
     'pymc3',
     'theano',
     'pandas'

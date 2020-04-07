@@ -78,7 +78,7 @@ def SIR_with_change_points(
 
         Returns
         -------
-        : pm.Model
+        : pymc3.Model
             Returns an instance of pymc3 model with the change points
 
     """
@@ -414,7 +414,7 @@ def SEIR_with_extensions(
 
         Returns
         -------
-        : pm.Model
+        : pymc3.Model
             Returns an instance of pymc3 model with the change points
 
     """

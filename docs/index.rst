@@ -11,11 +11,25 @@
     :titlesonly:
     :name: Welcome
     :maxdepth: 2
-    :caption: Contents
+    :caption: Overview
 
     doc/gettingstarted
-    doc/api
     doc/disclaimer
+
+.. toctree::
+    :titlesonly:
+    :maxdepth: 2
+    :caption: Reference
+
+    doc/models
+    doc/data_retrieval
+    doc/plotting
+
+
+
+
+
+
 
 
 Indices and tables
