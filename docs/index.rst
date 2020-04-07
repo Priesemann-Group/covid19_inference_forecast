@@ -14,8 +14,7 @@
     :caption: Contents
 
     doc/gettingstarted
-    doc/readme
-    doc/models
+    doc/api
     doc/disclaimer
 
 

@@ -18,6 +18,7 @@ from . import model_helper as mh
 # *
 # ------------------------------------------------------------------------------ #
 
+
 def SIR_with_change_points(
     new_cases_obs,
     change_points_list,
@@ -33,19 +34,21 @@ def SIR_with_change_points(
         new_cases_obs : list or array
             Timeseries (day over day) of newly reported cases (not the total number)
 
-        change_points_list: list of dicts.
-            Each dict has to have the following items (with default values):
-                pr_mean_date_begin_transient :  datetime.datetime, required
-                pr_beta_I_begin :               number, default = 100
-                pr_median_lambda_0 :            number, default = 0.4
-                pr_sigma_lambda_0 :             number, default = 0.5
-                pr_median_mu :                  number, default = 1 / 8
-                pr_sigma_mu :                   number, default = 0.2
-                pr_median_delay :               number, default = 8
-                pr_sigma_delay :                number, default = 0.2
-                pr_beta_sigma_obs :             number, default = 10
+        change_points_list : list of dicts
+            List of dictionaries, each corresponding to one change points
 
-        date_begin_simulation: datetime.datetime.
+            Each dict has to have the following items (with default values)
+                * pr_mean_date_begin_transient :  datetime.datetime, required
+                * pr_beta_I_begin :               number, default = 100
+                * pr_median_lambda_0 :            number, default = 0.4
+                * pr_sigma_lambda_0 :             number, default = 0.5
+                * pr_median_mu :                  number, default = 1 / 8
+                * pr_sigma_mu :                   number, default = 0.2
+                * pr_median_delay :               number, default = 8
+                * pr_sigma_delay :                number, default = 0.2
+                * pr_beta_sigma_obs :             number, default = 10
+
+        date_begin_simulation: datetime.datetime
             The begin of the simulation data
 
         num_days_sim : integer
@@ -60,24 +63,24 @@ def SIR_with_change_points(
         N : number
             The population size. For Germany, we used 83e6
 
-        priors_dict: dict
-            Dictionary of the prior assumptions, following items (with default values):
-                pr_beta_I_begin :        number, default = 100
-                pr_median_lambda_0 :     number, default = 0.4
-                pr_sigma_lambda_0 :      number, default = 0.5
-                pr_median_mu :           number, default = 1/8
-                pr_sigma_mu :            number, default = 0.2
-                pr_median_delay :        number, default = 8
-                pr_sigma_delay :         number, default = 0.2
-                pr_beta_sigma_obs :      number, default = 10
+        priors_dict : dict
+            Dictionary of the prior assumptions
+
+            Possible key-value pairs (and default values) are:
+                * pr_beta_I_begin :        number, default = 100
+                * pr_median_lambda_0 :     number, default = 0.4
+                * pr_sigma_lambda_0 :      number, default = 0.5
+                * pr_median_mu :           number, default = 1/8
+                * pr_sigma_mu :            number, default = 0.2
+                * pr_median_delay :        number, default = 8
+                * pr_sigma_delay :         number, default = 0.2
+                * pr_beta_sigma_obs :      number, default = 10
 
         Returns
         -------
         : pm.Model
             Returns an instance of pymc3 model with the change points
 
-        Example
-        -------
     """
     if priors_dict is None:
         priors_dict = dict()
@@ -190,7 +193,7 @@ def SIR_with_change_points(
             tr_len_list.append(tr_len)
 
         # build the time-dependent spreading rate
-        lambda_t_list = [lambda_list[0]*tt.ones(num_days_sim)]
+        lambda_t_list = [lambda_list[0] * tt.ones(num_days_sim)]
         lambda_before = lambda_list[0]
 
         for tr_begin, tr_len, lambda_after in zip(
@@ -356,8 +359,10 @@ def SEIR_with_extensions(
         new_cases_obs : list or array
             Timeseries (day over day) of newly reported cases (not the total number)
 
-        change_points_list: list of dicts
-            Each dict has to have the following items (with default values):
+        change_points_list : list of dicts
+            List of dictionaries, each corresponding to one change points
+
+            Each dict has to have the following items (with default values)
                 pr_mean_date_begin_transient: datetime.datetime, required
                 pr_median_lambda:             float, default: 0.4
                 pr_sigma_lambda:              float, default: 0.5
@@ -380,33 +385,37 @@ def SEIR_with_extensions(
         N : number
             The population size. For Germany, we used 83e6
 
-        priors_dict:
-            Dictionary of the prior assumptions, following items (with default values):
-                pr_beta_I_begin = 100,
-                pr_beta_E_begin_scale = 10,
-                pr_median_lambda_0 = 2,
-                pr_sigma_lambda_0 = 0.7,
-                pr_median_mu = 1/3,
-                pr_sigma_mu = 0.3,
-                pr_median_delay = 5,
-                pr_sigma_delay = 0.2,
-                scale_delay = 0.3,
-                pr_beta_sigma_obs = 10,
-                pr_sigma_random_walk = 0.05,
-                pr_mean_median_incubation = 5,
-                    sources: https://www.ncbi.nlm.nih.gov/pubmed/32150748
+        priors_dict : dict
+            Dictionary of the prior assumptions
+
+            Possible key-value pairs (and default values) are:
+                * pr_beta_I_begin = 100,
+                * pr_beta_E_begin_scale = 10,
+                * pr_median_lambda_0 = 2,
+                * pr_sigma_lambda_0 = 0.7,
+                * pr_median_mu = 1/3,
+                * pr_sigma_mu = 0.3,
+                * pr_median_delay = 5,
+                * pr_sigma_delay = 0.2,
+                * scale_delay = 0.3,
+                * pr_beta_sigma_obs = 10,
+                * pr_sigma_random_walk = 0.05,
+                * pr_mean_median_incubation = 5,
+                    https://www.ncbi.nlm.nih.gov/pubmed/32150748
                     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7014672/
-                    about -1 day compared to the sources day because persons likely
-                    become infectious before.
-                pr_sigma_median_incubation = 1,
-                    The error from the sources above is smaller, but as the -1 day
-                    is a very rough estimate, we take here a larger error.
-                sigma_incubation = 0.418,
-                    source: https://www.ncbi.nlm.nih.gov/pubmed/32150748
+                    about -1 day compared to the sources day because persons likely become infectious before.
+                * pr_sigma_median_incubation = 1,
+                    The error from the sources above is smaller, but as the -1 day is a very rough estimate, we take here a larger error.
+                * sigma_incubation = 0.418,
+                    https://www.ncbi.nlm.nih.gov/pubmed/32150748
 
         with_random_walk: boolean
             whether to add a Gaussian walk to `lambda_t`. computationolly expensive
 
+        Returns
+        -------
+        : pm.Model
+            Returns an instance of pymc3 model with the change points
 
     """
     if priors_dict is None:
