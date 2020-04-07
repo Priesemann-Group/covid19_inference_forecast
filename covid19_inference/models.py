@@ -190,8 +190,8 @@ def SIR_with_change_points(
             tr_len_list.append(tr_len)
 
         # build the time-dependent spreading rate
-        lambda_t_list = [lambda_list[0]]
-        lambda_before = lambda_t_list[0]
+        lambda_t_list = [lambda_list[0]*tt.ones(num_days_sim)]
+        lambda_before = lambda_list[0]
 
         for tr_begin, tr_len, lambda_after in zip(
             tr_begin_list, tr_len_list, lambda_list[1:]
