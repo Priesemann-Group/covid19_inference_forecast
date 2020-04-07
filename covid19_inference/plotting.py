@@ -142,7 +142,7 @@ def plot_cases(trace, new_cases_obs, date_begin_sim, diff_data_sim, start_date_p
 
     time = np.arange(-diff_to_0 , -diff_to_0 + len_sim )
     lambda_t = trace['lambda_t'][:, :]
-    μ = trace['μ'][:, None]
+    μ = trace['mu'][:, None]
     mpl_dates = conv_time_to_mpl_dates(time) + diff_data_sim + num_days_data
 
     ax.plot(mpl_dates, np.median(lambda_t - μ, axis=0), color=colors[1], linewidth=2)
