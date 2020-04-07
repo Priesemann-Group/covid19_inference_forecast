@@ -1,6 +1,10 @@
 # Covid-19 inference and forecast
 
-We attempt to model the spread of Covid-19. 
+[![Documentation Status](https://readthedocs.org/projects/covid19-inference-forecast/badge/?version=latest)](https://covid19-inference-forecast.readthedocs.io/en/latest/?badge=latest)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+We attempt to model the spread of Covid-19.
 
 
 The current paper draft (as of 2020-04-01) can be downloaded [from the repo.](https://github.com/Priesemann-Group/covid19_inference_forecast/raw/master/paper_draft_2020-04-01.pdf)
