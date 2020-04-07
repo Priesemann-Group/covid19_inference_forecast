@@ -6,6 +6,18 @@ from os import path
 with open('README.md') as f:
     long_description = f.read()
 
+verstr = "unknown"
+try:
+    verstrline = open('mrestimator/_version.py', "rt").read()
+except EnvironmentError:
+    pass
+else:
+    VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+    mo = re.search(VSRE, verstrline, re.M)
+    if mo:
+        verstr = mo.group(1)
+    else:
+        raise RuntimeError("unable to find version in mrestimator/_version.py")
 
 setup(
     name='covid19_inference',
@@ -14,5 +26,5 @@ setup(
     packages=['covid19_inference'],
     url='https://github.com/Priesemann-Group/covid19_inference_forecast',
     python_requires='>=3.6.0',
-    version = '0.0.4'
+    version = verstr,
 )

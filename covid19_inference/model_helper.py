@@ -7,6 +7,7 @@ def tt_lognormal(x, mu, sigma):
     distr = tt.exp(-((tt.log(x) - mu) ** 2) / (2 * sigma ** 2))
     return distr / tt.sum(distr, axis=0)
 
+
 def delay_cases(new_I_t, len_new_I_t, len_out, delay, delay_diff):
     """
         Delays (time shifts) the input new_I_t by delay.

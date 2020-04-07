@@ -7,25 +7,50 @@ import matplotlib.pyplot as plt
 def get_all_free_RVs_names(model):
     """
     Returns the names of all free parameters of the model
-    :param model:
-    :return:
+
+    Parameters
+    ----------
+        model: pm.Model instance
+
+    Returns
+    -------
+        : list of variable names
     """
     varnames = [str(x).replace('_log__', '') for x in model.free_RVs]
     return varnames
 
 def get_prior_distribution(model, x, varname):
+    """
+    Given a model and variable name, returns the prior distribution evaluated at x.
+    Parameters
+    ----------
+    model: pm.Model instance
+    x: list or array
+    varname: string
+
+    Returns
+    -------
+    : array
+    """
     return np.exp(model[varname].distribution.logp(x).eval())
 
 def plot_hist(model, trace, ax, varname, colors = ('tab:blue', 'tab:orange'), bins = 50):
     """
     Plots one histogram of the prior and posterior distribution of the variable varname.
-    :param model: The model
-    :param trace: the trace
-    :param ax: the axes where to plot
-    :param varname: the variable name to plot
-    :param colors: two color names in which to plot.
-    :param bins: number or array, is passed to np.hist
-    :return: None
+
+    Parameters
+    ----------
+    model: pm.Model instance
+    trace: trace of the model
+    ax: matplotlib.axes  instance
+    varname: string
+    colors: list with 2 colornames
+    bins:  number or array
+        passed to np.hist
+
+    Returns
+    -------
+    None
     """
     if len(trace[varname].shape) >= 2:
         print('Dimension of {} larger than one, skipping'.format(varname))
@@ -45,16 +70,26 @@ def plot_hist(model, trace, ax, varname, colors = ('tab:blue', 'tab:orange'), bi
 def plot_cases(trace, new_cases_obs, date_begin_sim, diff_data_sim, start_date_plot=None, end_date_plot=None,
                ylim=None, week_interval=None, colors = ('tab:blue', 'tab:orange')):
     """
-    Plots the new cases
-    :param trace: Needs to have the variables new_cases, delay, μ, lambda_t
-    :param new_cases_obs: array, the number of cases each day
-    :param date_begin_sim: datetime, the date of the begin of the simulation
-    :param diff_data_sim: float, the number of days between the begin of the simulation and the begin of the data
-    :param start_date_plot: datetime, the leftmost date that has to be plotted
-    :param end_date_plot: datetime, the rigthmost date to be plotted
-    :param ylim: float, the maximal y value to be plotted
-    :param week_interval: int, the interval in weeks of the y ticks
-    :return: figure, axes
+    Plots the new cases, the fit, forecast and lambda_t evolution
+
+    Parameters
+    ----------
+    trace : trace returned by model
+    new_cases_obs : array
+    date_begin_sim : datetime.datetime
+    diff_data_sim : float
+        Difference in days between the begin of the simulation and the data
+    start_date_plot : datetime.datetime
+    end_date_plot : datetime.datetime
+    ylim : float
+        the maximal y value to be plotted
+    week_interval : int
+        the interval in weeks of the y ticks
+    colors : list with 2 colornames
+
+    Returns
+    -------
+    figure, axes
     """
     def conv_time_to_mpl_dates(arr):
         return matplotlib.dates.date2num([datetime.timedelta(days=float(date)) + date_begin_sim for date in arr])
