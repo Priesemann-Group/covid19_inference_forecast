@@ -1,18 +1,21 @@
-# Covid-19 inference and forecast
+# COVID-19 inference and forecast
 
-We attempt to model the spread of Covid-19. 
+[![Documentation Status](https://readthedocs.org/projects/covid19-inference-forecast/badge/?version=latest)](https://covid19-inference-forecast.readthedocs.io/en/latest/?badge=latest)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+We want to quantify the effect of new policies on the spread of COVID-19. Crucially, fitting an exponential function to the number of cases lacks an interpretability of the fitting error. We built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. At the example of Germany, we show that the two kinks in the last weeks correspond to two changes of policies, leading to a growth rate of about 0 now.
 
-The current paper draft (as of 2020-04-01) can be downloaded [from the repo.](https://github.com/Priesemann-Group/covid19_inference_forecast/raw/master/paper_draft_2020-04-01.pdf)
-
-The current research article (a short version) [is also available.](https://github.com/Priesemann-Group/covid19_inference_forecast/raw/master/paper_overview_2020-04-01.pdf)
+The research article [is available on arXiv](https://arxiv.org/abs/2004.01105).
 
 The code used to produce the figures is available [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/Corona_germany_simple_model.ipynb) (simple model) and [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/Corona_germany_current_forecast_with3scenarios.ipynb) (with change points).
 It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
 
 Some output figures are shown below. The rest are found in the figures folder. We update them regularly.
 
-## Modeling three different scenarios
+### Please take notice of our [disclaimer](disclaimer.md).
+
+## Modeling three different scenarios in Germany
 
 ### Summary
 
