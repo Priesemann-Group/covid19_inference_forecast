@@ -3,10 +3,11 @@ import datetime
 import numpy as np
 import pymc3 as pm
 import theano.tensor as tt
+import theano
 
 # theano.config.gcc.cxxflags = "-Wno-c++11-narrowing" # workaround for macos
 
-import model_helper as mh
+from . import model_helper as mh
 
 
 # ------------------------------------------------------------------------------ #
@@ -163,7 +164,7 @@ def SIR_with_change_points(
         dt_before = date_begin_simulation
         for i, cp in enumerate(change_points_list):
             dt_begin_transient = cp["pr_mean_date_begin_transient"]
-            if dt_before is not None and dt_before > dt_begin_tr:
+            if dt_before is not None and dt_before > dt_begin_transient:
                 raise RuntimeError("Dates of change points are not temporally ordered")
 
             prior_mean = (
