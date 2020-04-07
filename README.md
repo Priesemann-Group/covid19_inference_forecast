@@ -19,20 +19,20 @@ Some output figures are shown below. The rest are found in the figures folder. W
 
 ### Summary
 
-<img src="figures/summary_forecast.pdf" width="600">
+<img src="figures/summary_forecast.png" width="600">
 
 ### Scenario assuming three change points
 
-<img src="figures/Fig_S3.pdf" width="600">
-<img src="figures/Fig_S4.pdf" width="650">
+<img src="figures/Fig_S3.png" width="600">
+<img src="figures/Fig_S4.png" width="650">
 
 ### Scenario assuming two change points
 
-<img src="figures/Fig_3.pdf" width="600">
-<img src="figures/Fig_4.pdf" width="650">
+<img src="figures/Fig_3.png" width="600">
+<img src="figures/Fig_4.png" width="650">
 
 ### Scenario assuming one change point
 
-<img src="figures/Fig_S1.pdf" width="600">
-<img src="figures/Fig_S2.pdf" width="650">
+<img src="figures/Fig_S1.png" width="600">
+<img src="figures/Fig_S2.png" width="650">
 
