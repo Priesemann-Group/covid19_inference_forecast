@@ -35,18 +35,16 @@ def SIR_with_change_points(
             Timeseries (day over day) of newly reported cases (not the total number)
 
         change_points_list : list of dicts
-            List of dictionaries, each corresponding to one change points
+            List of dictionaries, each corresponding to one change point.
 
-            Each dict has to have the following items (with default values)
-                * pr_mean_date_begin_transient :  datetime.datetime, required
-                * pr_beta_I_begin :               number, default = 100
-                * pr_median_lambda_0 :            number, default = 0.4
-                * pr_sigma_lambda_0 :             number, default = 0.5
-                * pr_median_mu :                  number, default = 1 / 8
-                * pr_sigma_mu :                   number, default = 0.2
-                * pr_median_delay :               number, default = 8
-                * pr_sigma_delay :                number, default = 0.2
-                * pr_beta_sigma_obs :             number, default = 10
+            Each dict can have the following key-value pairs. If a pair is not provided,
+            the respective default is used.
+                * pr_mean_date_begin_transient :     datetime.datetime, NO default
+                * pr_median_lambda :                 number, same as default priors, below
+                * pr_sigma_lambda :                  number, same as default priors, below
+                * pr_sigma_date_begin_transient :    number, 3
+                * pr_median_transient_len :          number, 3
+                * pr_sigma_transient_len :           number, 0.3
 
         date_begin_simulation: datetime.datetime
             The begin of the simulation data
@@ -360,15 +358,16 @@ def SEIR_with_extensions(
             Timeseries (day over day) of newly reported cases (not the total number)
 
         change_points_list : list of dicts
-            List of dictionaries, each corresponding to one change points
+            List of dictionaries, each corresponding to one change point
 
-            Each dict has to have the following items (with default values)
-                pr_mean_date_begin_transient: datetime.datetime, required
-                pr_median_lambda:             float, default: 0.4
-                pr_sigma_lambda:              float, default: 0.5
-                pr_sigma_begin_transient:     float, default: 3
-                pr_median_transient_len:      float, default: 3
-                pr_sigma_transient_len:       float, default: 0.3
+            Each dict can have the following key-value pairs. If a pair is not provided,
+            the respective default is used.
+                * pr_mean_date_begin_transient: datetime.datetime, NO default
+                * pr_median_lambda:             float, default: 0.4
+                * pr_sigma_lambda:              float, default: 0.5
+                * pr_sigma_begin_transient:     float, default: 3
+                * pr_median_transient_len:      float, default: 3
+                * pr_sigma_transient_len:       float, default: 0.3
 
         date_begin_simulation: datetime.datetime.
             The begin of the simulation data
@@ -389,24 +388,24 @@ def SEIR_with_extensions(
             Dictionary of the prior assumptions
 
             Possible key-value pairs (and default values) are:
-                * pr_beta_I_begin = 100,
-                * pr_beta_E_begin_scale = 10,
-                * pr_median_lambda_0 = 2,
-                * pr_sigma_lambda_0 = 0.7,
-                * pr_median_mu = 1/3,
-                * pr_sigma_mu = 0.3,
-                * pr_median_delay = 5,
-                * pr_sigma_delay = 0.2,
-                * scale_delay = 0.3,
-                * pr_beta_sigma_obs = 10,
-                * pr_sigma_random_walk = 0.05,
-                * pr_mean_median_incubation = 5,
+                * pr_beta_I_begin :               number, default: 100
+                * pr_beta_E_begin_scale :         number, default: 10
+                * pr_median_lambda_0 :            number, default: 2
+                * pr_sigma_lambda_0 :             number, default: 0.7
+                * pr_median_mu :                  number, default: 1/3
+                * pr_sigma_mu :                   number, default: 0.3
+                * pr_median_delay :               number, default: 5
+                * pr_sigma_delay :                number, default: 0.2
+                * scale_delay :                   number, default: 0.3
+                * pr_beta_sigma_obs :             number, default: 10
+                * pr_sigma_random_walk :          number, default: 0.05
+                * pr_mean_median_incubation :     number, default: 5
                     https://www.ncbi.nlm.nih.gov/pubmed/32150748
                     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7014672/
                     about -1 day compared to the sources day because persons likely become infectious before.
-                * pr_sigma_median_incubation = 1,
+                * pr_sigma_median_incubation :    number, default: 1
                     The error from the sources above is smaller, but as the -1 day is a very rough estimate, we take here a larger error.
-                * sigma_incubation = 0.418,
+                * sigma_incubation :              number, default: 0.418
                     https://www.ncbi.nlm.nih.gov/pubmed/32150748
 
         with_random_walk: boolean
