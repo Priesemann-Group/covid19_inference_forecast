@@ -1,4 +1,5 @@
 from setuptools import setup
+import re
 
 # read the contents of your README file
 from os import path
@@ -8,7 +9,7 @@ with open('README.md') as f:
 
 verstr = "unknown"
 try:
-    verstrline = open('mrestimator/_version.py', "rt").read()
+    verstrline = open('covid19_inference/_version.py', "rt").read()
 except EnvironmentError:
     pass
 else:
@@ -17,7 +18,7 @@ else:
     if mo:
         verstr = mo.group(1)
     else:
-        raise RuntimeError("unable to find version in mrestimator/_version.py")
+        raise RuntimeError("unable to find version in covid19_inference/_version.py")
 
 setup(
     name='covid19_inference',

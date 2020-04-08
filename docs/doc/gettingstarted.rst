@@ -33,5 +33,5 @@ To get started, we recommend to look at one of the currently two example noteboo
 1. `SIR model with changes points <https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/example_script_covid19_inference.ipynb>`_
     This model is extensively discussed in our paper: `Inferring COVID-19 spreading rates and potential change points for case number forecasts <https://arxiv.org/abs/2004.01105>`_
 
-2. `SEIR model with extensions <https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/example_script_covid19_inference_complex.ipynb>`_
+2. `SEIR-like model with extensions <https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/example_script_covid19_inference_complex.ipynb>`_
     The second notebook runs a probably more realistic SEIR-like model. Details are found in the reference guide :ref:`models` .

@@ -659,7 +659,7 @@ def _SEIR_model_with_delay(
 
     """
     x = np.arange(1, 9)
-    beta = tt_lognormal(x, tt.log(median_incubation), sigma_incubation)
+    beta = mh.tt_lognormal(x, tt.log(median_incubation), sigma_incubation)
     new_I_0 = tt.zeros_like(I_begin)
 
     def next_day(
