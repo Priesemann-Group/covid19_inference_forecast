@@ -8,7 +8,7 @@ We want to quantify the effect of new policies on the spread of COVID-19. Crucia
 
 The research article [is available on arXiv](https://arxiv.org/abs/2004.01105).
 
-The code used to produce the figures is available [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/Corona_germany_simple_model.ipynb) (simple model) and [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/SIR_with_delay_Germany_3scenarios.ipynb) (with change points).
+The code used to produce the figures is available [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper/Corona_germany_simple_model.ipynb) (simple model) and [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper/SIR_with_delay_Germany_3scenarios.ipynb) (with change points).
 It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
 
 If you want to use the code, we recommend to look at our [documentation](https://covid19-inference-forecast.readthedocs.io/en/latest/).
