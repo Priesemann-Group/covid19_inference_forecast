@@ -42,32 +42,9 @@ post_style = {
 # set to None to keep everything a vector, with `-1` Posteriors are rastered (see above)
 rasterization_zorder = -1
 
-country = "Germany"
-confirmed_cases = cov19.get_jhu_confirmed_cases()
-date_data_begin = datetime.datetime(2020, 3, 1)
-date_data_end = cov19.get_last_date(confirmed_cases)
-
-# number of days in the data -1, to match the new cases
-num_days_data = (date_data_end - date_data_begin).days
-# how many days the simulation starts before the data
-diff_data_sim = 16
-# how many days to forecast
-num_days_futu = 28
-# days of simulation until forecast starts
-diff_to_0 = num_days_data + diff_data_sim
-
-date_begin_sim = date_data_begin - datetime.timedelta(days=diff_data_sim)
-date_end_sim = date_data_end + datetime.timedelta(days=num_days_futu)
-num_days_sim = (date_end_sim - date_begin_sim).days
-
-cases_obs = cov19.filter_one_country(
-    confirmed_cases, country, date_data_begin, date_data_end
-)
-
 # ------------------------------------------------------------------------------ #
 # main functions
 # ------------------------------------------------------------------------------ #
-
 
 def run_model_three_change_points():
     print(
@@ -327,7 +304,7 @@ def create_figure_0(save_to=None):
             color=color,
             linewidth=1.5,
         )
-        time2 = np.arange(0, num_days_futu + 1)
+        time2 = np.arange(0, num_days_future + 1)
         mpl_dates_fut = conv_time_to_mpl_dates(time2) + diff_data_sim + num_days_data
         end_date = mpl_dates_fut[-10]
         cases_futu = trace_scen["new_cases"][:, num_days_data:].T
@@ -399,7 +376,7 @@ def create_figure_0(save_to=None):
             mpl_dates, np.median(cum_cases, axis=0), "--", color=color, linewidth=1.5
         )
 
-        time2 = np.arange(0, num_days_futu + 1)
+        time2 = np.arange(0, num_days_future + 1)
         mpl_dates_fut = conv_time_to_mpl_dates(time2) + diff_data_sim + num_days_data
         cases_futu = (
             np.cumsum(trace_scen["new_cases"][:, num_days_data:].T, axis=0)
@@ -530,13 +507,13 @@ def create_figure_3_timeseries(save_to=None):
 
     # interval for the plots with forecast
     start_date = conv_time_to_mpl_dates(-len(cases_obs) + 2) + diff_to_0
-    end_date = conv_time_to_mpl_dates(num_days_futu - 10) + diff_to_0
+    end_date = conv_time_to_mpl_dates(num_days_future - 10) + diff_to_0
     mid_date = conv_time_to_mpl_dates(1) + diff_to_0
 
     # x-axis for dates, new_cases are one element shorter than cum_cases, use [1:]
     # 0 is the last recorded data point
     time_past = np.arange(-len(cases_obs) + 1, 1)
-    time_futu = np.arange(0, num_days_futu + 1)
+    time_futu = np.arange(0, num_days_future + 1)
     mpl_dates_past = conv_time_to_mpl_dates(time_past) + diff_to_0
     mpl_dates_futu = conv_time_to_mpl_dates(time_futu) + diff_to_0
 
