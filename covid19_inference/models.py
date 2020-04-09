@@ -21,6 +21,7 @@ def SIR_with_change_points(
     diff_data_sim,
     N,
     priors_dict=None,
+    add_week_end_factor=False
 ):
     """
         Parameters
@@ -86,6 +87,8 @@ def SIR_with_change_points(
         pr_median_delay=8,
         pr_sigma_delay=0.2,
         pr_beta_sigma_obs=10,
+        pr_mean_weekend_factor=0.7,
+        pr_sigma_weekend_factor=0.3
     )
     default_priors_change_points = dict(
         pr_median_lambda=default_priors["pr_median_lambda_0"],
@@ -95,6 +98,10 @@ def SIR_with_change_points(
         pr_sigma_transient_len=0.3,
         pr_mean_date_begin_transient=None,
     )
+
+    if not add_week_end_factor:
+        del default_priors['pr_mean_weekend_factor']
+        del default_priors['pr_sigma_weekend_factor']
 
     for prior_name in priors_dict.keys():
         if prior_name not in default_priors:
@@ -235,13 +242,26 @@ def SIR_with_change_points(
             delay=delay,
             delay_diff=diff_data_sim,
         )
-        num_days_data = new_cases_obs.shape[-1]
+
+
+        if add_week_end_factor:
+            week_end_factor = pm.Beta('weekend_factor', mu=priors_dict['pr_mean_weekend_factor'],
+                                                        sigma=priors_dict['pr_sigma_weekend_factor'])
+            mask = []
+            for i in range(num_days_sim - diff_data_sim):
+                date_curr = date_begin_simulation  + datetime.timedelta(days=i +diff_data_sim+ 1)
+                if date_curr.isoweekday() in (6, 7):
+                    mask.append(i)
+            multiplication_vec = tt.ones(num_days_sim - diff_data_sim)
+            multiplication_vec[mask] *= week_end_factor
+            new_cases_inferred  = new_cases_inferred * multiplication_vec
 
         # likelihood of the model:
         # observed cases are distributed following studentT around the model.
         # we want to approximate a Poisson distribution of new cases.
         # we choose nu=4 to get heavy tails and robustness to outliers.
         # https://www.jstor.org/stable/2290063
+        num_days_data = new_cases_obs.shape[-1]
         pm.StudentT(
             name="_new_cases_studentT",
             nu=4,
