@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from matplotlib import rc_context
 import scipy.stats
 import theano
 import matplotlib
@@ -17,6 +18,8 @@ try:
 except ModuleNotFoundError:
     sys.path.append("../..")
     import covid19_inference as cov19
+
+
 
 # ------------------------------------------------------------------------------ #
 # global settings and variables
@@ -72,6 +75,7 @@ def run_model_three_change_points():
         "day before yesterday: {}".format(date_data_end.isoformat(), *cases_obs[:-3:-1])
     )
 
+    # these variables are needed by some plot functions
     global prior_date_mild_dist_begin
     global prior_date_strong_dist_begin
     global prior_date_contact_ban_begin
@@ -115,7 +119,7 @@ def run_model_three_change_points():
 
     traces = []
     for model in models:
-        traces.append(pm.sample(model=model, init="advi", tune=200, draws=500))
+        traces.append(pm.sample(model=model, init="advi", draws=3000))
 
     return models, traces
 
@@ -460,7 +464,7 @@ def create_figure_0(save_to=None):
     ax.text(
         delay + 0.4,
         0.4,
-        "unconstrained because\nof reporting delay",
+        "unconstrained due to\nreporting delay",
         color="tab:red",
         verticalalignment="top",
     )
@@ -501,20 +505,21 @@ def create_figure_0(save_to=None):
 
 def create_figure_3_timeseries(save_to=None):
     global traces
+    global models
     try:
         traces
     except NameError:
         print(f"Have to run simulations first, this will take some time")
-        _, traces = run_model_three_change_points()
+        models, traces = run_model_three_change_points()
 
     ylabel_new = f"New daily confirmed\ncases in {country}"
-    ylabel_cum = f"Total confirmed\ncasesin {country}"
+    ylabel_cum = f"Total confirmed\ncases in {country}"
     ylabel_lam = f"Effective\ngrowth rate $\lambda^\\ast (t)$"
 
     pos_letter = (-0.25, 1)
     titlesize = 16
     insetsize = ("25%", "50%")
-    figsize = (6, 6)
+    figsize = (4, 6)
     leg_loc = "upper right"
 
     new_c_ylim = [0, 15000]
@@ -535,17 +540,6 @@ def create_figure_3_timeseries(save_to=None):
     mpl_dates_past = conv_time_to_mpl_dates(time_past) + diff_to_0
     mpl_dates_futu = conv_time_to_mpl_dates(time_futu) + diff_to_0
 
-    # format yaxis 10_000 as 10 k
-    format_k = lambda num, _: "${:.0f}\,$k".format(num / 1_000)
-    # format xaxis, ticks and labels
-    def format_date_xticks(ax, minor=True):
-        ax.xaxis.set_major_locator(
-            matplotlib.dates.WeekdayLocator(interval=1, byweekday=matplotlib.dates.SU)
-        )
-        if minor:
-            ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())
-        ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%m/%d"))
-
     figs = []
     for trace, color, save_name in zip(
         (traces[1:]),
@@ -554,7 +548,7 @@ def create_figure_3_timeseries(save_to=None):
     ):
 
         fig, axes = plt.subplots(
-            3, 1, figsize=figsize, gridspec_kw={"height_ratios": [2, 3, 2]},
+            3, 1, figsize=figsize, gridspec_kw={"height_ratios": [2, 3, 3]},
         )
         figs.append(fig)
 
@@ -605,7 +599,7 @@ def create_figure_3_timeseries(save_to=None):
         ax.text(
             delay + 1.5,
             0.4,
-            "unconstrained because\nof reporting delay",
+            "unconstrained due to\nreporting delay",
             color="tab:red",
             verticalalignment="top",
         )
@@ -644,7 +638,7 @@ def create_figure_3_timeseries(save_to=None):
             "-",
             color=color,
             linewidth=1.5,
-            label="Fit with 95% CI",
+            label="Fit",
             zorder=10,
         )
         ax.fill_between(
@@ -661,7 +655,7 @@ def create_figure_3_timeseries(save_to=None):
             "--",
             color=color,
             linewidth=3,
-            label="Forecast with 75% and 95% CI",
+            label="Forecast",
         )
         ax.fill_between(
             mpl_dates_futu[1:],
@@ -696,7 +690,9 @@ def create_figure_3_timeseries(save_to=None):
             label.set_visible(False)
 
         # NEW CASES LOG SCALE, skip forecast
-        ax = inset_axes(ax, width=insetsize[0], height=insetsize[1], loc=2)
+        ax = inset_axes(
+            ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=0.75
+        )
         ax.plot(
             mpl_dates_past[1:], new_c_obsd, "d", markersize=2, label="Data", zorder=5
         )
@@ -757,7 +753,7 @@ def create_figure_3_timeseries(save_to=None):
         )
         ax.plot(
             mpl_dates_futu[1:],
-            np.median(cum_c_futu[:,1:], axis=0),
+            np.median(cum_c_futu[:, 1:], axis=0),
             "--",
             color=color,
             linewidth=3,
@@ -794,7 +790,9 @@ def create_figure_3_timeseries(save_to=None):
             label.set_visible(False)
 
         # Total CASES LOG SCALE, skip forecast
-        ax = inset_axes(ax, width=insetsize[0], height=insetsize[1], loc=2)
+        ax = inset_axes(
+            ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=0.75
+        )
         ax.plot(
             mpl_dates_past[:], cum_c_obsd, "d", markersize=2, label="Data", zorder=5
         )
@@ -827,6 +825,11 @@ def create_figure_3_timeseries(save_to=None):
         # Finalize
         # --------------------------------------------------------------------------- #
 
+        for ax in axes:
+            ax.set_rasterization_zorder(rasterization_zorder)
+            # ax.spines['right'].set_visible(False)
+            # ax.spines['top'].set_visible(False)
+
         plt.subplots_adjust(wspace=0.4, hspace=0.25)
         if save_to is not None:
             plt.savefig(
@@ -845,401 +848,362 @@ def create_figure_3_timeseries(save_to=None):
     return figs
 
 
-def create_figure_3_distributions(save_to=None):
-    trace = traces[2]
-    colors = ["#708090", "tab:orange"]
+def get_label_dict(version=0):
+    labels = dict()
+    labels["mu"] = f"Recovery rate $\mu$"
+    labels["delay"] = f"Delay $D$"
+    labels["I_begin"] = f"Initial infections $I_0$"
+    labels["sigma_obs"] = f"Scale $\sigma$\nof the likelihood"
+    labels["lambda_0"] = f"Initial\nspreading rate $\lambda_0$"
+    if version == 0:
+        labels["lambda_1"] = f"Mild distancing\nspreading rate $\lambda_1$"
+        labels["lambda_2"] = f"Strong distancing\nspreading rate $\lambda_2$"
+        labels["lambda_3"] = f"Contact ban\nspreading rate $\lambda_3$"
+        labels["transient_begin_0"] = f"Mild distancing\nstarting time $t_1$"
+        labels["transient_begin_1"] = f"Strong distancing\nstarting time $t_2$"
+        labels["transient_begin_2"] = f"Contact ban\nstarting time $t_3$"
+        labels["transient_len_0"] = f"Mild distancing\ntransient $\Delta t_1$"
+        labels["transient_len_1"] = f"Strong distancing\ntransient $\Delta t_2$"
+        labels["transient_len_2"] = f"Contact ban\ntransient $\Delta t_3$"
+    elif version == 1:
+        labels["lambda_1"] = f"Spreading rate $\lambda_1$"
+        labels["lambda_2"] = f"Spreading rate $\lambda_2$"
+        labels["lambda_3"] = f"Spreading rate $\lambda_3$"
+        labels["transient_begin_0"] = f"Starting time $t_1$"
+        labels["transient_begin_1"] = f"Starting time $t_2$"
+        labels["transient_begin_2"] = f"Starting time $t_3$"
+        labels["transient_len_0"] = f"Transient $\Delta t_1$"
+        labels["transient_len_1"] = f"Transient $\Delta t_2$"
+        labels["transient_len_2"] = f"Transient $\Delta t_3$"
+    elif version == 2:
+        labels["mu"] = f"Recovery rate"
+        labels["delay"] = f"Reporting delay"
+        labels["I_begin"] = f"Initial infections"
+        labels["sigma_obs"] = f"Scale (width)\nof the likelihood"
+        labels["lambda_0"] = f"Initial rate"
+        labels["lambda_1"] = f"Spreading rates"
+        labels["lambda_2"] = f""
+        labels["lambda_3"] = f""
+        labels["transient_begin_0"] = f"Change times"
+        labels["transient_begin_1"] = f""
+        labels["transient_begin_2"] = f""
+        labels["transient_len_0"] = f"Change duration"
+        labels["transient_len_1"] = f""
+        labels["transient_len_2"] = f""
+    return labels
 
-    fig, axes = plt.subplots(4, 3, figsize=(5, 8))
-    # plt.locator_params(nbins=4)
-    pos_letter = (-0.1, 1.3)
-    pos_median = (0.05, 0.9)
-    size_letters = 14
-    alpha_texbox = 0.3
-    font_text = 9
 
-    # LAM 0
-    limit_lambda = (0, 0.53)
-    ax = axes[0][0]
-    ax.hist(trace.lambda_0, bins=50, density=True, color=colors[1], label="Posterior")
-    limits = ax.get_xlim()
-    x = np.linspace(*limit_lambda, num=100)
-    ax.plot(
-        x,
-        scipy.stats.lognorm.pdf(x, scale=0.4, s=0.5),
-        label="Prior",
-        color=colors[0],
-        linewidth=3,
+def get_priors_dict():
+    pr = dict()
+    pr["lambda_0"] = lambda x: scipy.stats.lognorm.pdf(x, scale=0.4, s=0.5)
+    pr["lambda_1"] = lambda x: scipy.stats.lognorm.pdf(x, scale=0.2, s=0.5)
+    pr["lambda_2"] = lambda x: scipy.stats.lognorm.pdf(x, scale=1 / 8, s=0.5)
+    pr["lambda_3"] = lambda x: scipy.stats.lognorm.pdf(x, scale=1 / 8 / 2, s=0.5)
+    pr["transient_begin_0"] = lambda x: scipy.stats.norm.pdf(
+        x, loc=matplotlib.dates.date2num([prior_date_mild_dist_begin])[0], scale=3
     )
-    ax.set_xlim(*limit_lambda)
-    ax.set_xlabel("Initial\nspreading rate $\lambda_0$")
-    text = print_median_CI(trace.lambda_0, prec=2)
-    ax.text(
-        pos_median[0],
-        pos_median[1],
-        text,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-        bbox=dict(facecolor="white", alpha=alpha_texbox, edgecolor="none"),
-        fontsize=font_text,
+    pr["transient_begin_1"] = lambda x: scipy.stats.norm.pdf(
+        x, loc=matplotlib.dates.date2num([prior_date_strong_dist_begin])[0], scale=1
     )
-    ax.text(
-        pos_letter[0],
-        pos_letter[1],
-        "F",
-        transform=ax.transAxes,
-        size=size_letters,
-        horizontalalignment="right",
+    pr["transient_begin_2"] = lambda x: scipy.stats.norm.pdf(
+        x, loc=matplotlib.dates.date2num([prior_date_contact_ban_begin])[0], scale=1
     )
+    pr["transient_len_0"] = lambda x: scipy.stats.lognorm.pdf(x, scale=3, s=0.3)
+    pr["transient_len_1"] = lambda x: scipy.stats.lognorm.pdf(x, scale=3, s=0.3)
+    pr["transient_len_2"] = lambda x: scipy.stats.lognorm.pdf(x, scale=3, s=0.3)
+    pr["mu"] = lambda x: scipy.stats.lognorm.pdf(x, scale=1 / 8, s=0.2)
+    pr["delay"] = lambda x: scipy.stats.lognorm.pdf(x, scale=8, s=0.2)
+    pr["I_begin"] = lambda x: scipy.stats.halfcauchy.pdf(x, scale=100)
+    pr["sigma_obs"] = lambda x: scipy.stats.halfcauchy.pdf(x, scale=10)
+    return pr
 
-    # INIT INFECTIONS
-    ax = axes[0][1]
-    ax.hist(trace.I_begin, bins=50, color=colors[1], density=True, label="Posterior")
-    ax.set_xlabel("Initial number\nof infections $I_0$")
-    limits = ax.get_xlim()
-    x = np.linspace(*limits, num=5000)
-    ax.plot(
-        x,
-        scipy.stats.halfcauchy.pdf(x, scale=100),
-        label="Prior",
-        color=colors[0],
-        linewidth=3,
-    )
-    ax.set_xlim(*limits)
-    ax.set_xlim(0)
-    text = print_median_CI(trace.I_begin, prec=0)
-    ax.text(
-        pos_median[0],
-        pos_median[1],
-        text,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-        bbox=dict(facecolor="white", alpha=alpha_texbox, edgecolor="none"),
-        fontsize=font_text,
-    )
-    # ax.text(pos_letter[0], pos_letter[1], "K", transform=ax.transAxes, size=size_letters)
-    plt.subplots_adjust(hspace=0.5)
 
-    # LAM 1
-    ax = axes[1][0]
-    ax.hist(trace.lambda_1, bins=50, density=True, color=colors[1], label="Posterior")
-    limits = ax.get_xlim()
-    x = np.linspace(*limit_lambda, num=100)
-    ax.plot(
-        x,
-        scipy.stats.lognorm.pdf(x, scale=0.2, s=0.5),
-        label="Prior",
-        color=colors[0],
-        linewidth=3,
-    )
-    ax.set_xlim(*limit_lambda)
-    ax.set_xlabel("Mild distancing\nspreading rate $\lambda_1$")
-    text = print_median_CI(trace.lambda_1, prec=2)
-    ax.text(
-        pos_median[0],
-        pos_median[1],
-        text,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-        bbox=dict(facecolor="white", alpha=alpha_texbox, edgecolor="none"),
-        fontsize=font_text,
-    )
-    ax.text(
-        pos_letter[0],
-        pos_letter[1],
-        "G1",
-        transform=ax.transAxes,
-        size=size_letters,
-        horizontalalignment="right",
-    )
+def create_figure_3_distributions(save_to=None, layout=0):
+    global traces
+    global models
+    try:
+        traces
+    except NameError:
+        print(f"Have to run simulations first, this will take some time")
+        models, traces = run_model_three_change_points()
 
-    dates_mild = conv_time_to_mpl_dates(trace.transient_begin_0)
+    trace = traces[3]
+    # model = models[3]
+    colors = ["#708090", "tab:green"]
 
-    # TIME 1
-    ax = axes[1][1]
-    ax.hist(dates_mild, bins=50, density=True, color=colors[1], label="Posterior")
-    limits = ax.get_xlim()
-    x = np.linspace(*limits, num=100)
-    ax.plot(
-        x,
-        scipy.stats.norm.pdf(
-            x, loc=matplotlib.dates.date2num([prior_date_mild_dist_begin])[0], scale=3
-        ),
-        label="Prior",
-        color=colors[0],
-        linewidth=3,
-    )
-    ax.set_xlim(*limits)
-    ax.set_xlabel("Mild distancing\nstarting time $t_1$")
-    text = print_median_CI(
-        dates_mild - matplotlib.dates.date2num(datetime.datetime(2020, 3, 1)) + 1,
-        prec=1,
-    )
-    ax.text(
-        pos_median[0],
-        pos_median[1],
-        text,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-        bbox=dict(facecolor="white", alpha=alpha_texbox, edgecolor="none"),
-        fontsize=font_text,
-    )
-    # ax.text(pos_letter[0], pos_letter[1], "E", transform=ax.transAxes, size=size_letters)
-    ax.xaxis.set_major_locator(matplotlib.dates.DayLocator(interval=6))
-    ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())
-    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%m/%d"))
+    if layout == 0:
+        fig, axes = plt.subplots(3, 5, figsize=(9, 6))
+    elif layout == 1:
+        fig, axes = plt.subplots(4, 4, figsize=(6, 6), constrained_layout=True)
+    else:
+        fig, axes = plt.subplots(5, 3, figsize=(5, 6), constrained_layout=True)
 
-    # Transient T1
-    ax = axes[1][2]
-    ax.hist(
-        trace.transient_len_0, bins=50, density=True, color=colors[1], label="Posterior"
-    )
-    limits = ax.get_xlim()
-    x = np.linspace(*limits, num=100)
-    ax.plot(
-        x,
-        scipy.stats.lognorm.pdf(x, scale=3, s=0.3),
-        label="Prior",
-        color=colors[0],
-        linewidth=3,
-    )
-    ax.set_xlim(*limits)
-    # ax.set_ylabel('Density')
-    ax.set_xlabel("Mild distancing\ntransient $\Delta t_1$")
-    text = print_median_CI(trace.transient_len_0, prec=1)
-    ax.text(
-        pos_median[0],
-        pos_median[1],
-        text,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-        bbox=dict(facecolor="white", alpha=alpha_texbox, edgecolor="none"),
-        fontsize=font_text,
-    )
-    # ax.text(pos_letter[0], pos_letter[1], "G", transform=ax.transAxes, size=size_letters)
+    xlim_lambda = (0, 0.53)
+    xlim_transt = (0, 8)
+    xlim_tbegin = 4  # median plus minus x days
 
-    # LAM 2
-    ax = axes[2][0]
-    ax.hist(trace.lambda_2, bins=50, density=True, color=colors[1], label="Posterior")
-    limits = ax.get_xlim()
-    x = np.linspace(*limit_lambda, num=100)
-    ax.plot(
-        x,
-        scipy.stats.lognorm.pdf(x, scale=1 / 8, s=0.2),
-        label="Prior",
-        color=colors[0],
-        linewidth=3,
-    )
-    ax.set_xlim(*limit_lambda)
-    ax.set_xlabel("Strong distancing\nspreading rate $\lambda_2$")
-    text = print_median_CI(trace.lambda_2, prec=2)
-    ax.text(
-        pos_median[0],
-        pos_median[1],
-        text,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-        bbox=dict(facecolor="white", alpha=alpha_texbox, edgecolor="none"),
-        fontsize=font_text,
-    )
-    ax.text(
-        pos_letter[0],
-        pos_letter[1],
-        "G2",
-        transform=ax.transAxes,
-        size=size_letters,
-        horizontalalignment="right",
-    )
+    axpos = dict()
+    letters = dict()
+    labels = get_label_dict(version=0)
+    priors = get_priors_dict()
 
-    # TIME 2
-    ax = axes[2][1]
-    dates_strong = conv_time_to_mpl_dates(trace.transient_begin_1)
+    # leave away the closing doller, we add it later
+    insets = dict()
+    insets["lambda_0"] = r"$\lambda_0 \simeq "
+    insets["lambda_1"] = r"$\lambda_1 \simeq "
+    insets["lambda_2"] = r"$\lambda_2 \simeq "
+    insets["lambda_3"] = r"$\lambda_3 \simeq "
+    insets["transient_begin_0"] = r"$t_1 \simeq "
+    insets["transient_begin_1"] = r"$t_2 \simeq "
+    insets["transient_begin_2"] = r"$t_3 \simeq "
+    insets["transient_len_0"] = r"$\Delta t_1 \simeq "
+    insets["transient_len_1"] = r"$\Delta t_2 \simeq "
+    insets["transient_len_2"] = r"$\Delta t_3 \simeq "
 
-    ax.hist(dates_strong, bins=50, density=True, color=colors[1], label="Posterior")
-    limits = ax.get_xlim()
-    x = np.linspace(*limits, num=100)
-    ax.plot(
-        x,
-        scipy.stats.norm.pdf(
-            x, loc=matplotlib.dates.date2num([prior_date_strong_dist_begin])[0], scale=1
-        ),
-        label="Prior",
-        color=colors[0],
-        linewidth=3,
-    )
-    ax.set_xlim(*limits)
-    ax.set_xlabel("Strong distancing\nstarting time $t_2$")
-    text = print_median_CI(
-        dates_strong - matplotlib.dates.date2num(datetime.datetime(2020, 3, 1)) + 1,
-        prec=1,
-    )
-    ax.text(
-        pos_median[0],
-        pos_median[1],
-        text,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-        bbox=dict(facecolor="white", alpha=alpha_texbox, edgecolor="none"),
-        fontsize=font_text,
-    )
-    # ax.text(pos_letter[0], pos_letter[1], "F", transform=ax.transAxes, size=size_letters)
-    ax.xaxis.set_major_locator(matplotlib.dates.DayLocator(interval=4))
-    ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())
-    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%m/%d"))
+    insets["mu"] = r"$\mu \simeq "
+    insets["delay"] = r"$D \simeq "
+    insets["sigma_obs"] = r"$\sigma \simeq "
+    insets["I_begin"] = r"$I_0 \simeq "
 
-    # Transient T2
-    ax = axes[2][2]
-    ax.hist(
-        trace.transient_len_1, bins=50, density=True, color=colors[1], label="Posterior"
-    )
-    limits = ax.get_xlim()
-    x = np.linspace(*limits, num=100)
-    ax.plot(
-        x,
-        scipy.stats.lognorm.pdf(x, scale=3, s=0.3),
-        label="Prior",
-        color=colors[0],
-        linewidth=3,
-    )
-    ax.set_xlim(*limits)
-    ax.set_xlabel("Strong distancing\ntransient $\Delta t_2$")
-    text = print_median_CI(trace.transient_len_1, prec=1)
-    ax.text(
-        pos_median[0],
-        pos_median[1],
-        text,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-        bbox=dict(facecolor="white", alpha=alpha_texbox, edgecolor="none"),
-        fontsize=font_text,
-    )
-    # ax.text(pos_letter[0], pos_letter[1], "H", transform=ax.transAxes, size=size_letters)
+    if layout == 0:
+        pos_letter = (0, 1.08)
+        axpos["lambda_0"] = axes[0][0]
+        axpos["lambda_1"] = axes[0][1]
+        axpos["lambda_2"] = axes[0][2]
+        axpos["lambda_3"] = axes[0][3]
+        axpos["transient_begin_0"] = axes[1][1]
+        axpos["transient_begin_1"] = axes[1][2]
+        axpos["transient_begin_2"] = axes[1][3]
+        axpos["transient_len_0"] = axes[2][1]
+        axpos["transient_len_1"] = axes[2][2]
+        axpos["transient_len_2"] = axes[2][3]
 
-    # RECOVERY
-    ax = axes[3][0]
-    ax.hist(trace.mu, bins=50, density=True, color=colors[1], label="Posterior")
-    limits = ax.get_xlim()
-    x = np.linspace(*limits, num=100)
-    ax.plot(
-        x,
-        scipy.stats.lognorm.pdf(x, scale=1 / 8, s=0.2),
-        label="Prior",
-        color=colors[0],
-        linewidth=3,
-    )
-    ax.set_xlim(*limits)
-    # ax.set_ylabel('Density')
-    ax.set_xlabel("Recovery rate $\mu$")
-    text = print_median_CI(trace.mu, prec=2)
-    ax.text(
-        pos_median[0],
-        pos_median[1],
-        text,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-        bbox=dict(facecolor="white", alpha=alpha_texbox, edgecolor="none"),
-        fontsize=font_text,
-    )
-    ax.text(
-        pos_letter[0],
-        pos_letter[1],
-        "H",
-        transform=ax.transAxes,
-        size=size_letters,
-        horizontalalignment="right",
-    )
+        axpos["mu"] = axes[0][4]
+        axpos["delay"] = axes[2][4]
+        axpos["I_begin"] = axes[1][0]
+        axpos["sigma_obs"] = axes[1][4]
+        axpos["legend"] = axes[2][0]
 
-    # WIDTH
-    ax = axes[3][1]
-    ax.hist(trace.sigma_obs, bins=50, color=colors[1], density=True, label="Posterior")
-    # ax.set_ylabel('Density')
-    ax.set_xlabel("Width $\sigma$\nof the likelihood")
-    limits = ax.get_xlim()
-    x = np.linspace(*limits, num=100)
-    ax.plot(
-        x,
-        scipy.stats.halfcauchy.pdf(x, scale=10),
-        label="Prior",
-        color=colors[0],
-        linewidth=3,
-    )
-    ax.set_xlim(*limits)
-    text = print_median_CI(trace.sigma_obs, prec=1)
-    ax.text(
-        pos_median[0],
-        pos_median[1],
-        text,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-        bbox=dict(facecolor="white", alpha=alpha_texbox, edgecolor="none"),
-        fontsize=font_text,
-    )
-    # ax.text(pos_letter[0], pos_letter[1], "J", transform=ax.transAxes, size=size_letters)
+        letters["lambda_0"] = "D"
+        letters["lambda_1"] = "E1"
+        letters["lambda_2"] = "E2"
+        letters["lambda_3"] = "E3"
+        letters["mu"] = "F"
 
-    # DELAY
-    ax = axes[3][2]
-    ax.hist(trace.delay, bins=50, density=True, color=colors[1], label="Posterior")
-    limits = ax.get_xlim()
-    x = np.linspace(*limits, num=100)
-    ax.plot(
-        x,
-        scipy.stats.lognorm.pdf(x, scale=8, s=0.2),
-        label="Prior",
-        color=colors[0],
-        linewidth=3,
-    )
-    ax.set_xlim(*limits)
-    ax.set_xlabel("Delay $D$")
-    text = print_median_CI(trace.delay, prec=1)
-    ax.text(
-        pos_median[0],
-        pos_median[1],
-        text,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-        bbox=dict(facecolor="white", alpha=alpha_texbox, edgecolor="none"),
-        fontsize=font_text,
-    )
-    # ax.text(pos_letter[0], pos_letter[1], "I", transform=ax.transAxes, size=size_letters)
+    elif layout == 1:
+        pos_letter = (-0.3, 1.1)
+        labels = get_label_dict(version=2)
+        axpos["lambda_0"] = axes[0][0]
+        axpos["lambda_1"] = axes[0][1]
+        axpos["lambda_2"] = axes[0][2]
+        axpos["lambda_3"] = axes[0][3]
+        axpos["transient_begin_0"] = axes[1][1]
+        axpos["transient_begin_1"] = axes[1][2]
+        axpos["transient_begin_2"] = axes[1][3]
+        axpos["transient_len_0"] = axes[2][1]
+        axpos["transient_len_1"] = axes[2][2]
+        axpos["transient_len_2"] = axes[2][3]
 
-    # plt.tight_layout()
+        axpos["mu"] = axes[3][0]
+        axpos["delay"] = axes[3][1]
+        axpos["I_begin"] = axes[3][2]
+        axpos["sigma_obs"] = axes[3][3]
+        axpos["legend"] = axes[2][0]
 
-    ax = axes[0][2]
-    ax.set_visible(False)
-    ax.plot([], [], color="#708090", linewidth=3)
-    ax.hist([0], color="tab:orange")
-    ax.legend()
+        axes[1][0].axis("off")
 
-    for ax_row in axes:
+        letters["lambda_0"] = "D"
+        letters["lambda_1"] = "E1"
+        letters["lambda_2"] = "E2"
+        letters["lambda_3"] = "E3"
+        # letters["mu"] = "F"
+
+    elif layout == 2:
+        pos_letter = (-0.3, 1.1)
+        labels = get_label_dict(version=2)
+        axpos["lambda_0"] = axes[1][0]
+        axpos["lambda_1"] = axes[2][0]
+        axpos["lambda_2"] = axes[3][0]
+        axpos["lambda_3"] = axes[4][0]
+        axpos["transient_begin_0"] = axes[2][1]
+        axpos["transient_begin_1"] = axes[3][1]
+        axpos["transient_begin_2"] = axes[4][1]
+        axpos["transient_len_0"] = axes[2][2]
+        axpos["transient_len_1"] = axes[3][2]
+        axpos["transient_len_2"] = axes[4][2]
+
+        axpos["mu"] = axes[0][0]
+        axpos["delay"] = axes[1][2]
+        axpos["I_begin"] = axes[1][1]
+        axpos["sigma_obs"] = axes[0][1]
+        axpos["legend"] = axes[0][2]
+
+        letters["lambda_0"] = r"E"
+        letters["lambda_1"] = r"F"
+        # letters["lambda_2"] = r"F2"
+        # letters["lambda_3"] = r"F3"
+        letters["mu"] = r"D"
+        # letters["sigma_obs"] = "G"
+        # letters["delay"] = "H"
+
+    for key in axpos.keys():
+        axpos[key].xaxis.set_label_position("top")
+
+    # render panels
+    for key in axpos.keys():
+        if "legend" in key:
+            continue
+
+        if "transient_begin" in key:
+            data = conv_time_to_mpl_dates(trace[key])
+        else:
+            data = trace[key]
+
+        ax = axpos[key]
+        ax.set_xlabel(labels[key])
+
+        # make some bold
+        if layout == 2 and (
+            key == "lambda_1" or key == "transient_begin_0" or key == "transient_len_0"
+        ):
+            ax.set_xlabel(labels[key], fontweight="bold")
+
+        # posteriors
+        ax.hist(
+            data,
+            bins=50,
+            density=True,
+            color=colors[1],
+            label="Posterior",
+            alpha=0.7,
+            zorder=-5,
+        )
+
+        # xlim
+        if "lambda" in key or "mu" == key:
+            ax.set_xlim(xlim_lambda)
+            ax.axvline(np.median(trace["mu"]), ls=":", color="black")
+        elif "I_begin" == key:
+            ax.set_xlim(0)
+        elif "transient_len" in key:
+            ax.set_xlim(xlim_transt)
+        elif "transient_begin" in key:
+            md = np.median(data)
+            ax.set_xlim([int(md) - xlim_tbegin, int(md) + xlim_tbegin - 1])
+            format_date_xticks(ax)
+
+        # priors
+        limits = ax.get_xlim()
+        x = np.linspace(*limits, num=100)
+        ax.plot(
+            x,
+            priors[key](x),
+            # cov19.plotting.get_prior_distribution(model, x, key),
+            label="Prior",
+            color=colors[0],
+            linewidth=3,
+        )
+        ax.set_xlim(*limits)
+
+        # letters
+        if key in letters.keys():
+            ax.text(
+                pos_letter[0],
+                pos_letter[1],
+                letters[key],
+                transform=ax.transAxes,
+                size=14,
+                horizontalalignment="left",
+            )
+
+        # median
+        global text
+        if "lambda" in key or "mu" == key:
+            text = print_median_CI(data, prec=2)
+        elif "transient_begin" in key:
+            text = print_median_CI(
+                data - matplotlib.dates.date2num(date_data_begin) + 1, prec=1
+            )
+        else:
+            text = print_median_CI(data, prec=1)
+
+        if False:
+            ax.text(
+                0.05,
+                0.9,
+                text,
+                horizontalalignment="center",
+                verticalalignment="top",
+                transform=ax.transAxes,
+                bbox=dict(facecolor="white", alpha=0.3, edgecolor="none"),
+                fontsize=12,
+            )
+        else:
+            if key in insets.keys():
+                # strip everything except the median value
+                text = text.replace("Median: ", "").replace("CI: ", "")
+                md = text.split("\n")[0]
+                ci = text.split("\n")[1]
+
+                # matplotlib.rcParams['text.usetex'] = True
+                # with rc_context(rc={'text.usetex': True}):
+                text = insets[key] + md + "$" + "\n" + r'$\,$'
+                ax.text(
+                    0.6, 0.9, text, fontsize=12, transform=ax.transAxes,
+                    verticalalignment="top",
+                    horizontalalignment="center",
+                    bbox=dict(facecolor="white", alpha=0.5, edgecolor="none"),
+                )
+                ax.text(
+                    0.6, 0.6, ci, fontsize=9, transform=ax.transAxes,
+                    verticalalignment="top",
+                    horizontalalignment="center",
+                    # bbox=dict(facecolor="white", alpha=0.5, edgecolor="none"),
+                ),
+
+    # legend
+    ax = axpos["legend"]
+    ax.set_axis_off()
+    ax.plot([], [], color=colors[0], linewidth=3, label="Prior")
+    ax.hist([], color=colors[1], label="Posterior")
+    ax.legend(loc="center left")
+    ax.get_legend().get_frame().set_linewidth(0.0)
+    ax.get_legend().get_frame().set_facecolor("#F0F0F0")
+
+    for jdx, ax_row in enumerate(axes):
         for idx, ax in enumerate(ax_row):
-            if idx == 0:
+            if idx == 0 and jdx == 0:
                 ax.set_ylabel("Density")
             ax.tick_params(labelleft=False)
             ax.locator_params(nbins=4)
-            ax.xaxis.set_label_position("top")
+            ax.set_rasterization_zorder(rasterization_zorder)
+            ax.spines["right"].set_visible(False)
+            ax.spines["top"].set_visible(False)
 
-    plt.subplots_adjust(wspace=0.2, hspace=0.9)
+    # plt.subplots_adjust(wspace=0.2, hspace=0.9)
 
     if save_to is not None:
         plt.savefig(save_to + ".pdf", bbox_inches="tight", pad_inches=0, dpi=300)
         plt.savefig(save_to + ".png", bbox_inches="tight", pad_inches=0, dpi=300)
 
-    return fig
+    # return fig
 
 
 # ------------------------------------------------------------------------------ #
 # helper
 # ------------------------------------------------------------------------------ #
+
+# format yaxis 10_000 as 10 k
+format_k = lambda num, _: "${:.0f}\,$k".format(num / 1_000)
+
+# format xaxis, ticks and labels
+def format_date_xticks(ax, minor=True):
+    ax.xaxis.set_major_locator(
+        matplotlib.dates.WeekdayLocator(interval=1, byweekday=matplotlib.dates.SU)
+    )
+    if minor:
+        ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())
+    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%m/%d"))
 
 
 def truncate_number(number, precision):
