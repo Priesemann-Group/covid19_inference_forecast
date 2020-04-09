@@ -73,9 +73,9 @@ def SIR_with_change_points(
                 * pr_sigma_weekend_factor :number, default = 0.3
 
         add_week_end_factor : bool
-            Whether to add a prior, that cases are less reported on week ends. Multiplies the new cases numbers on week
-            ends by a number between 0 and 1, given by a prior beta distribution. The beta distribution is parametrised
-            by pr_mean_weekend_factor and pr_sigma_weekend_factor, and which days to consider as week ends by
+            Whether to add the prior that cases are less reported on week ends. Multiplies the new cases numbers on weekends
+            by a number between 0 and 1, given by a prior beta distribution. The beta distribution is parametrised
+            by pr_mean_weekend_factor and pr_sigma_weekend_factor, and which days to consider as weekends by
             week_end_days. 6 and 7 corresponds to Saturday and Sunday respectively (the default).
         Returns
         -------
