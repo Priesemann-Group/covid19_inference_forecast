@@ -72,6 +72,11 @@ def SIR_with_change_points(
                 * pr_mean_weekend_factor : number, default = 0.7
                 * pr_sigma_weekend_factor :number, default = 0.3
 
+        add_week_end_factor : bool
+            Whether to add a prior, that cases are less reported on week ends. Multiplies the new cases numbers on week
+            ends by a number between 0 and 1, given by a prior beta distribution. The beta distribution is parametrised
+            by pr_mean_weekend_factor and pr_sigma_weekend_factor, and which days to consider as week ends by
+            week_end_days. 6 and 7 corresponds to Saturday and Sunday respectively (the default).
         Returns
         -------
         : pymc3.Model
@@ -254,11 +259,13 @@ def SIR_with_change_points(
                                                         sigma=priors_dict['pr_sigma_weekend_factor'])
             mask = np.zeros(num_days_sim - diff_data_sim)
             for i in range(num_days_sim - diff_data_sim):
-                date_curr = date_begin_simulation  + datetime.timedelta(days=i +diff_data_sim+ 1)
+                date_curr = date_begin_simulation  + datetime.timedelta(days=i + diff_data_sim + 1)
                 if date_curr.isoweekday() in priors_dict['week_end_days']:
                     mask[i] = 1
             multiplication_vec = np.ones(num_days_sim - diff_data_sim) - (1-week_end_factor)*mask
-            new_cases_inferred  = new_cases_inferred * multiplication_vec
+            new_cases_inferred_eff  = new_cases_inferred * multiplication_vec
+        else:
+            new_cases_inferred_eff = new_cases_inferred
 
         # likelihood of the model:
         # observed cases are distributed following studentT around the model.
@@ -269,7 +276,7 @@ def SIR_with_change_points(
         pm.StudentT(
             name="_new_cases_studentT",
             nu=4,
-            mu=new_cases_inferred[:num_days_data],
+            mu=new_cases_inferred_eff[:num_days_data],
             sigma=tt.abs_(new_cases_inferred[:num_days_data] + 1) ** 0.5
             * sigma_obs,  # +1 and tt.abs to avoid nans
             observed=new_cases_obs,
@@ -279,6 +286,7 @@ def SIR_with_change_points(
         # later via e.g. `model.trace['lambda_t']`
         pm.Deterministic("lambda_t", lambda_t)
         pm.Deterministic("new_cases", new_cases_inferred)
+        pm.Deterministic("new_cases_eff", new_cases_inferred_eff)
 
     return model
 
