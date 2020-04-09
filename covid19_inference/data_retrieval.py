@@ -57,15 +57,33 @@ def get_jhu_deaths():
 
 
 def filter_one_country(data_df, country, begin_date, end_date):
+    """
+    Returns the number of cases of one country as a np.array, given a dataframe returned by `get_jhu_confirmed_cases`
+    Parameters
+    ----------
+    data_df : pandas.dataframe
+    country : string
+    begin_date : datetime.datetime
+    end_date: datetime.datetime
+
+    Returns
+    -------
+    : array
+    """
     date_formatted_begin = _format_date(begin_date)
     date_formatted_end = _format_date(end_date)
-    cases_obs = np.array(
-        data_df.loc[
-            data_df["Country/Region"] == country,
-            date_formatted_begin:date_formatted_end,
-        ]
-    )[0]
-    return cases_obs
+
+    y = data_df[(data_df['Province/State'].isnull()) & (data_df['Country/Region']==country)]
+
+    if len(y)==1:
+        cases_obs = y.loc[:,date_formatted_begin:date_formatted_end]
+    elif len(y)==0:
+        cases_obs = data_df[data_df['Country/Region']==country].sum().loc[date_formatted_begin:date_formatted_end]
+
+    else:
+        raise RuntimeError('Country not found: {}'.format(country))
+
+    return np.array(cases_obs).flatten()
 
 
 def get_last_date(data_df):
