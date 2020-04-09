@@ -464,7 +464,7 @@ def create_figure_0(save_to=None):
     ax.text(
         delay + 0.4,
         0.4,
-        "unconstrained due to\nreporting delay",
+        "unconstrained due\nto reporting delay",
         color="tab:red",
         verticalalignment="top",
     )
@@ -549,6 +549,7 @@ def create_figure_3_timeseries(save_to=None):
 
         fig, axes = plt.subplots(
             3, 1, figsize=figsize, gridspec_kw={"height_ratios": [2, 3, 3]},
+            constrained_layout=True
         )
         figs.append(fig)
 
@@ -599,7 +600,7 @@ def create_figure_3_timeseries(save_to=None):
         ax.text(
             delay + 1.5,
             0.4,
-            "unconstrained due to\nreporting delay",
+            "unconstrained due\nto reporting delay",
             color="tab:red",
             verticalalignment="top",
         )
@@ -827,10 +828,10 @@ def create_figure_3_timeseries(save_to=None):
 
         for ax in axes:
             ax.set_rasterization_zorder(rasterization_zorder)
-            # ax.spines['right'].set_visible(False)
-            # ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
 
-        plt.subplots_adjust(wspace=0.4, hspace=0.25)
+        # plt.subplots_adjust(wspace=0.4, hspace=0.25)
         if save_to is not None:
             plt.savefig(
                 save_to + save_name + ".pdf",
@@ -936,10 +937,10 @@ def create_figure_3_distributions(save_to=None, layout=0):
     elif layout == 1:
         fig, axes = plt.subplots(4, 4, figsize=(6, 6), constrained_layout=True)
     else:
-        fig, axes = plt.subplots(5, 3, figsize=(5, 6), constrained_layout=True)
+        fig, axes = plt.subplots(5, 3, figsize=(4.5, 6), constrained_layout=True)
 
     xlim_lambda = (0, 0.53)
-    xlim_transt = (0, 8)
+    xlim_transt = (0, 7)
     xlim_tbegin = 4  # median plus minus x days
 
     axpos = dict()
@@ -1019,7 +1020,7 @@ def create_figure_3_distributions(save_to=None, layout=0):
         # letters["mu"] = "F"
 
     elif layout == 2:
-        pos_letter = (-0.3, 1.1)
+        pos_letter = (-0.2, 1.1)
         labels = get_label_dict(version=2)
         axpos["lambda_0"] = axes[1][0]
         axpos["lambda_1"] = axes[2][0]
@@ -1169,6 +1170,10 @@ def create_figure_3_distributions(save_to=None, layout=0):
     ax.legend(loc="center left")
     ax.get_legend().get_frame().set_linewidth(0.0)
     ax.get_legend().get_frame().set_facecolor("#F0F0F0")
+
+    # dirty hack to get some space at the bottom to align with timeseries
+    axes[-1][-1].xaxis.set_label_position("bottom")
+    axes[-1][-1].set_xlabel(r"$\,$")
 
     for jdx, ax_row in enumerate(axes):
         for idx, ax in enumerate(ax_row):
