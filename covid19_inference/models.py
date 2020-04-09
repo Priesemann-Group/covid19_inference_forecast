@@ -1,22 +1,16 @@
 import datetime
+import platform
 
+import theano
+import theano.tensor as tt
 import numpy as np
 import pymc3 as pm
-import theano.tensor as tt
-import theano
-
-# theano.config.gcc.cxxflags = "-Wno-c++11-narrowing" # workaround for macos
 
 from . import model_helper as mh
 
 
-# ------------------------------------------------------------------------------ #
-# TODO PS:
-# * prior list and change point list should be consistent with SIR
-# median lambda of the LogNormal to which the change point changes to
-# standard deviation of the LogNormal prior
-# *
-# ------------------------------------------------------------------------------ #
+if platform.system() == 'Darwin':
+    theano.config.gcc.cxxflags = "-Wno-c++11-narrowing" # workaround for pauls macos
 
 
 def SIR_with_change_points(
