@@ -57,13 +57,9 @@ date_begin_sim = date_data_begin - datetime.timedelta(days=diff_data_sim)
 date_end_sim = date_data_end + datetime.timedelta(days=num_days_futu)
 num_days_sim = (date_end_sim - date_begin_sim).days
 
-
 cases_obs = cov19.filter_one_country(
     confirmed_cases, country, date_data_begin, date_data_end
 )
-
-# traces = None
-# models = None
 
 # ------------------------------------------------------------------------------ #
 # main functions
@@ -76,6 +72,9 @@ def run_model_three_change_points():
         "day before yesterday: {}".format(date_data_end.isoformat(), *cases_obs[:-3:-1])
     )
 
+    global prior_date_mild_dist_begin
+    global prior_date_strong_dist_begin
+    global prior_date_contact_ban_begin
     prior_date_mild_dist_begin = datetime.datetime(2020, 3, 9)
     prior_date_strong_dist_begin = datetime.datetime(2020, 3, 16)
     prior_date_contact_ban_begin = datetime.datetime(2020, 3, 23)
@@ -123,7 +122,9 @@ def run_model_three_change_points():
 
 def create_figure_0(save_to=None):
     global traces
-    if traces is None:
+    try:
+        traces
+    except NameError:
         print(f"Have to run simulations first, this will take some time")
         _, traces = run_model_three_change_points()
 
@@ -500,18 +501,27 @@ def create_figure_0(save_to=None):
 
 def create_figure_3_timeseries(save_to=None):
     global traces
-    if traces is None:
+    try:
+        traces
+    except NameError:
         print(f"Have to run simulations first, this will take some time")
         _, traces = run_model_three_change_points()
 
     ylabel_new = f"New daily confirmed\ncases in {country}"
-    ylabel_cum = f"Total confirmed cases\nin {country}"
+    ylabel_cum = f"Total confirmed\ncasesin {country}"
+    ylabel_lam = f"Effective\ngrowth rate $\lambda^\\ast (t)$"
 
-    pos_letter = (-0.3, 1)
+    pos_letter = (-0.25, 1)
     titlesize = 16
+    insetsize = ("25%", "50%")
+    figsize = (6, 6)
+    leg_loc = "upper right"
 
-    # format 10_000 as 10 k
-    format_k = lambda num, _: "${:.0f}\,$k".format(num / 1_000)
+    new_c_ylim = [0, 15000]
+    new_c_insetylim = [50, 17_000]
+
+    cum_c_ylim = [0, 200_000]
+    cum_c_insetylim = [50, 250_000]
 
     # interval for the plots with forecast
     start_date = conv_time_to_mpl_dates(-len(cases_obs) + 2) + diff_to_0
@@ -525,6 +535,17 @@ def create_figure_3_timeseries(save_to=None):
     mpl_dates_past = conv_time_to_mpl_dates(time_past) + diff_to_0
     mpl_dates_futu = conv_time_to_mpl_dates(time_futu) + diff_to_0
 
+    # format yaxis 10_000 as 10 k
+    format_k = lambda num, _: "${:.0f}\,$k".format(num / 1_000)
+    # format xaxis, ticks and labels
+    def format_date_xticks(ax, minor=True):
+        ax.xaxis.set_major_locator(
+            matplotlib.dates.WeekdayLocator(interval=1, byweekday=matplotlib.dates.SU)
+        )
+        if minor:
+            ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())
+        ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%m/%d"))
+
     figs = []
     for trace, color, save_name in zip(
         (traces[1:]),
@@ -533,11 +554,13 @@ def create_figure_3_timeseries(save_to=None):
     ):
 
         fig, axes = plt.subplots(
-            3, 1, figsize=(8, 8), gridspec_kw={"height_ratios": [1, 3, 3]},
+            3, 1, figsize=figsize, gridspec_kw={"height_ratios": [2, 3, 2]},
         )
         figs.append(fig)
 
-        # PREPARE DATA
+        # --------------------------------------------------------------------------- #
+        # prepare data
+        # --------------------------------------------------------------------------- #
         # observed data, only one dim: [day]
         new_c_obsd = np.diff(cases_obs)
         cum_c_obsd = cases_obs
@@ -552,7 +575,59 @@ def create_figure_3_timeseries(save_to=None):
             np.cumsum(np.insert(new_c_futu, 0, 0, axis=1), axis=1) + cases_obs[-1]
         )
 
-        # NEW CASES LIN SCALE
+        # --------------------------------------------------------------------------- #
+        # growth rate lambda*
+        # --------------------------------------------------------------------------- #
+        ax = axes[0]
+        mu = trace["mu"][:, np.newaxis]
+        lambda_t = trace["lambda_t"][:, diff_data_sim:]
+        ax.plot(
+            np.concatenate([mpl_dates_past[1:], mpl_dates_futu[1:]]),
+            np.median(lambda_t - mu, axis=0),
+            color=color,
+            linewidth=2,
+        )
+        ax.fill_between(
+            np.concatenate([mpl_dates_past[1:], mpl_dates_futu[1:]]),
+            np.percentile(lambda_t - mu, q=2.5, axis=0),
+            np.percentile(lambda_t - mu, q=97.5, axis=0),
+            alpha=0.15,
+            color=color,
+            lw=0,
+        )
+        ax.set_ylabel(ylabel_lam)
+        ax.set_ylim(-0.15, 0.45)
+        ax.hlines(0, start_date, end_date, linestyles=":")
+        delay = matplotlib.dates.date2num(date_data_end) - np.percentile(
+            trace.delay, q=75
+        )
+        ax.vlines(delay, -10, 10, linestyles="-", colors=["tab:red"])
+        ax.text(
+            delay + 1.5,
+            0.4,
+            "unconstrained because\nof reporting delay",
+            color="tab:red",
+            verticalalignment="top",
+        )
+        ax.text(
+            delay - 1.5,
+            0.4,
+            "constrained\nby data",
+            color="tab:red",
+            horizontalalignment="right",
+            verticalalignment="top",
+        )
+        ax.text(
+            pos_letter[0], pos_letter[1], "A", transform=ax.transAxes, size=titlesize
+        )
+        ax.set_xlim(start_date, end_date)
+        format_date_xticks(ax)
+        for label in ax.xaxis.get_ticklabels()[1::2]:
+            label.set_visible(False)
+
+        # --------------------------------------------------------------------------- #
+        # New cases, lin scale first
+        # --------------------------------------------------------------------------- #
         ax = axes[1]
         ax.plot(
             mpl_dates_past[1:],
@@ -566,10 +641,11 @@ def create_figure_3_timeseries(save_to=None):
         ax.plot(
             mpl_dates_past[1:],
             np.median(new_c_past, axis=0),
-            "--",
+            "-",
             color=color,
             linewidth=1.5,
             label="Fit with 95% CI",
+            zorder=10,
         )
         ax.fill_between(
             mpl_dates_past[1:],
@@ -579,10 +655,10 @@ def create_figure_3_timeseries(save_to=None):
             color=color,
             lw=0,
         )
-
         ax.plot(
             mpl_dates_futu[1:],
             np.median(new_c_futu, axis=0),
+            "--",
             color=color,
             linewidth=3,
             label="Forecast with 75% and 95% CI",
@@ -603,33 +679,34 @@ def create_figure_3_timeseries(save_to=None):
             color=color,
             lw=0,
         )
-        ax.set_xlabel("Date")
         ax.set_ylabel(ylabel_new)
-        ax.legend(loc="upper left")
-        ax.set_ylim(0, 15_000)
+        ax.legend(loc=leg_loc)
+        ax.get_legend().get_frame().set_linewidth(0.0)
+        ax.get_legend().get_frame().set_facecolor("#F0F0F0")
+        ax.set_ylim(new_c_ylim)
         ax.set_xlim(start_date, end_date)
         ax.text(
-            pos_letter[0], pos_letter[1], "D", transform=ax.transAxes, size=titlesize
+            pos_letter[0], pos_letter[1], "B", transform=ax.transAxes, size=titlesize
         )
 
-        ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(format_k))
         ax.set_xlim(start_date, end_date)
-        ax.xaxis.set_major_locator(
-            matplotlib.dates.WeekdayLocator(interval=2, byweekday=matplotlib.dates.SU)
-        )
-        ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())
-        ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%m/%d"))
+        format_date_xticks(ax)
+        ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(format_k))
+        for label in ax.xaxis.get_ticklabels()[1::2]:
+            label.set_visible(False)
 
         # NEW CASES LOG SCALE, skip forecast
-        ax = inset_axes(ax, width="30%", height="30%", loc=2)
+        ax = inset_axes(ax, width=insetsize[0], height=insetsize[1], loc=2)
         ax.plot(
-            mpl_dates_past[1:], new_c_obsd, "d", markersize=4, label="Data", zorder=5
+            mpl_dates_past[1:], new_c_obsd, "d", markersize=2, label="Data", zorder=5
         )
         ax.plot(
             mpl_dates_past[1:],
             np.median(new_c_past, axis=0),
+            "-",
             color=color,
             label="Fit (with 95% CI)",
+            zorder=10,
         )
         ax.fill_between(
             mpl_dates_past[1:],
@@ -639,172 +716,118 @@ def create_figure_3_timeseries(save_to=None):
             color=color,
             lw=0,
         )
+        format_date_xticks(ax, minor=True)
         ax.set_yscale("log")
-        ax.set_ylabel(ylabel_new)
-        ax.xaxis.set_major_locator(
-            matplotlib.dates.WeekdayLocator(byweekday=matplotlib.dates.SU)
-        )
-        ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())
-        ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%m/%d"))
+        ax.set_yticks([1e1, 1e2, 1e3, 1e4, 1e5])
         ax.set_xlim(start_date, mid_date)
+        ax.set_ylim(new_c_insetylim)
+        ax.yaxis.tick_right()
+        for label in ax.xaxis.get_ticklabels()[1:-1]:
+            label.set_visible(False)
 
-        ax.legend()
-
-        # TOTAL CASES LOG SCALE
-        # ax = axes[2]
-        # ax.plot(mpl_dates, cases_obs[1:], "d", markersize=4, label="Data", zorder=5)
-        # cum_cases = np.cumsum(new_cases_past, axis=1) + cases_obs[0]
-        # percentiles = (
-        #     np.percentile(cum_cases, q=2.5, axis=0),
-        #     np.percentile(cum_cases, q=97.5, axis=0),
-        # )
-        # ax.plot(
-        #     mpl_dates,
-        #     np.median(cum_cases, axis=0),
-        #     color=color,
-        #     label="Fit (with 95% CI)",
-        # )
-        # ax.fill_between(
-        #     mpl_dates, percentiles[0], percentiles[1], alpha=0.3, color=color, lw=0
-        # )
-        # ax.set_yscale("log")
-        # ax.set_ylabel(ylabel_cum)
-        # ax.set_xlabel("Date")
-        # ax.legend()
-        # ax.text(
-        #     pos_letter[0], pos_letter[1], "B", transform=ax.transAxes, size=titlesize
-        # )
-        # ax.xaxis.set_major_locator(
-        #     matplotlib.dates.WeekdayLocator(interval=2, byweekday=matplotlib.dates.SU)
-        # )
-        # ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())
-        # ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%m/%d"))
-        # ax.set_xlim(mpl_dates[0])
-
-        # TOTAL CASES LIN SCALE
-        # ax = axes[2]
-        # time1 = np.arange(-len(cases_obs) + 2, 1)
-        # mpl_dates = conv_time_to_mpl_dates(time1) + diff_data_sim + num_days_data
-        # ax.plot(
-        #     mpl_dates,
-        #     cases_obs[1:],
-        #     "d",
-        #     label="Confirmed cases",
-        #     markersize=4,
-        #     color="tab:blue",
-        #     zorder=5,
-        # )
-        # ax.plot(
-        #     mpl_dates,
-        #     np.median(cum_cases, axis=0),
-        #     "--",
-        #     color=color,
-        #     linewidth=1.5,
-        #     label="Fit with 95% CI",
-        # )
-        # percentiles = (
-        #     np.percentile(cum_cases, q=2.5, axis=0),
-        #     np.percentile(cum_cases, q=97.5, axis=0),
-        # )
-        # ax.fill_between(
-        #     mpl_dates, percentiles[0], percentiles[1], alpha=0.2, color=color, lw=0
-        # )
-        # time2 = np.arange(0, num_days_futu + 1)
-        # mpl_dates_fut = conv_time_to_mpl_dates(time2) + diff_data_sim + num_days_data
-        # median = np.median(cases_futu, axis=-1)
-        # percentiles = (
-        #     np.percentile(cases_futu, q=2.5, axis=-1),
-        #     np.percentile(cases_futu, q=97.5, axis=-1),
-        # )
-        # ax.plot(
-        #     mpl_dates_fut[1:],
-        #     median,
-        #     color=color,
-        #     linewidth=3,
-        #     label="Forecast with 75% and 95% CI",
-        # )
-        # ax.fill_between(
-        #     mpl_dates_fut[1:],
-        #     percentiles[0],
-        #     percentiles[1],
-        #     alpha=0.1,
-        #     color=color,
-        #     lw=0,
-        # )
-        # ax.fill_between(
-        #     mpl_dates_fut[1:],
-        #     np.percentile(cases_futu, q=12.5, axis=-1),
-        #     np.percentile(cases_futu, q=87.5, axis=-1),
-        #     alpha=0.2,
-        #     color=color,
-        #     lw=0,
-        # )
-        # ax.set_xlabel("Date")
-        # ax.set_ylabel(ylabel_cum)
-        # ax.legend(loc="upper left")
-        # ax.set_ylim(0, 200_000)
-        # func_format = lambda num, _: "${:.0f}\,$k".format(num / 1_000)
-        # ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(func_format))
-        # ax.set_xlim(start_date, end_date)
-        # ax.xaxis.set_major_locator(
-        #     matplotlib.dates.WeekdayLocator(interval=2, byweekday=matplotlib.dates.SU)
-        # )
-        # ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())
-        # ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%m/%d"))
-        # ax.set_xlim(start_date, end_date)
-        # ax.text(
-        #     pos_letter[0], pos_letter[1], "E", transform=ax.transAxes, size=titlesize
-        # )
-
-        # GROWTH RATE LAMBDA*
-        ax = axes[0]
-        time = np.arange(-diff_to_0 + 1, -diff_to_0 + num_days_sim + 1)
-        lambda_t = trace["lambda_t"][:, :]
-        mu = trace["mu"][:, None]
-        mpl_dates = conv_time_to_mpl_dates(time) + diff_data_sim + num_days_data
-        ax.plot(mpl_dates, np.median(lambda_t - mu, axis=0), color=color, linewidth=2)
+        # --------------------------------------------------------------------------- #
+        # Total cases, lin scale first
+        # --------------------------------------------------------------------------- #
+        ax = axes[2]
+        ax.plot(
+            mpl_dates_past[:],
+            cum_c_obsd,
+            "d",
+            label="Data",
+            markersize=4,
+            color="tab:blue",
+            zorder=5,
+        )
+        ax.plot(
+            mpl_dates_past[:],
+            np.median(cum_c_past, axis=0),
+            "-",
+            color=color,
+            linewidth=1.5,
+            label="Fit with 95% CI",
+            zorder=10,
+        )
         ax.fill_between(
-            mpl_dates,
-            np.percentile(lambda_t - mu, q=2.5, axis=0),
-            np.percentile(lambda_t - mu, q=97.5, axis=0),
-            alpha=0.15,
+            mpl_dates_past[:],
+            np.percentile(cum_c_past, q=2.5, axis=0),
+            np.percentile(cum_c_past, q=97.5, axis=0),
+            alpha=0.1,
             color=color,
             lw=0,
         )
-        ax.set_ylabel("Effective\ngrowth rate $\lambda_t^*$")
-        ax.set_ylim(-0.15, 0.45)
-        ax.hlines(0, start_date, end_date, linestyles=":")
-        delay = matplotlib.dates.date2num(date_data_end) - np.percentile(
-            trace.delay, q=75
+        ax.plot(
+            mpl_dates_futu[1:],
+            np.median(cum_c_futu[:,1:], axis=0),
+            "--",
+            color=color,
+            linewidth=3,
+            label="Forecast with 75% and 95% CI",
         )
-        ax.vlines(delay, -10, 10, linestyles="-", colors=["tab:red"])
-        ax.text(
-            delay + 0.5,
-            0.4,
-            "unconstrained because\nof reporting delay",
-            color="tab:red",
-            verticalalignment="top",
+        ax.fill_between(
+            mpl_dates_futu[1:],
+            np.percentile(cum_c_futu[:, 1:], q=2.5, axis=0),
+            np.percentile(cum_c_futu[:, 1:], q=97.5, axis=0),
+            alpha=0.1,
+            color=color,
+            lw=0,
         )
-        ax.text(
-            delay - 0.5,
-            0.4,
-            "constrained\nby data",
-            color="tab:red",
-            horizontalalignment="right",
-            verticalalignment="top",
+        ax.fill_between(
+            mpl_dates_futu[1:],
+            np.percentile(cum_c_futu[:, 1:], q=12.5, axis=0),
+            np.percentile(cum_c_futu[:, 1:], q=87.5, axis=0),
+            alpha=0.2,
+            color=color,
+            lw=0,
         )
+        ax.set_xlabel("Date")
+        ax.set_ylabel(ylabel_cum)
+        ax.set_ylim(cum_c_ylim)
+        ax.set_xlim(start_date, end_date)
         ax.text(
             pos_letter[0], pos_letter[1], "C", transform=ax.transAxes, size=titlesize
         )
-        ax.xaxis.set_major_locator(
-            matplotlib.dates.WeekdayLocator(interval=2, byweekday=matplotlib.dates.SU)
-        )
-        ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())
-        ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%m/%d"))
-        ax.set_xlim(start_date, end_date)
 
-        # FINALIZE
-        plt.subplots_adjust(wspace=0.4, hspace=0.3)
+        ax.set_xlim(start_date, end_date)
+        format_date_xticks(ax)
+        ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(format_k))
+        for label in ax.xaxis.get_ticklabels()[1::2]:
+            label.set_visible(False)
+
+        # Total CASES LOG SCALE, skip forecast
+        ax = inset_axes(ax, width=insetsize[0], height=insetsize[1], loc=2)
+        ax.plot(
+            mpl_dates_past[:], cum_c_obsd, "d", markersize=2, label="Data", zorder=5
+        )
+        ax.plot(
+            mpl_dates_past[:],
+            np.median(cum_c_past, axis=0),
+            "-",
+            color=color,
+            label="Fit (with 95% CI)",
+            zorder=10,
+        )
+        ax.fill_between(
+            mpl_dates_past[:],
+            np.percentile(cum_c_past, q=2.5, axis=0),
+            np.percentile(cum_c_past, q=97.5, axis=0),
+            alpha=0.1,
+            color=color,
+            lw=0,
+        )
+        format_date_xticks(ax, minor=True)
+        ax.set_yscale("log")
+        ax.set_yticks([1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7])
+        ax.set_xlim(start_date, mid_date)
+        ax.set_ylim(cum_c_insetylim)
+        ax.yaxis.tick_right()
+        for label in ax.xaxis.get_ticklabels()[1:-1]:
+            label.set_visible(False)
+
+        # --------------------------------------------------------------------------- #
+        # Finalize
+        # --------------------------------------------------------------------------- #
+
+        plt.subplots_adjust(wspace=0.4, hspace=0.25)
         if save_to is not None:
             plt.savefig(
                 save_to + save_name + ".pdf",
