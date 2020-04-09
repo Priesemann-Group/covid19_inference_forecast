@@ -17,7 +17,15 @@ Some output figures are shown below. The rest are found in the figures folder. W
 
 ### Please take notice of our [disclaimer](disclaimer.md).
 
-## Modeling three different scenarios in Germany
+## What-if scenarios
+
+What if the growth would have continued with less change points?
+
+<img src="figures/what_if_forecast.png" width="600">
+
+We fitted the four scenarios to the number of new cases until respectively March 18th, March 25th, April 1st and April 7th.
+
+## Modeling three different scenarios in Germany (updated figures of the paper)
 
 ### Summary
 
