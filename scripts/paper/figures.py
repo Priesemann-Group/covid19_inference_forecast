@@ -1146,20 +1146,20 @@ def create_figure_3_distributions(save_to=None, layout=0):
                 ci = text.split("\n")[1]
 
                 # matplotlib.rcParams['text.usetex'] = True
-                with rc_context(rc={'text.usetex': True}):
-                    text = insets[key] + md + "$" + "\n" + f'{{\\footnotesize{ci}}}'
-                    ax.text(
-                        0.6, 0.9, text, fontsize=14, transform=ax.transAxes,
-                        verticalalignment="top",
-                        horizontalalignment="center",
-                        bbox=dict(facecolor="white", alpha=0.5, edgecolor="none"),
-                    )
-                # ax.text(
-                #     0.6, 0.5, ci, fontsize=8, transform=ax.transAxes,
-                #     verticalalignment="top",
-                #     horizontalalignment="center",
-                #     bbox=dict(facecolor="white", alpha=0.5, edgecolor="none"),
-                # ),
+                # with rc_context(rc={'text.usetex': True}):
+                text = insets[key] + md + "$" + "\n" + r'$\,$'
+                ax.text(
+                    0.6, 0.9, text, fontsize=12, transform=ax.transAxes,
+                    verticalalignment="top",
+                    horizontalalignment="center",
+                    bbox=dict(facecolor="white", alpha=0.5, edgecolor="none"),
+                )
+                ax.text(
+                    0.6, 0.6, ci, fontsize=9, transform=ax.transAxes,
+                    verticalalignment="top",
+                    horizontalalignment="center",
+                    # bbox=dict(facecolor="white", alpha=0.5, edgecolor="none"),
+                ),
 
     # legend
     ax = axpos["legend"]
