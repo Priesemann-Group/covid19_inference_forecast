@@ -68,6 +68,9 @@ def SIR_with_change_points(
                 * pr_median_delay :        number, default = 8
                 * pr_sigma_delay :         number, default = 0.2
                 * pr_beta_sigma_obs :      number, default = 10
+                * week_end_days :          tuple, default = (6,7)
+                * pr_mean_weekend_factor : number, default = 0.7
+                * pr_sigma_weekend_factor :number, default = 0.3
 
         Returns
         -------
@@ -87,6 +90,7 @@ def SIR_with_change_points(
         pr_median_delay=8,
         pr_sigma_delay=0.2,
         pr_beta_sigma_obs=10,
+        week_end_days = (6,7),
         pr_mean_weekend_factor=0.7,
         pr_sigma_weekend_factor=0.3
     )
@@ -100,6 +104,7 @@ def SIR_with_change_points(
     )
 
     if not add_week_end_factor:
+        del default_priors['week_end_days']
         del default_priors['pr_mean_weekend_factor']
         del default_priors['pr_sigma_weekend_factor']
 
@@ -247,13 +252,12 @@ def SIR_with_change_points(
         if add_week_end_factor:
             week_end_factor = pm.Beta('weekend_factor', mu=priors_dict['pr_mean_weekend_factor'],
                                                         sigma=priors_dict['pr_sigma_weekend_factor'])
-            mask = []
+            mask = np.zeros(num_days_sim - diff_data_sim)
             for i in range(num_days_sim - diff_data_sim):
                 date_curr = date_begin_simulation  + datetime.timedelta(days=i +diff_data_sim+ 1)
-                if date_curr.isoweekday() in (6, 7):
-                    mask.append(i)
-            multiplication_vec = tt.ones(num_days_sim - diff_data_sim)
-            multiplication_vec[mask] *= week_end_factor
+                if date_curr.isoweekday() in priors_dict['week_end_days']:
+                    mask[i] = 1
+            multiplication_vec = np.ones(num_days_sim - diff_data_sim) - (1-week_end_factor)*mask
             new_cases_inferred  = new_cases_inferred * multiplication_vec
 
         # likelihood of the model:
