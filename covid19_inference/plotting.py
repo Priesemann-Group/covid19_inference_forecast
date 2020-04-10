@@ -68,7 +68,7 @@ def plot_hist(model, trace, ax, varname, colors = ('tab:blue', 'tab:orange'), bi
 
 
 def plot_cases(trace, new_cases_obs, date_begin_sim, diff_data_sim, start_date_plot=None, end_date_plot=None,
-               ylim=None, week_interval=None, colors = ('tab:blue', 'tab:orange')):
+               ylim=None, week_interval=None, colors = ('tab:blue', 'tab:orange'), country = 'Germany'):
     """
     Plots the new cases, the fit, forecast and lambda_t evolution
 
@@ -163,7 +163,7 @@ def plot_cases(trace, new_cases_obs, date_begin_sim, diff_data_sim, start_date_p
                     alpha=0.2, color=colors[1])
 
     ax.set_xlabel('Date')
-    ax.set_ylabel('New confirmed cases in Germany')
+    ax.set_ylabel(f'New confirmed cases in {country}')
     ax.legend(loc='upper left')
     ax.set_ylim(0, ylim)
     func_format = lambda num, _: "${:.0f}\,$k".format(num / 1_000)
