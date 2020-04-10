@@ -68,7 +68,7 @@ def SIR_with_change_points(
                 * pr_median_delay :        number, default = 8
                 * pr_sigma_delay :         number, default = 0.2
                 * pr_beta_sigma_obs :      number, default = 10
-                * week_end_days :          tuple, default = (6,7)
+                * week_end_days :          tuple,  default = (6,7)
                 * pr_mean_weekend_factor : number, default = 0.7
                 * pr_sigma_weekend_factor :number, default = 0.3
 
