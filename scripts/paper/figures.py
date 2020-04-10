@@ -530,7 +530,7 @@ def create_figure_timeserie(trace, color='tab:green', save_to = None, num_days_f
     # x-axis for dates, new_cases are one element shorter than cum_cases, use [1:]
     # 0 is the last recorded data point
     time_past = np.arange(-len(cases_obs) + 1, 1)
-    time_futu = np.arange(0, num_days_future + 1)
+    time_futu = np.arange(0, num_days_fut_to_plot + 1)
     mpl_dates_past = conv_time_to_mpl_dates(time_past) + diff_to_0
     mpl_dates_futu = conv_time_to_mpl_dates(time_futu) + diff_to_0
     fig, axes = plt.subplots(
@@ -547,7 +547,7 @@ def create_figure_timeserie(trace, color='tab:green', save_to = None, num_days_f
 
     # model traces, dims: [sample, day],
     new_c_past = trace["new_cases"][:, :num_days_data]
-    new_c_futu = trace["new_cases"][:, num_days_data:]
+    new_c_futu = trace["new_cases"][:, num_days_data:num_days_data+num_days_fut_to_plot]
     cum_c_past = (
             np.cumsum(np.insert(new_c_past, 0, 0, axis=1), axis=1) + cases_obs[0]
     )
