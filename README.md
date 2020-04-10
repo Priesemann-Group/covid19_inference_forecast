@@ -33,16 +33,16 @@ We fitted the four scenarios to the number of new cases until respectively March
 
 ### Scenario assuming three change points
 
-<img src="figures/Fig_S3.png" width="600">
-<img src="figures/Fig_S4.png" width="650">
+<img src="figures/Fig_S3.png" width="400">
+<img src="figures/Fig_S4.png" width="400">
 
 ### Scenario assuming two change points
 
-<img src="figures/Fig_3.png" width="600">
-<img src="figures/Fig_4.png" width="650">
+<img src="figures/Fig_3.png" width="400">
+<img src="figures/Fig_4.png" width="400">
 
 ### Scenario assuming one change point
 
-<img src="figures/Fig_S1.png" width="600">
-<img src="figures/Fig_S2.png" width="650">
+<img src="figures/Fig_S1.png" width="400">
+<img src="figures/Fig_S2.png" width="400">
 
