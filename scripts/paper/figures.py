@@ -1376,6 +1376,7 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
         letters["mu"] = r"D"
         # letters["sigma_obs"] = "G"
         # letters["delay"] = "H"
+        i  = num_rows-1
         for i, (key, inset) in enumerate(additional_insets.items()):
             col = int(np.floor((i + 14) / num_rows))
             row = i % num_rows
