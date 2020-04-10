@@ -560,7 +560,7 @@ def create_figure_timeserie(trace, color='tab:green', save_to = None, num_days_f
     # --------------------------------------------------------------------------- #
     ax = axes[0]
     mu = trace["mu"][:, np.newaxis]
-    lambda_t = trace["lambda_t"][:, diff_data_sim:]
+    lambda_t = trace["lambda_t"][:, diff_data_sim:diff_data_sim+num_days_data+num_days_fut_to_plot]
     ax.plot(
         np.concatenate([mpl_dates_past[1:], mpl_dates_futu[1:]]),
         np.median(lambda_t - mu, axis=0),
@@ -1252,8 +1252,8 @@ def get_label_dict(version=0):
         labels['E_begin_scale'] = 'Initial scale\nof exposed'
         labels['median_incubation'] = 'Median\nincubation delay'
         labels['sigma_random_walk'] = 'Std. of\nrandom walk'
+        labels['weekend_factor'] = 'Factor\nweekends discounted'
     return labels
-
 
 def create_figure_3_distributions(model, trace, save_to=None, layout=2,
                                   additional_insets=None, xlim_lambda=(0, 0.53), color='tab:green',
