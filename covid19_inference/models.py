@@ -71,7 +71,7 @@ def SIR_with_change_points(
                 * pr_beta_sigma_obs :      number, default = 10
                 * week_end_days :          tuple,  default = (6,7)
                 * pr_mean_weekend_factor : number, default = 0.7
-                * pr_sigma_weekend_factor :number, default = 0.3
+                * pr_sigma_weekend_factor :number, default = 0.17
 
         weekends_modulated : bool
             Whether to add the prior that cases are less reported on week ends. Multiplies the new cases numbers on weekends
@@ -101,7 +101,7 @@ def SIR_with_change_points(
         pr_beta_sigma_obs=10,
         week_end_days = (6,7),
         pr_mean_weekend_factor=0.7,
-        pr_sigma_weekend_factor=0.3
+        pr_sigma_weekend_factor=0.17
     )
     default_priors_change_points = dict(
         pr_median_lambda=default_priors["pr_median_lambda_0"],
@@ -256,7 +256,6 @@ def SIR_with_change_points(
             delay=delay,
             delay_diff=diff_data_sim,
         )
-
 
         if weekends_modulated:
             week_end_factor = pm.Beta('weekend_factor', mu=priors_dict['pr_mean_weekend_factor'],
