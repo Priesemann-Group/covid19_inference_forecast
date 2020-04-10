@@ -76,8 +76,11 @@ def SIR_with_change_points(
         weekends_modulated : bool
             Whether to add the prior that cases are less reported on week ends. Multiplies the new cases numbers on weekends
             by a number between 0 and 1, given by a prior beta distribution. The beta distribution is parametrised
-            by pr_mean_weekend_factor and pr_sigma_weekend_factor, and which days to consider as weekends by
-            week_end_days. 6 and 7 corresponds to Saturday and Sunday respectively (the default).
+            by pr_mean_weekend_factor and pr_sigma_weekend_factor
+        weekend_modulation_type : 'step' or 'abs_sine':
+            whether the weekends are modulated by a step function, which only multiplies the days given by  week_end_days
+            by the week_end_factor, or whether the whole week is modulated by an abs(sin(x)) function, with an offset
+            with flat prior.
         Returns
         -------
         : pymc3.Model
@@ -271,7 +274,7 @@ def SIR_with_change_points(
                 date_begin = date_begin_simulation + datetime.timedelta(days=diff_data_sim + 1)
                 weekday_begin = date_begin.weekday()
                 t -= weekday_begin # Sunday is zero
-                modulation = 1-tt.abs_(tt.sin(offset/t * np.pi))
+                modulation = 1-tt.abs_(tt.sin(t/7 * np.pi + offset_rad/2))
 
             multiplication_vec = np.ones(num_days_sim - diff_data_sim) - (1 - week_end_factor) * modulation
             new_cases_inferred_eff  = new_cases_inferred * multiplication_vec
@@ -296,9 +299,8 @@ def SIR_with_change_points(
         # add these observables to the model so we can extract a time series of them
         # later via e.g. `model.trace['lambda_t']`
         pm.Deterministic("lambda_t", lambda_t)
-        pm.Deterministic("new_cases", new_cases_inferred)
-        pm.Deterministic("new_cases_eff", new_cases_inferred_eff)
-
+        pm.Deterministic("new_cases", new_cases_inferred_eff)
+        pm.Deterministic("new_cases_raw", new_cases_inferred)
     return model
 
 
