@@ -265,8 +265,8 @@ def create_figure_0(save_to=None):
         ax.set_rasterization_zorder(rasterization_zorder)
 
     if save_to is not None:
-        fig.savefig(save_to + "_summary_distributions.png", dpi=300)
-        fig.savefig(save_to + "_summary_distributions.pdf", dpi=300)
+        fig.savefig(save_to + "Fig_summary_distributions.png", dpi=300)
+        fig.savefig(save_to + "Fig_summary_distributions.pdf", dpi=300)
 
     # ------------------------------------------------------------------------------ #
     # time series
@@ -497,8 +497,8 @@ def create_figure_0(save_to=None):
         ax.set_rasterization_zorder(rasterization_zorder)
 
     if save_to is not None:
-        fig.savefig(save_to + "_summary_forecast.pdf", dpi=300)
-        fig.savefig(save_to + "_summary_forecast.png", dpi=300)
+        fig.savefig(save_to + "Fig_summary_forecast.pdf", dpi=300)
+        fig.savefig(save_to + "Fig_summary_forecast.png", dpi=300)
 
     return figs
 
