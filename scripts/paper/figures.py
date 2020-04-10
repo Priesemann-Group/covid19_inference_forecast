@@ -42,9 +42,32 @@ post_style = {
 # set to None to keep everything a vector, with `-1` Posteriors are rastered (see above)
 rasterization_zorder = -1
 
+country = "Germany"
+confirmed_cases = cov19.get_jhu_confirmed_cases()
+date_data_begin = datetime.datetime(2020, 3, 1)
+date_data_end = cov19.get_last_date(confirmed_cases)
+
+# number of days in the data -1, to match the new cases
+num_days_data = (date_data_end - date_data_begin).days
+# how many days the simulation starts before the data
+diff_data_sim = 16
+# how many days to forecast
+num_days_future = 28
+# days of simulation until forecast starts
+diff_to_0 = num_days_data + diff_data_sim
+
+date_begin_sim = date_data_begin - datetime.timedelta(days=diff_data_sim)
+date_end_sim = date_data_end + datetime.timedelta(days=num_days_future)
+num_days_sim = (date_end_sim - date_begin_sim).days
+
+cases_obs = cov19.filter_one_country(
+    confirmed_cases, country, date_data_begin, date_data_end
+)
+
 # ------------------------------------------------------------------------------ #
 # main functions
 # ------------------------------------------------------------------------------ #
+
 
 def run_model_three_change_points():
     print(
@@ -480,6 +503,336 @@ def create_figure_0(save_to=None):
     return figs
 
 
+
+def create_figure_timeserie(trace, color='tab:green', save_to = None, num_days_fut_to_plot=18,
+                           y_lim_lambda=(-0.15, 0.45), plot_red_axis=True):
+    ylabel_new = f"New daily confirmed\ncases in {country}"
+    ylabel_cum = f"Total confirmed\ncases in {country}"
+    ylabel_lam = f"Effective\ngrowth rate $\lambda^\\ast (t)$"
+
+    pos_letter = (-0.25, 1)
+    titlesize = 16
+    insetsize = ("25%", "50%")
+    figsize = (4, 6)
+    leg_loc = "upper right"
+
+    new_c_ylim = [0, 15000]
+    new_c_insetylim = [50, 17_000]
+
+    cum_c_ylim = [0, 200_000]
+    cum_c_insetylim = [50, 250_000]
+
+    # interval for the plots with forecast
+    start_date = conv_time_to_mpl_dates(-len(cases_obs) + 2) + diff_to_0
+    end_date = conv_time_to_mpl_dates(num_days_fut_to_plot) + diff_to_0
+    mid_date = conv_time_to_mpl_dates(1) + diff_to_0
+
+    # x-axis for dates, new_cases are one element shorter than cum_cases, use [1:]
+    # 0 is the last recorded data point
+    time_past = np.arange(-len(cases_obs) + 1, 1)
+    time_futu = np.arange(0, num_days_future + 1)
+    mpl_dates_past = conv_time_to_mpl_dates(time_past) + diff_to_0
+    mpl_dates_futu = conv_time_to_mpl_dates(time_futu) + diff_to_0
+    fig, axes = plt.subplots(
+        3, 1, figsize=figsize, gridspec_kw={"height_ratios": [2, 3, 3]},
+        constrained_layout=True
+    )
+
+    # --------------------------------------------------------------------------- #
+    # prepare data
+    # --------------------------------------------------------------------------- #
+    # observed data, only one dim: [day]
+    new_c_obsd = np.diff(cases_obs)
+    cum_c_obsd = cases_obs
+
+    # model traces, dims: [sample, day],
+    new_c_past = trace["new_cases"][:, :num_days_data]
+    new_c_futu = trace["new_cases"][:, num_days_data:]
+    cum_c_past = (
+            np.cumsum(np.insert(new_c_past, 0, 0, axis=1), axis=1) + cases_obs[0]
+    )
+    cum_c_futu = (
+            np.cumsum(np.insert(new_c_futu, 0, 0, axis=1), axis=1) + cases_obs[-1]
+    )
+
+    # --------------------------------------------------------------------------- #
+    # growth rate lambda*
+    # --------------------------------------------------------------------------- #
+    ax = axes[0]
+    mu = trace["mu"][:, np.newaxis]
+    lambda_t = trace["lambda_t"][:, diff_data_sim:]
+    ax.plot(
+        np.concatenate([mpl_dates_past[1:], mpl_dates_futu[1:]]),
+        np.median(lambda_t - mu, axis=0),
+        color=color,
+        linewidth=2,
+    )
+    ax.fill_between(
+        np.concatenate([mpl_dates_past[1:], mpl_dates_futu[1:]]),
+        np.percentile(lambda_t - mu, q=2.5, axis=0),
+        np.percentile(lambda_t - mu, q=97.5, axis=0),
+        alpha=0.15,
+        color=color,
+        lw=0,
+    )
+    ax.set_ylabel(ylabel_lam)
+    ax.set_ylim(*y_lim_lambda)
+    ax.hlines(0, start_date, end_date, linestyles=":")
+    delay = matplotlib.dates.date2num(date_data_end) - np.percentile(
+        trace.delay, q=75
+    )
+    if plot_red_axis:
+        ax.vlines(delay, -10, 10, linestyles="-", colors=["tab:red"])
+        ax.text(
+            delay + 1.5,
+            0.4,
+            "unconstrained due\nto reporting delay",
+            color="tab:red",
+            verticalalignment="top",
+        )
+        ax.text(
+            delay - 1.5,
+            0.4,
+            "constrained\nby data",
+            color="tab:red",
+            horizontalalignment="right",
+            verticalalignment="top",
+        )
+    ax.text(
+        pos_letter[0], pos_letter[1], "A", transform=ax.transAxes, size=titlesize
+    )
+    ax.set_xlim(start_date, end_date)
+    format_date_xticks(ax)
+    for label in ax.xaxis.get_ticklabels()[1::2]:
+        label.set_visible(False)
+
+    # --------------------------------------------------------------------------- #
+    # New cases, lin scale first
+    # --------------------------------------------------------------------------- #
+    ax = axes[1]
+    ax.plot(
+        mpl_dates_past[1:],
+        new_c_obsd,
+        "d",
+        label="Data",
+        markersize=4,
+        color="tab:blue",
+        zorder=5,
+    )
+    ax.plot(
+        mpl_dates_past[1:],
+        np.median(new_c_past, axis=0),
+        "-",
+        color=color,
+        linewidth=1.5,
+        label="Fit",
+        zorder=10,
+    )
+    ax.fill_between(
+        mpl_dates_past[1:],
+        np.percentile(new_c_past, q=2.5, axis=0),
+        np.percentile(new_c_past, q=97.5, axis=0),
+        alpha=0.1,
+        color=color,
+        lw=0,
+    )
+    ax.plot(
+        mpl_dates_futu[1:],
+        np.median(new_c_futu, axis=0),
+        "--",
+        color=color,
+        linewidth=3,
+        label="Forecast",
+    )
+    ax.fill_between(
+        mpl_dates_futu[1:],
+        np.percentile(new_c_futu, q=2.5, axis=0),
+        np.percentile(new_c_futu, q=97.5, axis=0),
+        alpha=0.1,
+        color=color,
+        lw=0,
+    )
+    ax.fill_between(
+        mpl_dates_futu[1:],
+        np.percentile(new_c_futu, q=12.5, axis=0),
+        np.percentile(new_c_futu, q=87.5, axis=0),
+        alpha=0.2,
+        color=color,
+        lw=0,
+    )
+    ax.set_ylabel(ylabel_new)
+    ax.legend(loc=leg_loc)
+    ax.get_legend().get_frame().set_linewidth(0.0)
+    ax.get_legend().get_frame().set_facecolor("#F0F0F0")
+    ax.set_ylim(new_c_ylim)
+    ax.set_xlim(start_date, end_date)
+    ax.text(
+        pos_letter[0], pos_letter[1], "B", transform=ax.transAxes, size=titlesize
+    )
+
+    ax.set_xlim(start_date, end_date)
+    format_date_xticks(ax)
+    ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(format_k))
+    for label in ax.xaxis.get_ticklabels()[1::2]:
+        label.set_visible(False)
+
+    # NEW CASES LOG SCALE, skip forecast
+    ax = inset_axes(
+        ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=0.75
+    )
+    ax.plot(
+        mpl_dates_past[1:], new_c_obsd, "d", markersize=2, label="Data", zorder=5
+    )
+    ax.plot(
+        mpl_dates_past[1:],
+        np.median(new_c_past, axis=0),
+        "-",
+        color=color,
+        label="Fit (with 95% CI)",
+        zorder=10,
+    )
+    ax.fill_between(
+        mpl_dates_past[1:],
+        np.percentile(new_c_past, q=2.5, axis=0),
+        np.percentile(new_c_past, q=97.5, axis=0),
+        alpha=0.1,
+        color=color,
+        lw=0,
+    )
+    format_date_xticks(ax, minor=True)
+    ax.set_yscale("log")
+    ax.set_yticks([1e1, 1e2, 1e3, 1e4, 1e5])
+    ax.set_xlim(start_date, mid_date)
+    ax.set_ylim(new_c_insetylim)
+    ax.yaxis.tick_right()
+    for label in ax.xaxis.get_ticklabels()[1:-1]:
+        label.set_visible(False)
+
+    # --------------------------------------------------------------------------- #
+    # Total cases, lin scale first
+    # --------------------------------------------------------------------------- #
+    ax = axes[2]
+    ax.plot(
+        mpl_dates_past[:],
+        cum_c_obsd,
+        "d",
+        label="Data",
+        markersize=4,
+        color="tab:blue",
+        zorder=5,
+    )
+    ax.plot(
+        mpl_dates_past[:],
+        np.median(cum_c_past, axis=0),
+        "-",
+        color=color,
+        linewidth=1.5,
+        label="Fit with 95% CI",
+        zorder=10,
+    )
+    ax.fill_between(
+        mpl_dates_past[:],
+        np.percentile(cum_c_past, q=2.5, axis=0),
+        np.percentile(cum_c_past, q=97.5, axis=0),
+        alpha=0.1,
+        color=color,
+        lw=0,
+    )
+    ax.plot(
+        mpl_dates_futu[1:],
+        np.median(cum_c_futu[:, 1:], axis=0),
+        "--",
+        color=color,
+        linewidth=3,
+        label="Forecast with 75% and 95% CI",
+    )
+    ax.fill_between(
+        mpl_dates_futu[1:],
+        np.percentile(cum_c_futu[:, 1:], q=2.5, axis=0),
+        np.percentile(cum_c_futu[:, 1:], q=97.5, axis=0),
+        alpha=0.1,
+        color=color,
+        lw=0,
+    )
+    ax.fill_between(
+        mpl_dates_futu[1:],
+        np.percentile(cum_c_futu[:, 1:], q=12.5, axis=0),
+        np.percentile(cum_c_futu[:, 1:], q=87.5, axis=0),
+        alpha=0.2,
+        color=color,
+        lw=0,
+    )
+    ax.set_xlabel("Date")
+    ax.set_ylabel(ylabel_cum)
+    ax.set_ylim(cum_c_ylim)
+    ax.set_xlim(start_date, end_date)
+    ax.text(
+        pos_letter[0], pos_letter[1], "C", transform=ax.transAxes, size=titlesize
+    )
+
+    ax.set_xlim(start_date, end_date)
+    format_date_xticks(ax)
+    ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(format_k))
+    for label in ax.xaxis.get_ticklabels()[1::2]:
+        label.set_visible(False)
+
+    # Total CASES LOG SCALE, skip forecast
+    ax = inset_axes(
+        ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=0.75
+    )
+    ax.plot(
+        mpl_dates_past[:], cum_c_obsd, "d", markersize=2, label="Data", zorder=5
+    )
+    ax.plot(
+        mpl_dates_past[:],
+        np.median(cum_c_past, axis=0),
+        "-",
+        color=color,
+        label="Fit (with 95% CI)",
+        zorder=10,
+    )
+    ax.fill_between(
+        mpl_dates_past[:],
+        np.percentile(cum_c_past, q=2.5, axis=0),
+        np.percentile(cum_c_past, q=97.5, axis=0),
+        alpha=0.1,
+        color=color,
+        lw=0,
+    )
+    format_date_xticks(ax, minor=True)
+    ax.set_yscale("log")
+    ax.set_yticks([1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7])
+    ax.set_xlim(start_date, mid_date)
+    ax.set_ylim(cum_c_insetylim)
+    ax.yaxis.tick_right()
+    for label in ax.xaxis.get_ticklabels()[1:-1]:
+        label.set_visible(False)
+
+    # --------------------------------------------------------------------------- #
+    # Finalize
+    # --------------------------------------------------------------------------- #
+
+    for ax in axes:
+        ax.set_rasterization_zorder(rasterization_zorder)
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+
+    # plt.subplots_adjust(wspace=0.4, hspace=0.25)
+    if save_to is not None:
+        plt.savefig(
+            save_to + ".pdf",
+            dpi=300,
+            bbox_inches="tight",
+            pad_inches=0,
+        )
+        plt.savefig(
+            save_to + ".png",
+            dpi=300,
+            bbox_inches="tight",
+            pad_inches=0,
+        )
+
+
 def create_figure_3_timeseries(save_to=None):
     global traces
     global models
@@ -826,6 +1179,34 @@ def create_figure_3_timeseries(save_to=None):
     return figs
 
 
+
+def get_priors_dict():
+    pr = dict()
+    pr["lambda_0"] = lambda x: scipy.stats.lognorm.pdf(x, scale=0.4, s=0.5)
+    pr["lambda_1"] = lambda x: scipy.stats.lognorm.pdf(x, scale=0.2, s=0.5)
+    pr["lambda_2"] = lambda x: scipy.stats.lognorm.pdf(x, scale=1 / 8, s=0.5)
+    pr["lambda_3"] = lambda x: scipy.stats.lognorm.pdf(x, scale=1 / 8 / 2, s=0.5)
+    pr["transient_begin_0"] = lambda x: scipy.stats.norm.pdf(
+        x, loc=matplotlib.dates.date2num([prior_date_mild_dist_begin])[0], scale=3
+    )
+    pr["transient_begin_1"] = lambda x: scipy.stats.norm.pdf(
+        x, loc=matplotlib.dates.date2num([prior_date_strong_dist_begin])[0], scale=1
+    )
+    pr["transient_begin_2"] = lambda x: scipy.stats.norm.pdf(
+        x, loc=matplotlib.dates.date2num([prior_date_contact_ban_begin])[0], scale=1
+    )
+    pr["transient_len_0"] = lambda x: scipy.stats.lognorm.pdf(x, scale=3, s=0.3)
+    pr["transient_len_1"] = lambda x: scipy.stats.lognorm.pdf(x, scale=3, s=0.3)
+    pr["transient_len_2"] = lambda x: scipy.stats.lognorm.pdf(x, scale=3, s=0.3)
+    pr["mu"] = lambda x: scipy.stats.lognorm.pdf(x, scale=1 / 8, s=0.2)
+    pr["delay"] = lambda x: scipy.stats.lognorm.pdf(x, scale=8, s=0.2)
+    pr["I_begin"] = lambda x: scipy.stats.halfcauchy.pdf(x, scale=100)
+    pr["sigma_obs"] = lambda x: scipy.stats.halfcauchy.pdf(x, scale=10)
+    return pr
+
+
+
+
 def get_label_dict(version=0):
     labels = dict()
     labels["mu"] = f"Recovery rate $\mu$"
@@ -868,62 +1249,37 @@ def get_label_dict(version=0):
         labels["transient_len_0"] = f"Change duration"
         labels["transient_len_1"] = f""
         labels["transient_len_2"] = f""
+        labels['E_begin_scale'] = 'Initial scale\nof exposed'
+        labels['median_incubation'] = 'Median\nincubation delay'
+        labels['sigma_random_walk'] = 'Std. of\nrandom walk'
     return labels
 
 
-def get_priors_dict():
-    pr = dict()
-    pr["lambda_0"] = lambda x: scipy.stats.lognorm.pdf(x, scale=0.4, s=0.5)
-    pr["lambda_1"] = lambda x: scipy.stats.lognorm.pdf(x, scale=0.2, s=0.5)
-    pr["lambda_2"] = lambda x: scipy.stats.lognorm.pdf(x, scale=1 / 8, s=0.5)
-    pr["lambda_3"] = lambda x: scipy.stats.lognorm.pdf(x, scale=1 / 8 / 2, s=0.5)
-    pr["transient_begin_0"] = lambda x: scipy.stats.norm.pdf(
-        x, loc=matplotlib.dates.date2num([prior_date_mild_dist_begin])[0], scale=3
-    )
-    pr["transient_begin_1"] = lambda x: scipy.stats.norm.pdf(
-        x, loc=matplotlib.dates.date2num([prior_date_strong_dist_begin])[0], scale=1
-    )
-    pr["transient_begin_2"] = lambda x: scipy.stats.norm.pdf(
-        x, loc=matplotlib.dates.date2num([prior_date_contact_ban_begin])[0], scale=1
-    )
-    pr["transient_len_0"] = lambda x: scipy.stats.lognorm.pdf(x, scale=3, s=0.3)
-    pr["transient_len_1"] = lambda x: scipy.stats.lognorm.pdf(x, scale=3, s=0.3)
-    pr["transient_len_2"] = lambda x: scipy.stats.lognorm.pdf(x, scale=3, s=0.3)
-    pr["mu"] = lambda x: scipy.stats.lognorm.pdf(x, scale=1 / 8, s=0.2)
-    pr["delay"] = lambda x: scipy.stats.lognorm.pdf(x, scale=8, s=0.2)
-    pr["I_begin"] = lambda x: scipy.stats.halfcauchy.pdf(x, scale=100)
-    pr["sigma_obs"] = lambda x: scipy.stats.halfcauchy.pdf(x, scale=10)
-    return pr
-
-
-def create_figure_3_distributions(save_to=None, layout=0):
-    global traces
-    global models
-    try:
-        traces
-    except NameError:
-        print(f"Have to run simulations first, this will take some time")
-        models, traces = run_model_three_change_points()
-
-    trace = traces[3]
+def create_figure_3_distributions(model, trace, save_to=None, layout=2,
+                                  additional_insets=None, xlim_lambda=(0, 0.53), color='tab:green',
+                                  num_changepoints=3, xlim_tbegin=4):
+    if additional_insets is None:
+        additional_insets = {}
     # model = models[3]
-    colors = ["#708090", "tab:green"]
-
+    colors = ["#708090", color]
+    additional_dists = len(additional_insets)
     if layout == 0:
         fig, axes = plt.subplots(3, 5, figsize=(9, 6))
     elif layout == 1:
         fig, axes = plt.subplots(4, 4, figsize=(6, 6), constrained_layout=True)
-    else:
-        fig, axes = plt.subplots(5, 3, figsize=(4.5, 6), constrained_layout=True)
+    elif layout == 2:
+        num_columns = int(np.ceil((additional_dists + 14) / 5))
+        num_rows = num_changepoints + 2
+        width_col = 4.5 / 3 * num_columns
+        height_fig = 6 if not num_changepoints == 1 else 5
+        fig, axes = plt.subplots(num_rows, num_columns, figsize=(width_col, 6), constrained_layout=True)
 
-    xlim_lambda = (0, 0.53)
     xlim_transt = (0, 7)
-    xlim_tbegin = 4  # median plus minus x days
+    xlim_tbegin = xlim_tbegin  # median plus minus x days
 
     axpos = dict()
     letters = dict()
     labels = get_label_dict(version=0)
-    priors = get_priors_dict()
 
     # leave away the closing doller, we add it later
     insets = dict()
@@ -942,6 +1298,9 @@ def create_figure_3_distributions(save_to=None, layout=0):
     insets["delay"] = r"$D \simeq "
     insets["sigma_obs"] = r"$\sigma \simeq "
     insets["I_begin"] = r"$I_0 \simeq "
+
+    for key, inset in additional_insets.items():
+        insets[key] = inset
 
     if layout == 0:
         pos_letter = (0, 1.08)
@@ -1000,21 +1359,15 @@ def create_figure_3_distributions(save_to=None, layout=0):
         pos_letter = (-0.2, 1.1)
         labels = get_label_dict(version=2)
         axpos["lambda_0"] = axes[1][0]
-        axpos["lambda_1"] = axes[2][0]
-        axpos["lambda_2"] = axes[3][0]
-        axpos["lambda_3"] = axes[4][0]
-        axpos["transient_begin_0"] = axes[2][1]
-        axpos["transient_begin_1"] = axes[3][1]
-        axpos["transient_begin_2"] = axes[4][1]
-        axpos["transient_len_0"] = axes[2][2]
-        axpos["transient_len_1"] = axes[3][2]
-        axpos["transient_len_2"] = axes[4][2]
+        for i_cp in range(0, num_changepoints):
+            axpos["lambda_{}".format(i_cp + 1)] = axes[i_cp + 2][0]
+            axpos["transient_begin_{}".format(i_cp)] = axes[i_cp + 2][1]
+            axpos["transient_len_{}".format(i_cp)] = axes[i_cp + 2][2]
 
         axpos["mu"] = axes[0][0]
         axpos["delay"] = axes[1][2]
         axpos["I_begin"] = axes[1][1]
         axpos["sigma_obs"] = axes[0][1]
-        axpos["legend"] = axes[0][2]
 
         letters["lambda_0"] = r"E"
         letters["lambda_1"] = r"F"
@@ -1023,6 +1376,14 @@ def create_figure_3_distributions(save_to=None, layout=0):
         letters["mu"] = r"D"
         # letters["sigma_obs"] = "G"
         # letters["delay"] = "H"
+        for i, (key, inset) in enumerate(additional_insets.items()):
+            col = int(np.floor((i + 14) / num_rows))
+            row = i % num_rows
+            axpos[key] = axes[row][col]
+        for i in range(i + 1, num_rows):
+            axes[i][col].set_visible(False)
+        if not len(additional_insets) % num_rows == 1:
+            axpos["legend"] = axes[0][num_columns - 1]
 
     for key in axpos.keys():
         axpos[key].xaxis.set_label_position("top")
@@ -1042,7 +1403,7 @@ def create_figure_3_distributions(save_to=None, layout=0):
 
         # make some bold
         if layout == 2 and (
-            key == "lambda_1" or key == "transient_begin_0" or key == "transient_len_0"
+                key == "lambda_1" or key == "transient_begin_0" or key == "transient_len_0"
         ):
             ax.set_xlabel(labels[key], fontweight="bold")
 
@@ -1073,10 +1434,16 @@ def create_figure_3_distributions(save_to=None, layout=0):
         # priors
         limits = ax.get_xlim()
         x = np.linspace(*limits, num=100)
+        if 'transient_begin' in key:
+            beg_x = matplotlib.dates.num2date(x[0])
+            diff_dates_x = (beg_x.replace(tzinfo=None) - date_begin_sim).days
+            x_input = x - x[0] + diff_dates_x
+        else:
+            x_input = x
         ax.plot(
             x,
-            priors[key](x),
-            # cov19.plotting.get_prior_distribution(model, x, key),
+            # priors[key](x),
+            cov19.plotting.get_prior_distribution(model, x_input, key),
             label="Prior",
             color=colors[0],
             linewidth=3,
@@ -1096,7 +1463,7 @@ def create_figure_3_distributions(save_to=None, layout=0):
 
         # median
         global text
-        if "lambda" in key or "mu" == key:
+        if "lambda" in key or "mu" == key or 'sigma_random_walk' == key:
             text = print_median_CI(data, prec=2)
         elif "transient_begin" in key:
             text = print_median_CI(
@@ -1140,17 +1507,19 @@ def create_figure_3_distributions(save_to=None, layout=0):
                 ),
 
     # legend
-    ax = axpos["legend"]
-    ax.set_axis_off()
-    ax.plot([], [], color=colors[0], linewidth=3, label="Prior")
-    ax.hist([], color=colors[1], label="Posterior")
-    ax.legend(loc="center left")
-    ax.get_legend().get_frame().set_linewidth(0.0)
-    ax.get_legend().get_frame().set_facecolor("#F0F0F0")
+    if 'legend' in axpos:
+        ax = axpos["legend"]
+        ax.set_axis_off()
+        ax.plot([], [], color=colors[0], linewidth=3, label="Prior")
+        ax.hist([], color=colors[1], label="Posterior")
+        ax.legend(loc="center left")
+        ax.get_legend().get_frame().set_linewidth(0.0)
+        ax.get_legend().get_frame().set_facecolor("#F0F0F0")
 
     # dirty hack to get some space at the bottom to align with timeseries
-    axes[-1][-1].xaxis.set_label_position("bottom")
-    axes[-1][-1].set_xlabel(r"$\,$")
+    if not num_changepoints == 1:
+        axes[-1][0].xaxis.set_label_position("bottom")
+        axes[-1][0].set_xlabel(r"$\,$")
 
     for jdx, ax_row in enumerate(axes):
         for idx, ax in enumerate(ax_row):
@@ -1167,10 +1536,6 @@ def create_figure_3_distributions(save_to=None, layout=0):
     if save_to is not None:
         plt.savefig(save_to + ".pdf", bbox_inches="tight", pad_inches=0, dpi=300)
         plt.savefig(save_to + ".png", bbox_inches="tight", pad_inches=0, dpi=300)
-
-    # return fig
-
-
 # ------------------------------------------------------------------------------ #
 # helper
 # ------------------------------------------------------------------------------ #
