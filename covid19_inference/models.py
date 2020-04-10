@@ -21,7 +21,8 @@ def SIR_with_change_points(
     diff_data_sim,
     N,
     priors_dict=None,
-    add_week_end_factor=False
+    weekends_modulated=False,
+    weekend_modulation_type = 'step'
 ):
     """
         Parameters
@@ -72,7 +73,7 @@ def SIR_with_change_points(
                 * pr_mean_weekend_factor : number, default = 0.7
                 * pr_sigma_weekend_factor :number, default = 0.3
 
-        add_week_end_factor : bool
+        weekends_modulated : bool
             Whether to add the prior that cases are less reported on week ends. Multiplies the new cases numbers on weekends
             by a number between 0 and 1, given by a prior beta distribution. The beta distribution is parametrised
             by pr_mean_weekend_factor and pr_sigma_weekend_factor, and which days to consider as weekends by
@@ -254,15 +255,25 @@ def SIR_with_change_points(
         )
 
 
-        if add_week_end_factor:
+        if weekends_modulated:
             week_end_factor = pm.Beta('weekend_factor', mu=priors_dict['pr_mean_weekend_factor'],
                                                         sigma=priors_dict['pr_sigma_weekend_factor'])
-            mask = np.zeros(num_days_sim - diff_data_sim)
-            for i in range(num_days_sim - diff_data_sim):
-                date_curr = date_begin_simulation  + datetime.timedelta(days=i + diff_data_sim + 1)
-                if date_curr.isoweekday() in priors_dict['week_end_days']:
-                    mask[i] = 1
-            multiplication_vec = np.ones(num_days_sim - diff_data_sim) - (1-week_end_factor)*mask
+            if weekend_modulation_type == 'step':
+                modulation = np.zeros(num_days_sim - diff_data_sim)
+                for i in range(num_days_sim - diff_data_sim):
+                    date_curr = date_begin_simulation  + datetime.timedelta(days=i + diff_data_sim + 1)
+                    if date_curr.isoweekday() in priors_dict['week_end_days']:
+                        modulation[i] = 1
+            elif weekend_modulation_type == 'abs_sine':
+                offset_rad = pm.VonMises('offset_modulation_rad', mu = 0, kappa = 0.01)
+                offset = pm.Deterministic('offset_modulation', offset_rad/(2*np.pi)*7)
+                t = np.arange(num_days_sim - diff_data_sim)
+                date_begin = date_begin_simulation + datetime.timedelta(days=diff_data_sim + 1)
+                weekday_begin = date_begin.weekday()
+                t -= weekday_begin # Sunday is zero
+                modulation = tt.abs_(tt.sin(offset/t * np.pi))
+
+            multiplication_vec = np.ones(num_days_sim - diff_data_sim) - (1 - week_end_factor) * modulation
             new_cases_inferred_eff  = new_cases_inferred * multiplication_vec
         else:
             new_cases_inferred_eff = new_cases_inferred
