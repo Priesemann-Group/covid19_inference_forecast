@@ -271,7 +271,7 @@ def SIR_with_change_points(
                 date_begin = date_begin_simulation + datetime.timedelta(days=diff_data_sim + 1)
                 weekday_begin = date_begin.weekday()
                 t -= weekday_begin # Sunday is zero
-                modulation = tt.abs_(tt.sin(offset/t * np.pi))
+                modulation = 1-tt.abs_(tt.sin(offset/t * np.pi))
 
             multiplication_vec = np.ones(num_days_sim - diff_data_sim) - (1 - week_end_factor) * modulation
             new_cases_inferred_eff  = new_cases_inferred * multiplication_vec
