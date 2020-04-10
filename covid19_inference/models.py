@@ -109,7 +109,7 @@ def SIR_with_change_points(
         pr_mean_date_begin_transient=None,
     )
 
-    if not add_week_end_factor:
+    if not weekends_modulated:
         del default_priors['week_end_days']
         del default_priors['pr_mean_weekend_factor']
         del default_priors['pr_sigma_weekend_factor']
