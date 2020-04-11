@@ -17,37 +17,32 @@ Some output figures are shown below. The rest are found in the figures folder. W
 
 ### Please take notice of our [disclaimer](disclaimer.md).
 
-## What-if scenarios
-
-What if the growth would have continued with less change points?
-
-<img src="figures/what_if_forecast.png" width="600">
-
-We fitted the four scenarios to the number of new cases until respectively March 18th, March 25th, April 1st and April 7th.
-
 ## Modeling three different scenarios in Germany (updated figures of the paper)
 
 ### Summary
 
-<img src="figures/Fig_summary_forecast.png" width="600">
+<img src="figures/Fig_summary_forecast.png" width="500">
 
 ### Scenario assuming three change points
 
 <p float="left">
-  <img src="figures/Fig_S3.png" height="500" />
-  <img src="figures/Fig_S4.png" height="500" /> 
+  <img src="figures/Fig_S3.png" height="450" />
+  <img src="figures/Fig_S4.png" height="450" /> 
 </p>
 
-### Scenario assuming two change points
+### Scenario assuming three change points with a weekly modulation of reported cases
 
 <p float="left">
-  <img src="figures/Fig_3.png" height="500">
-  <img src="figures/Fig_4.png" height="500">
+  <img src="figures/Fig_cases_sine_weekend.png" height="450">
+  <img src="figures/Fig_hists_sine_weekend.png" height="450">
 </p>
 
-### Scenario assuming one change point
-<p float="left">
-  <img src="figures/Fig_S1.png" height="500">
-  <img src="figures/Fig_S2.png" height="500">
-</p>
+
+## What-if scenarios
+
+What if the growth would have continued with less change points?
+
+<img src="figures/what_if_forecast.png" width="500">
+
+We fitted the four scenarios to the number of new cases until respectively March 18th, March 25th, April 1st and April 7th.
 
