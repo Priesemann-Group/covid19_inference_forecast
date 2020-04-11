@@ -34,7 +34,7 @@ Some output figures are shown below. The rest are found in the figures folder. W
 
 <p float="left">
   <img src="figures/Fig_cases_sine_weekend.png" height="450">
-  <img src="figures/Fig_hists_sine_weekend.png" height="450">
+  <img src="figures/Fig_distr_sine_weekend.png" height="450">
 </p>
 
 
