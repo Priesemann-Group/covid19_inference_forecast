@@ -1253,6 +1253,7 @@ def get_label_dict(version=0):
         labels['median_incubation'] = 'Median\nincubation delay'
         labels['sigma_random_walk'] = 'Std. of\nrandom walk'
         labels['weekend_factor'] = 'Factor\nweekends discounted'
+        labels['offset_modulation_rad'] = 'Offset from sunday\nof the modulation'
     return labels
 
 def create_figure_3_distributions(model, trace, save_to=None, layout=2,
@@ -1398,6 +1399,8 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
             data = conv_time_to_mpl_dates(trace[key])
         else:
             data = trace[key]
+        if 'weekend_factor_rad' == key:
+            data = data/np.pi/2*7
 
         ax = axpos[key]
         ax.set_xlabel(labels[key])
@@ -1441,6 +1444,8 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
             x_input = x - x[0] + diff_dates_x
         else:
             x_input = x
+        if 'weekend_factor_rad' == key:
+            x *=np.pi*2/7
         ax.plot(
             x,
             # priors[key](x),
