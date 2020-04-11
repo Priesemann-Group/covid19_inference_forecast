@@ -1,10 +1,68 @@
 import datetime
+import logging
 import os
+import pathlib
+import subprocess
 
 import numpy as np
 import pandas as pd
 
 import urllib, json
+
+
+_log = logging.getLogger('covid19_inference.data_retrieval')
+
+
+def clone_jhu_at_time(checkout_time:datetime.datetime, workdir:os.PathLike):
+    """Obtain history JHU dataset by git cloning at a time point in the past.
+
+    Parameters
+    ----------
+    checkout_time : datetime.datetime
+        A timezone-aware datetime object, representing a time point in the past
+    workdir : os.PathLike
+        a directory to which the data may be cloned. For example a tempfile.TemporaryDirectory
+        
+    Returns
+    -------
+    fp_confirmed : os.PathLike
+        path to time_series_covid19_confirmed_global.csv
+    fp_deaths : os.PathLike
+        path to time_series_covid19_deaths_global.csv
+    fp_recovered : os.PathLike
+        path to time_series_covid19_recovered_global.csv 
+    """
+    if not checkout_time.tzinfo:
+        raise ValueError('The [checkout_time] must be timezone-aware!')
+    # clone
+    repodir = pathlib.Path(workdir, 'jhu_repo')
+    repo = 'https://github.com/CSSEGISandData/COVID-19'
+    _log.info(f'Cloning "{repo}" to "{repodir}"')
+    subprocess.run(f'git clone {repo} {repodir}')
+
+    # find the commit hash that was relevant at the selected date
+    checkout_time = checkout_time.isoformat()
+    _log.info(f'Finding the last commit before {checkout_time}')
+    commit_id = subprocess.run(
+        f'git rev-list -1 --until="{checkout_time}" master',
+        cwd=repodir, stdout=subprocess.PIPE, encoding='utf8'
+    ).stdout.strip()
+    if len(commit_id) != 40:
+        raise Exception(f'Failed to find a valid commit id before the specified checkout_time ({checkout_time})')
+    
+    _log.info(f'Checking out commit {commit_id}')
+    subprocess.run(
+        f'git checkout {commit_id}',
+        cwd=repodir, stdout=subprocess.PIPE, encoding='utf8',
+        # this step is important - we must not fail silently
+        check=True
+    )
+
+    dp_ts = pathlib.Path(repodir, 'csse_covid_19_data', 'csse_covid_19_time_series')
+    fp_confirmed = pathlib.Path(dp_ts, 'time_series_covid19_confirmed_global.csv')
+    fp_deaths = pathlib.Path(dp_ts, 'time_series_covid19_deaths_global.csv')
+    fp_recovered = pathlib.Path(dp_ts, 'time_series_covid19_recovered_global.csv')
+    return fp_confirmed, fp_deaths, fp_recovered
 
 
 def _jhu_to_iso(fp_csv:str) -> pd.DataFrame:
