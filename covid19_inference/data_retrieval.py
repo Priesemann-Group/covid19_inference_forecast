@@ -6,6 +6,72 @@ import pandas as pd
 
 import urllib, json
 
+
+def _jhu_to_iso(fp_csv:str) -> pd.DataFrame:
+    """Convert Johns Hopkins University dataset to nicely formatted DataFrame.
+
+    Drops Lat/Long columns and reformats to a multi-index of (country, state).
+
+    Parameters
+    ----------
+    fp_csv : string
+
+    Returns
+    -------
+    : pandas.DataFrame
+    """
+    df = pd.read_csv(fp_csv, sep=',')
+    # change columns & index
+    df = df.drop(columns=['Lat', 'Long']).rename(columns={
+        'Province/State': 'state',
+        'Country/Region': 'country'
+    })
+    df = df.set_index(['country', 'state'])
+    # datetime columns
+    df.columns = [datetime.datetime.strptime(d, '%m/%d/%y') for d in df.columns]
+    return df
+
+
+def get_jhu_cdr(
+        country:str, state:str,
+        fp_confirmed:str='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv',
+        fp_deaths:str='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv',
+        fp_recovered:str='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv',
+    ) -> pd.DataFrame:
+    """Gets confirmed, deaths and recovered Johns Hopkins University dataset as a DataFrame with datetime index.
+
+    Parameters
+    ----------
+    country : string
+        name of the country (the "Country/Region" column), can be None if state is set
+    state : string
+        name of the state (the "Province/State" column), can be None if country is set
+    fp_confirmed : string
+        filepath or URL pointing to the original CSV of global confirmed cases
+    fp_deaths : string
+        filepath or URL pointing to the original CSV of global deaths
+    fp_recovered : string
+        filepath or URL pointing to the original CSV of global recovered cases
+
+    Returns
+    -------
+    : pandas.DataFrame
+    """
+    # load & transform
+    df_confirmed = _jhu_to_iso(fp_confirmed)
+    df_deaths = _jhu_to_iso(fp_deaths)
+    df_recovered = _jhu_to_iso(fp_recovered)
+
+    # filter
+    df = pd.DataFrame(columns=['date', 'confirmed', 'deaths', 'recovered']).set_index('date')
+    df['confirmed'] = df_confirmed.loc[(country, state)]
+    df['deaths'] = df_deaths.loc[(country, state)]
+    df['recovered'] = df_recovered.loc[(country, state)]
+    df.index.name = 'date'
+
+    return df
+
+
 def get_jhu_confirmed_cases():
     """
         Attempts to download the most current data from the online repository of the
