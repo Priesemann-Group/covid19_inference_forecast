@@ -34,29 +34,33 @@ def clone_jhu_at_time(checkout_time:datetime.datetime, workdir:os.PathLike):
     """
     if not checkout_time.tzinfo:
         raise ValueError('The [checkout_time] must be timezone-aware!')
+
     # clone
     repodir = pathlib.Path(workdir, 'jhu_repo')
     repo = 'https://github.com/CSSEGISandData/COVID-19'
     _log.info(f'Cloning "{repo}" to "{repodir}"')
-    subprocess.run(f'git clone {repo} {repodir}')
+    _log.debug(subprocess.run(
+        ['git', 'clone', repo, 'jhu_repo'],
+        cwd=workdir, stdout=subprocess.PIPE, encoding='utf8'
+    ).stdout)
 
     # find the commit hash that was relevant at the selected date
     checkout_time = checkout_time.isoformat()
     _log.info(f'Finding the last commit before {checkout_time}')
     commit_id = subprocess.run(
-        f'git rev-list -1 --until="{checkout_time}" master',
+        ['git', 'rev-list', '-1', f'--until="{checkout_time}"', 'master'],
         cwd=repodir, stdout=subprocess.PIPE, encoding='utf8'
     ).stdout.strip()
     if len(commit_id) != 40:
         raise Exception(f'Failed to find a valid commit id before the specified checkout_time ({checkout_time})')
     
     _log.info(f'Checking out commit {commit_id}')
-    subprocess.run(
-        f'git checkout {commit_id}',
+    _log.debug(subprocess.run(
+        ['git', 'checkout', commit_id],
         cwd=repodir, stdout=subprocess.PIPE, encoding='utf8',
         # this step is important - we must not fail silently
         check=True
-    )
+    ))
 
     dp_ts = pathlib.Path(repodir, 'csse_covid_19_data', 'csse_covid_19_time_series')
     fp_confirmed = pathlib.Path(dp_ts, 'time_series_covid19_confirmed_global.csv')
