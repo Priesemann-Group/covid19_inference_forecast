@@ -29,7 +29,7 @@ We fitted the four scenarios to the number of new cases until respectively March
 
 ### Summary
 
-<img src="figures/summary_forecast.png" width="600">
+<img src="figures/Fig_summary_forecast.png" width="600">
 
 ### Scenario assuming three change points
 
