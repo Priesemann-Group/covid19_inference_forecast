@@ -94,7 +94,7 @@ def plot_cases(trace, new_cases_obs, date_begin_sim, diff_data_sim, start_date_p
     def conv_time_to_mpl_dates(arr):
         return matplotlib.dates.date2num([datetime.timedelta(days=float(date)) + date_begin_sim for date in arr])
 
-    new_cases_sim = trace.new_cases
+    new_cases_sim = trace['new_cases']
     len_sim = trace['lambda_t'].shape[1]
     if start_date_plot is None:
         start_date_plot = date_begin_sim + datetime.timedelta(days=diff_data_sim)
@@ -190,7 +190,7 @@ def plot_cases(trace, new_cases_obs, date_begin_sim, diff_data_sim, start_date_p
     #ax.set_ylim(-0.15, 0.45)
     ylims = ax.get_ylim()
     ax.hlines(0, start_date_mpl, end_date_mpl, linestyles=':')
-    delay = matplotlib.dates.date2num(date_data_end) - np.percentile(trace.delay, q=75)
+    delay = matplotlib.dates.date2num(date_data_end) - np.percentile(trace['delay'], q=75)
     ax.vlines(delay, ylims[0], ylims[1], linestyles='-', colors=['tab:red'])
     ax.set_ylim(*ylims)
     ax.text(delay + 0.5, ylims[1] - 0.04*np.diff(ylims), 'unconstrained because\nof reporting delay', color='tab:red', verticalalignment='top')
