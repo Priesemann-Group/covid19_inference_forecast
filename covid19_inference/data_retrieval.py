@@ -153,6 +153,7 @@ def filter_one_country(data_df, country, begin_date, end_date):
 
 
 def get_last_date(data_df):
+    print(data_df)
     last_date = data_df.columns[-1]
     month, day, year = map(int, last_date.split("/"))
     return datetime.datetime(year + 2000, month, day)
@@ -178,7 +179,6 @@ def get_rki():
 
     #If the number of landkreise differs from 412, uses local copy (query system can behave weirdly during updates)
     if n_data == 412:
-
         print('Downloading {:d} unique Landkreise'.format(n_data))
 
         df_keys = ['Bundesland', 'Landkreis', 'Altersgruppe', 'Geschlecht', 'AnzahlFall',
@@ -213,7 +213,7 @@ def get_rki():
         this_dir = os.path.dirname(__file__)
         df = pd.read_csv(this_dir + "/../data/rki_fallback.csv", sep=",")
         df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y')
-
+    
     return df
 
 def filter_rki(df, begin_date, end_date, variable = 'AnzahlFall', level = None, value = None):
@@ -258,6 +258,41 @@ def filter_rki(df, begin_date, end_date, variable = 'AnzahlFall', level = None, 
 
     return np.array(df_series[begin_date:end_date])
 
+def get_rki_EpiCurve(curve_name="bydate_imputiert"):
+    """Imports the cummulative EpiCurve (date of onset of illness) from a supplied file.
+    Datasets made machine readable from RKI publication from 09.04.2020, Abb. 2
+    
+    source: https://www.rki.de/DE/Content/Infekt/EpidBull/Archiv/2020/17/Art_02.html
+    
+    contains (untial 04.04.2020) cummulative:
+    - observed cases by date of onset 
+    - extrapolated cases based on cases without date of onset or asymptomatic
+    - 'nowcast' low/mean/high estimates for cases not yet reported
+    
+    Parameters
+    ----------
+    curve_name : "bydate_observed","bydate_imputiert","bydate_Nowcast_low","bydate_Nowcast","bydate_Nowcast_high"
+    
+    Returns
+    -------
+    dataframe
+        dataframe containing all the datasets from the Epi Curve, Total containing the selected curve's data
+    """
+    print("Data not available online, using local copy.")
+    this_dir = os.path.dirname(__file__)
+    if this_dir != "":  # fix dir for local testing
+        this_dir+="/"
+    df = pd.read_csv(this_dir + "../data/rki_bulletin200409_EpiCurve.csv", sep=",")
+    df['Meldedatum'] = pd.to_datetime(df['dmy_date'], format='%d-%m-%Y')
+    
+    #Input parsing
+    if curve_name not in ["bydate_observed","bydate_imputiert","bydate_Nowcast_low","bydate_Nowcast","bydate_Nowcast_high"]:
+        print("no valid curve selected from dataset, choose 'bydate_imputiert' as default")
+        curve_name = "bydate_imputiert"
+    df['Total'] = df[curve_name]
+    df['date'] = df['dmy_date']
+    
+    return df
 
 _format_date = lambda date_py: "{}/{}/{}".format(
     date_py.month, date_py.day, str(date_py.year)[2:4]
