@@ -153,7 +153,6 @@ def filter_one_country(data_df, country, begin_date, end_date):
 
 
 def get_last_date(data_df):
-    print(data_df)
     last_date = data_df.columns[-1]
     month, day, year = map(int, last_date.split("/"))
     return datetime.datetime(year + 2000, month, day)
@@ -179,6 +178,7 @@ def get_rki():
 
     #If the number of landkreise differs from 412, uses local copy (query system can behave weirdly during updates)
     if n_data == 412:
+
         print('Downloading {:d} unique Landkreise'.format(n_data))
 
         df_keys = ['Bundesland', 'Landkreis', 'Altersgruppe', 'Geschlecht', 'AnzahlFall',
@@ -213,7 +213,7 @@ def get_rki():
         this_dir = os.path.dirname(__file__)
         df = pd.read_csv(this_dir + "/../data/rki_fallback.csv", sep=",")
         df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y')
-    
+
     return df
 
 def filter_rki(df, begin_date, end_date, variable = 'AnzahlFall', level = None, value = None):
