@@ -67,7 +67,16 @@ def make_delay_matrix(n_rows, n_columns, initial_delay=0):
 
 def apply_delay(array, delay, sigma_delay, delay_mat):
     mat = tt_lognormal(delay_mat, mu=np.log(delay), sigma=sigma_delay)
-    return tt.dot(array, mat)
+    if array.ndim == 2 and mat.ndim ==3:
+        array_shuf = array.dimshuffle((1, 0))
+        mat_shuf = mat.dimshuffle((2, 0, 1))
+        delayed_arr = tt.batched_dot(array_shuf, mat_shuf)
+        delayed_arr = delayed_arr.dimshuffle((1,0))
+    elif array.ndim == 1 and mat.ndim == 2:
+        delayed_arr = tt.dot(array, mat)
+    else:
+        raise RuntimeError("For some reason, wrong number of dimensions, shouldn't happen")
+    return delayed_arr
 
 
 def delay_cases_lognormal(
@@ -86,6 +95,8 @@ def delay_cases_lognormal(
     delay_mat[
         delay_mat < 0.01
     ] = 0.01  # needed because negative values lead to nans in the lognormal distribution.
+    if input_arr.ndim == 2:
+        delay_mat = tt.shape_padaxis(delay_mat, axis=-1)
     delayed_arr = apply_delay(input_arr, median_delay, scale_delay, delay_mat)
     return delayed_arr
 

@@ -12,7 +12,6 @@ from . import model_helper as mh
 if platform.system() == 'Darwin':
     theano.config.gcc.cxxflags = "-Wno-c++11-narrowing" # workaround for pauls macos
 
-
 def SIR_with_change_points(
     new_cases_obs,
     change_points_list,
@@ -301,6 +300,363 @@ def SIR_with_change_points(
         pm.Deterministic("new_cases", new_cases_inferred_eff)
         pm.Deterministic("new_cases_raw", new_cases_inferred)
     return model
+
+
+def SIR_with_change_points_2d(
+    new_cases_obs,
+    change_points_list,
+    date_begin_simulation,
+    num_days_sim,
+    diff_data_sim,
+    N,
+    priors_dict=None,
+    weekends_modulated=False,
+    weekend_modulation_type = 'step'
+):
+    """
+        Parameters
+        ----------
+        new_cases_obs : list or array
+            Timeseries (day over day) of newly reported cases (not the total number)
+
+        change_points_list : list of dicts
+            List of dictionaries, each corresponding to one change point.
+
+            Each dict can have the following key-value pairs. If a pair is not provided,
+            the respective default is used.
+                * pr_mean_date_begin_transient :     datetime.datetime, NO default
+                * pr_median_lambda :                 number, same as default priors, below
+                * pr_sigma_lambda :                  number, same as default priors, below
+                * pr_sigma_date_begin_transient :    number, 3
+                * pr_median_transient_len :          number, 3
+                * pr_sigma_transient_len :           number, 0.3
+
+        date_begin_simulation: datetime.datetime
+            The begin of the simulation data
+
+        num_days_sim : integer
+            Number of days to forecast into the future
+
+        diff_data_sim : integer
+            Number of days that the simulation-begin predates the first data point in
+            `new_cases_obs`. This is necessary so the model can fit the reporting delay.
+            Set this parameter to a value larger than what you expect to find
+            for the reporting delay.
+
+        N : number
+            The population size. For Germany, we used 83e6
+
+        priors_dict : dict
+            Dictionary of the prior assumptions
+
+            Possible key-value pairs (and default values) are:
+                * pr_beta_I_begin :        number, default = 100
+                * pr_median_lambda_0 :     number, default = 0.4
+                * pr_sigma_lambda_0 :      number, default = 0.5
+                * pr_median_mu :           number, default = 1/8
+                * pr_sigma_mu :            number, default = 0.2
+                * pr_median_delay :        number, default = 8
+                * pr_sigma_delay :         number, default = 0.2
+                * pr_beta_sigma_obs :      number, default = 10
+                * week_end_days :          tuple,  default = (6,7)
+                * pr_mean_weekend_factor : number, default = 0.7
+                * pr_sigma_weekend_factor :number, default = 0.17
+
+        weekends_modulated : bool
+            Whether to add the prior that cases are less reported on week ends. Multiplies the new cases numbers on weekends
+            by a number between 0 and 1, given by a prior beta distribution. The beta distribution is parametrised
+            by pr_mean_weekend_factor and pr_sigma_weekend_factor
+        weekend_modulation_type : 'step' or 'abs_sine':
+            whether the weekends are modulated by a step function, which only multiplies the days given by  week_end_days
+            by the week_end_factor, or whether the whole week is modulated by an abs(sin(x)) function, with an offset
+            with flat prior.
+        Returns
+        -------
+        : pymc3.Model
+            Returns an instance of pymc3 model with the change points
+
+    """
+    if priors_dict is None:
+        priors_dict = dict()
+
+    default_priors = dict(
+        pr_beta_I_begin=100,
+        pr_median_lambda_0=0.4,
+        pr_sigma_lambda_0=0.5,
+        pr_median_mu=1 / 8,
+        pr_sigma_mu=0.2,
+        pr_median_delay=8,
+        pr_sigma_delay=0.2,
+        pr_beta_sigma_obs=10,
+        week_end_days = (6,7),
+        pr_mean_weekend_factor=0.7,
+        pr_sigma_weekend_factor=0.17
+    )
+    default_priors_change_points = dict(
+        pr_median_lambda=default_priors["pr_median_lambda_0"],
+        pr_sigma_lambda=default_priors["pr_sigma_lambda_0"],
+        pr_sigma_date_begin_transient=3,
+        pr_median_transient_len=3,
+        pr_sigma_transient_len=0.3,
+        pr_mean_date_begin_transient=None,
+    )
+
+    if not weekends_modulated:
+        del default_priors['week_end_days']
+        del default_priors['pr_mean_weekend_factor']
+        del default_priors['pr_sigma_weekend_factor']
+
+    for prior_name in priors_dict.keys():
+        if prior_name not in default_priors:
+            raise RuntimeError(f"Prior with name {prior_name} not known")
+    for change_point in change_points_list:
+        for prior_name in change_point.keys():
+            if prior_name not in default_priors_change_points:
+                raise RuntimeError(f"Prior with name {prior_name} not known")
+
+    for prior_name, value in default_priors.items():
+        if prior_name not in priors_dict:
+            priors_dict[prior_name] = value
+            print(f"{prior_name} was set to default value {value}")
+    for prior_name, value in default_priors_change_points.items():
+        for i_cp, change_point in enumerate(change_points_list):
+            if prior_name not in change_point:
+                change_point[prior_name] = value
+                print(
+                    f"{prior_name} of change point {i_cp} was set to default value {value}"
+                )
+
+    if (
+        diff_data_sim
+        < priors_dict["pr_median_delay"]
+        + 3 * priors_dict["pr_median_delay"] * priors_dict["pr_sigma_delay"]
+    ):
+        raise RuntimeError("diff_data_sim is to small compared to the prior delay")
+    if num_days_sim < len(new_cases_obs) + diff_data_sim:
+        raise RuntimeError(
+            "Simulation ends before the end of the data. Increase num_days_sim."
+        )
+
+    # ------------------------------------------------------------------------------ #
+    # Model and prior implementation
+    # ------------------------------------------------------------------------------ #
+
+    with pm.Model() as model:
+        # all pm functions now apply on the model instance
+        shape_sim = (num_days_sim ,new_cases_obs.shape[1])
+
+        # true cases at begin of loaded data but we do not know the real number
+        I_begin = pm.HalfCauchy(name="I_begin", beta=priors_dict["pr_beta_I_begin"], shape=shape_sim[1])
+
+        params = parameters_for_lambda_t_2d(priors_dict, change_points_list, date_begin_simulation, shape_sim)
+        lambda_t_log = build_lambda_t_with_sigmoids(*params, shape_sim)
+        lambda_t = tt.exp(lambda_t_log)
+
+        # fraction of people that recover each day, recovery rate mu
+        mu = pm.Normal(
+            name="mu",
+            mu=np.log(priors_dict["pr_median_mu"]),
+            sigma=priors_dict["pr_sigma_mu"],
+        )
+
+        # delay in days between contracting the disease and being recorded
+
+        delay_L2, delay_L1 = hierarchical_normal_model('delay_L2', 'delay_L1', 'sigma_delay_L2',
+                                                             np.log(priors_dict["pr_median_delay"]),
+                                                             priors_dict["pr_sigma_delay"],
+                                                             shape_sim[1],
+                                                             w=0.5)
+
+        # prior of the error of observed cases
+        sigma_obs = pm.HalfCauchy("sigma_obs", beta=pm.HalfFlat(), shape=shape_sim[1])
+
+        # -------------------------------------------------------------------------- #
+        # training the model with loaded data provided as argument
+        # -------------------------------------------------------------------------- #
+
+        S_begin = N - I_begin
+        S_t, I_t, new_I_t = _SIR_model(
+            lambda_t=lambda_t, mu=mu, S_begin=S_begin, I_begin=I_begin, N=N
+        )
+
+        new_cases_inferred = mh.delay_cases_lognormal(
+            input_arr=new_I_t,
+            len_input_arr=num_days_sim,
+            len_output_arr=num_days_sim - diff_data_sim,
+            median_delay=delay_L2,
+            scale_delay=priors_dict["scale_delay"],
+            delay_betw_input_output=diff_data_sim,
+        )
+
+
+        new_cases_inferred_eff = new_cases_inferred
+
+        # likelihood of the model:
+        # observed cases are distributed following studentT around the model.
+        # we want to approximate a Poisson distribution of new cases.
+        # we choose nu=4 to get heavy tails and robustness to outliers.
+        # https://www.jstor.org/stable/2290063
+        num_days_data = new_cases_obs.shape[-1]
+        pm.StudentT(
+            name="_new_cases_studentT",
+            nu=4,
+            mu=new_cases_inferred_eff[:num_days_data],
+            sigma=tt.abs_(new_cases_inferred[:num_days_data] + 1) ** 0.5
+            * sigma_obs,  # +1 and tt.abs to avoid nans
+            observed=new_cases_obs,
+        )
+
+        # add these observables to the model so we can extract a time series of them
+        # later via e.g. `model.trace['lambda_t']`
+        pm.Deterministic("lambda_t", tt.exp(lambda_t))
+        pm.Deterministic("new_cases", new_cases_inferred_eff)
+        pm.Deterministic("new_cases_raw", new_cases_inferred)
+    return model
+
+
+
+def parameters_for_lambda_t_2d(priors_dict, change_points_list, date_begin_simulation, shape_sim):
+    lambda_list = []
+    tr_time_list = []
+    tr_len_list = []
+
+    lambda_0_L2, lambda_0_L1 =  hierarchical_normal_model('lambda_0_L2', 'lambda_0_L1', 'sigma_lambda_0_L2',
+                                                          np.log(priors_dict["pr_median_lambda_0"]),
+                                                          priors_dict["pr_sigma_lambda_0"],
+                                                          shape_sim[1],
+                                                          w=0.5)
+    lambda_list.append(lambda_0_L2)
+    for i, cp in enumerate(change_points_list):
+        lambda_cp_L2, lambda_cp_L1 = hierarchical_normal_model(f'lambda_{i+1}_L2', f'lambda_{i+1}_L1', f'sigma_lambda_{i+1}_L2',
+                                                                np.log(cp["pr_median_lambda"]),
+                                                                cp["pr_sigma_lambda"],
+                                                                shape_sim[1],
+                                                                w=0.5)
+        lambda_list.append(lambda_cp_L2)
+
+
+    dt_before = 0
+    for i, cp in enumerate(change_points_list):
+        dt_begin_transient = cp["pr_mean_date_begin_transient"]
+        if dt_before is not None and dt_before > dt_begin_transient:
+            raise RuntimeError("Dates of change points are not temporally ordered")
+        prior_mean = (
+                dt_begin_transient - date_begin_simulation
+        ).days
+        tr_time_L2, tr_time_L1 = hierarchical_normal_model(f'transient_day_{i+1}_L2', f'transient_day_{i+1}_L1', f'sigma_transient_day_{i+1}_L2',
+                                                            prior_mean,
+                                                            cp["pr_sigma_day_transient"],
+                                                            shape_sim[1],
+                                                            w=0.5)
+        tr_time_list.append(tr_time_L2)
+
+
+    for i, cp in enumerate(change_points_list):
+        tr_len_L2, tr_len_L1 = hierarchical_normal_model(f'transient_len_{{i+1}_L2', f'transient_len_{i+1}_L1', f'sigma_transient_len_{i+1}_L2',
+                                                            np.log(cp["pr_median_transient_len"]),
+                                                            cp["pr_sigma_transient_len"],
+                                                            shape_sim[1],
+                                                            w=0.5)
+        tr_len_list.append(tt.exp(tr_len_L2))
+    return lambda_list, tr_time_list, tr_len_list
+
+def hierarchical_normal_model(name_Y, name_X, name_sigma_Y, pr_mean, pr_sigma,len_Y, w=0.0):
+    """
+    Takes ideas from https://pdfs.semanticscholar.org/7b85/fb48a077c679c325433fbe13b87560e12886.pdf
+    and https://projecteuclid.org/euclid.ba/1340371048 chapter 6
+    Parameters
+    ----------
+    name_Y
+    name_X
+    name_sigma_Y
+    pr_mean
+    pr_sigma
+    pr_beta
+    len_Y
+    w
+
+    Returns
+    -------
+
+    """
+    sigma_Y = pm.HalfCauchy(name_sigma_Y, beta=pm.HalfFlat() ,shape=len_Y)
+    X = pm.Normal(name_X, mu = (1-w)*pr_mean, sigma=pr_sigma)
+    Y = pm.Normal(name_Y, mu = X + w*pr_mean, sigma=sigma_Y, shape=len_Y)
+    return Y, X
+
+def parameters_for_lambda_t_1d(priors_dict, change_points_list, date_begin_simulation, shape_sim):
+    # fraction of people that are newly infected each day
+    lambda_list = []
+    tr_time_list = []
+    tr_len_list = []
+
+    lambda_list.append(
+        pm.Normal(
+            name="lambda_0",
+            mu=np.log(priors_dict["pr_median_lambda_0"]),
+            sigma=priors_dict["pr_sigma_lambda_0"],
+        )
+    )
+    for i, cp in enumerate(change_points_list):
+        lambda_list.append(
+            pm.Normal(
+                name=f"lambda_{i + 1}",
+                mu=np.log(cp["pr_median_lambda"]),
+                sigma=cp["pr_sigma_lambda"],
+            )
+        )
+
+    # list of start dates of the transient periods of the change points
+    dt_before = 0
+    for i, cp in enumerate(change_points_list):
+        dt_begin_transient = cp["pr_mean_date_transient"]
+        if dt_before is not None and dt_before > dt_begin_transient:
+            raise RuntimeError("Dates of change points are not temporally ordered")
+
+        prior_mean = (
+                dt_begin_transient - date_begin_simulation
+        ).days
+
+        tr_time = pm.Normal(
+            name=f"transient_day_{i}",
+            mu=prior_mean,
+            sigma=cp["pr_sigma_day_transient"],
+        )
+        tr_time_list.append(tr_time)
+        dt_before = tr_time
+
+    # same for transient times
+    for i, cp in enumerate(change_points_list):
+        tr_len = pm.Lognormal(
+            name=f"transient_len_{i}",
+            mu=np.log(cp["pr_median_transient_len"]),
+            sigma=cp["pr_sigma_transient_len"],
+        )
+        tr_len_list.append(tr_len)
+    return lambda_list, tr_time_list, tr_len_list
+
+
+
+def build_lambda_t_with_sigmoids(lambda_list, tr_time_list, tr_len_list, shape_sim):
+    num_days_sim = shape_sim[0]
+
+    # build the time-dependent spreading rate
+    lambda_t_list = [lambda_list[0] * tt.ones(num_days_sim)]
+    lambda_before = lambda_list[0]
+
+    for tr_time, tr_len, lambda_after in zip(
+            tr_time_list, tr_len_list, lambda_list[1:]
+    ):
+        t = np.arange(num_days_sim)
+        if shape_sim.ndim == 2:
+            t = np.repeat(t[:,None], shape_sim[1], axis=-1)
+        lambda_t = tt.nnet.sigmoid((t-tr_time)/tr_len*2) * (lambda_after - lambda_before)
+        # tr_len*2 because the derivative of the sigmoid at zero is 1/2, we want to set it to 1/tr_len
+        lambda_before = lambda_after
+        lambda_t_list.append(lambda_t)
+    lambda_t = sum(lambda_t_list)
+    return lambda_t
+
 
 
 def _SIR_model(lambda_t, mu, S_begin, I_begin, N):
