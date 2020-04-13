@@ -6,12 +6,14 @@
 
 We want to quantify the effect of new policies on the spread of COVID-19. Crucially, fitting an exponential function to the number of cases lacks an interpretability of the fitting error. We built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. At the example of Germany, we show that the two kinks in the last weeks correspond to two changes of policies, leading to a growth rate of about 0 now.
 
-The research article [is available on arXiv](https://arxiv.org/abs/2004.01105).
+The research article [is available on arXiv](https://arxiv.org/abs/2004.01105) (**updated on April 13**).
 
 The code used to produce the figures is available [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper/Corona_germany_simple_model.ipynb) (simple model) and [here](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper/SIR_with_delay_Germany_3scenarios.ipynb) (with change points).
 It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
 
 If you want to use the code, we recommend to look at our [documentation](https://covid19-inference-forecast.readthedocs.io/en/latest/).
+
+**We are looking for support** to help us with analyzing other countries and to extend to an hierarchical regional model. We might get additional funding for that. Everyone is welcome to join our information session on Zoom on Thursday 16th at 13:00. We will publish the Zoom address here on Thursday at 12:00.
 
 Some output figures are shown below. The rest are found in the figures folder. We update them regularly.
 
