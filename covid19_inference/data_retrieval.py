@@ -158,7 +158,7 @@ def get_last_date(data_df):
     return datetime.datetime(year + 2000, month, day)
 
 
-def get_rki():
+def get_rki(try_max = 10):
 
     '''
     Downloads Robert Koch Institute data, separated by region (landkreis)
@@ -167,7 +167,14 @@ def get_rki():
     -------
     dataframe
         dataframe containing all the RKI data from arcgis.
+    
+    Parameters
+    ----------
+    try_max : int, optional
+        Maximum number of tries for each query.
     '''
+
+    landkreise_max = 413
 
     #Gets all unique landkreis_id from data
     url_id = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/ArcGIS/rest/services/RKI_COVID19/FeatureServer/0/query?where=0%3D0&objectIds=&time=&resultType=none&outFields=idLandkreis&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=true&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token='
@@ -176,29 +183,42 @@ def get_rki():
     n_data = len(json_data['features'])
     unique_ids = [json_data['features'][i]['attributes']['IdLandkreis'] for i in range(n_data)]
 
-    #If the number of landkreise differs from 412, uses local copy (query system can behave weirdly during updates)
-    if n_data == 412:
+    #If the number of landkreise is smaller than landkreise_max, uses local copy (query system can behave weirdly during updates)
+    if n_data >= landkreise_max:
 
-        print('Downloading {:d} unique Landkreise'.format(n_data))
+        print('Downloading {:d} unique Landkreise. May take a while.\n'.format(n_data))
 
         df_keys = ['Bundesland', 'Landkreis', 'Altersgruppe', 'Geschlecht', 'AnzahlFall',
-           'AnzahlTodesfall', 'Meldedatum', 'NeuerFall']
+           'AnzahlTodesfall', 'Meldedatum', 'NeuerFall', 'NeuGenesen', 'AnzahlGenesen']
 
         df = pd.DataFrame(columns=df_keys)
 
         #Fills DF with data from all landkreise
         for idlandkreis in unique_ids:
-            url_str = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/ArcGIS/rest/services/RKI_COVID19/FeatureServer/0/query?where=IdLandkreis%3D%27'+ idlandkreis + '%27&objectIds=&time=&resultType=none&outFields=Bundesland%2C+Landkreis%2C+Altersgruppe%2C+Geschlecht%2C+AnzahlFall%2C+AnzahlTodesfall%2C+Meldedatum%2C+NeuerFall&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token='
             
-            with urllib.request.urlopen(url_str) as url:
-                json_data = json.loads(url.read().decode())
+            url_str = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/ArcGIS/rest/services/RKI_COVID19/FeatureServer/0//query?where=IdLandkreis%3D'+ idlandkreis + '&objectIds=&time=&resultType=none&outFields=Bundesland%2C+Landkreis%2C+Altersgruppe%2C+Geschlecht%2C+AnzahlFall%2C+AnzahlTodesfall%2C+Meldedatum%2C+NeuerFall%2C+NeuGenesen%2C+AnzahlGenesen&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token='
 
-            n_data = len(json_data['features'])
+            count_try = 0
 
-            if n_data > 5000:
-                ValueError('Query limit exceeded')
+            while count_try < try_max:
+                try:
+                    with urllib.request.urlopen(url_str) as url:
+                        json_data = json.loads(url.read().decode())
 
-            data_flat = [json_data['features'][i]['attributes'] for i in range(n_data)]
+                    n_data = len(json_data['features'])
+
+                    if n_data > 5000:
+                        raise ValueError('Query limit exceeded')
+
+                    data_flat = [json_data['features'][i]['attributes'] for i in range(n_data)]
+
+                    break
+
+                except:
+                    count_try += 1           
+
+            if count_try == try_max:
+                raise ValueError('Maximum limit of tries exceeded.')
 
             df_temp = pd.DataFrame(data_flat)
         
@@ -209,7 +229,7 @@ def get_rki():
 
     else:
 
-        print("Failed to download current data, using local copy.")
+        print("Warning: Query returned {:d} landkreise (out of {:d}), likely being updated at the moment. Using fallback (outdated) copy.".format(n_data, landkreise_max))
         this_dir = os.path.dirname(__file__)
         df = pd.read_csv(this_dir + "/../data/rki_fallback.csv", sep=",")
         df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y')
@@ -241,14 +261,11 @@ def filter_rki(df, begin_date, end_date, variable = 'AnzahlFall', level = None, 
     """
 
     #Input parsing
-    if variable not in ['AnzahlFall', 'AnzahlTodesfall', 'Total']:
-        ValueError('Invalid variable. Valid options: "AnzahlFall", "AnzahlTodesfall", "Total"')
+    if variable not in ['AnzahlFall', 'AnzahlTodesfall']:
+        ValueError('Invalid variable. Valid options: "AnzahlFall", "AnzahlTodesfall"')
 
     if level not in ['Landkreis', 'Bundesland', None]:
         ValueError('Invalid level. Valid options: "Landkreis", "Bundesland", None')
-
-    if variable == 'Total':
-        df['Total'] = df['NeuerFall'] + df['AnzahlFall']    
 
     #Keeps only the relevant data
     if level is not None:
