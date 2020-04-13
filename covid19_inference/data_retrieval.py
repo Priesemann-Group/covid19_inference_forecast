@@ -244,11 +244,11 @@ def filter_rki(df, begin_date, end_date, variable = 'AnzahlFall', level = None, 
     df : dataframe
         dataframe obtained from get_rki()
     begin_date : DateTime
-        initial date to return
+        initial date to return, in 'YYYY-MM-DD'
     end_date : DateTime
-        last date to return
+        last date to return, in 'YYYY-MM-DD'
     variable : str, optional
-        type of variable to return: cases ("AnzahlFall"), deaths ("AnzahlTodesfall")
+        type of variable to return: cases ("AnzahlFall"), deaths ("AnzahlTodesfall"), recovered ("AnzahlGenesen")
     level : None, optional
         whether to return data from all Germany (None), a state ("Bundesland") or a region ("Landkreis")
     value : None, optional
@@ -261,8 +261,8 @@ def filter_rki(df, begin_date, end_date, variable = 'AnzahlFall', level = None, 
     """
 
     #Input parsing
-    if variable not in ['AnzahlFall', 'AnzahlTodesfall']:
-        ValueError('Invalid variable. Valid options: "AnzahlFall", "AnzahlTodesfall"')
+    if variable not in ['AnzahlFall', 'AnzahlTodesfall', 'AnzahlGenesen']:
+        ValueError('Invalid variable. Valid options: "AnzahlFall", "AnzahlTodesfall", "AnzahlGenesen"')
 
     if level not in ['Landkreis', 'Bundesland', None]:
         ValueError('Invalid level. Valid options: "Landkreis", "Bundesland", None')
@@ -275,6 +275,35 @@ def filter_rki(df, begin_date, end_date, variable = 'AnzahlFall', level = None, 
 
     return np.array(df_series[begin_date:end_date])
 
+def filter_rki_all_bundesland(df, begin_date, end_date, variable = 'AnzahlFall'):
+
+    """Filters the full RKI dataset     
+    
+    Parameters
+    ----------
+    df : DataFrame
+        RKI dataframe, from get_rki()
+    begin_date : str
+        initial date to return, in 'YYYY-MM-DD'
+    end_date : str
+        last date to return, in 'YYYY-MM-DD'
+    variable : str, optional
+        type of variable to return: cases ("AnzahlFall"), deaths ("AnzahlTodesfall"), recovered ("AnzahlGenesen")
+    
+    Returns
+    -------
+    DataFrame
+        DataFrame with datetime dates as index, and all German Bundesland as columns
+    """   
+
+    if variable not in ['AnzahlFall', 'AnzahlTodesfall', 'AnzahlGenesen']:
+        ValueError('Invalid variable. Valid options: "AnzahlFall", "AnzahlTodesfall", "AnzahlGenesen"')
+
+    #Nifty, if slightly unreadable one-liner
+    df2 = df.groupby(['date','Bundesland'])[variable].sum().reset_index().pivot(index='date',columns='Bundesland', values=variable).fillna(0)
+
+    #Returns cumsum of variable
+    return df2[begin_date:end_date].cumsum()
 
 _format_date = lambda date_py: "{}/{}/{}".format(
     date_py.month, date_py.day, str(date_py.year)[2:4]
