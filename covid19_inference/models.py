@@ -552,7 +552,7 @@ def parameters_for_lambda_t_2d(priors_dict, change_points_list, date_begin_simul
 
 
     for i, cp in enumerate(change_points_list):
-        tr_len_L2, tr_len_L1 = hierarchical_normal_model(f'transient_len_{{i+1}_L2', f'transient_len_{i+1}_L1', f'sigma_transient_len_{i+1}_L2',
+        tr_len_L2, tr_len_L1 = hierarchical_normal_model(f'transient_len_{i+1}_L2', f'transient_len_{i+1}_L1', f'sigma_transient_len_{i+1}_L2',
                                                             np.log(cp["pr_median_transient_len"]),
                                                             cp["pr_sigma_transient_len"],
                                                             shape_sim[1],
