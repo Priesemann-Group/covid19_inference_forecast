@@ -269,7 +269,7 @@ def filter_rki(df, begin_date, end_date, variable = 'AnzahlFall', level = None, 
 
     #Keeps only the relevant data
     if level is not None:
-        df = df[df[level]==value][['date', value]]
+        df = df[df[level]==value][['date', variable]]
 
     df_series = df.groupby('date')[variable].sum().cumsum()
 
