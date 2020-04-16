@@ -13,14 +13,7 @@ It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
 
 If you want to use the code, we recommend to look at our [documentation](https://covid19-inference-forecast.readthedocs.io/en/latest/).
 
-**We are looking for support** to help us with analyzing other countries and to extend to an hierarchical regional model. We might get additional funding for that. Everyone is welcome to join our information session on Zoom on Thursday 16th at 13:00. We will publish the Zoom address here on Thursday at 12:00. Meeting adress:
-
-https://zoom.us/j/96534773427?pwd=Y1hQdEsvcHpWTGpSODF3VzU1WTg1Zz09
-
-Meeting ID: 965 3477 3427
-
-Password: 020229
-
+We are continuing to develop our code in a new repository [here] (https://github.com/Priesemann-Group/covid19_inference/), but it is not in working state yet. The code used for the paper and the figures will stay here. 
 
 Some output figures are shown below. The rest are found in the figures folder. We update them regularly.
 
