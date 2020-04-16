@@ -13,7 +13,7 @@ It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
 
 If you want to use the code, we recommend to look at our [documentation](https://covid19-inference-forecast.readthedocs.io/en/latest/).
 
-We are continuing to develop our code in a new repository [here] (https://github.com/Priesemann-Group/covid19_inference/), but it is not in working state yet. The code used for the paper and the figures will stay here. 
+We are continuing to develop our code in a new repository [here](https://github.com/Priesemann-Group/covid19_inference/), but it is not in working state yet. The code used for the paper and the figures will stay here. 
 
 Some output figures are shown below. The rest are found in the figures folder. We update them regularly.
 
