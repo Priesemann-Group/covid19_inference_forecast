@@ -2,15 +2,15 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-04-17 18:03:02
+# @Last Modified: 2020-04-17 23:30:08
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
 # ------------------------------------------------------------------------------ #
 # Modeling three different scenarios around easter. (one, two, or three changes)
-# A) just a change around easter (an increaste in spreading)
-# B) possibly an improvement shortly after easter when the visits are ofter
-# C) the german government plans to relax measures on 04/19.
+# A) RED:    just a change around easter (an increaste in spreading)
+# B) GREEN:  an improvement shortly after easter when the family visits are over
+# C) ORANGE: the german government plans to relax measures on 04/19.
 # ------------------------------------------------------------------------------ #
 
 
@@ -20,7 +20,10 @@ import datetime
 
 import numpy as np
 import pymc3 as pm
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 try:
     import covid19_inference as cov19
@@ -29,6 +32,14 @@ except ModuleNotFoundError:
     sys.path.append("../../")
     sys.path.append("../../../")
     import covid19_inference as cov19
+
+# ------------------------------------------------------------------------------ #
+# global variables
+# let's make them function arguments or attach them to model instances, soon
+# ------------------------------------------------------------------------------ #
+
+# set save path for figures, ideally use absolute path
+save_path = './figures/easter_'
 
 confirmed_cases = cov19.get_jhu_confirmed_cases()
 
@@ -52,6 +63,23 @@ num_days_sim = (date_end_sim - date_begin_sim).days
 cases_obs = cov19.filter_one_country(
     confirmed_cases, country, date_data_begin, date_data_end
 )
+
+# styling for prior distributions
+prio_style = {
+    "color": "#708090",
+    "linewidth": 3,
+    "label": "Prior",
+}
+# styling for posterior distributions
+post_style = {
+    "density": True,
+    "color": "tab:orange",
+    "label": "Posterior",
+    "zorder": -2,
+}
+
+# set to None to keep everything a vector, with `-1` Posteriors are rastered (see above)
+rasterization_zorder = -1
 
 # ------------------------------------------------------------------------------ #
 # define change points for the three models
@@ -143,8 +171,6 @@ print("Finished simulations for model C")
 # Plotting
 # ------------------------------------------------------------------------------ #
 
-# set save path for figures relative to this script file
-save_path = os.path.dirname(__file__) + "../../figures/easter_"
 create_figure_timeseries(
     trace_A,
     color="tab:red",
@@ -153,13 +179,13 @@ create_figure_timeseries(
 )
 create_figure_timeseries(
     trace_B,
-    color="'tab:green'",
+    color="tab:green",
     num_days_futu_to_plot=num_days_future,
     save_to=save_path + "ts_B",
 )
 create_figure_timeseries(
     trace_C,
-    color="'tab:orange'",
+    color="tab:orange",
     num_days_futu_to_plot=num_days_future,
     save_to=save_path + "ts_C",
 )
@@ -167,21 +193,21 @@ create_figure_timeseries(
 create_figure_distributions(
     model_A,
     trace_A,
-    color="'tab:red'",
+    color="tab:red",
     num_changepoints=len(change_points_A),
     save_to=save_path + "dist_A",
 )
 create_figure_distributions(
     model_B,
     trace_B,
-    color="'tab:green'",
+    color="tab:green",
     num_changepoints=len(change_points_B),
     save_to=save_path + "dist_B",
 )
 create_figure_distributions(
     model_C,
     trace_C,
-    color="'tab:orange'",
+    color="tab:orange",
     num_changepoints=len(change_points_C),
     save_to=save_path + "dist_C",
 )
@@ -214,6 +240,8 @@ def create_figure_timeseries(
 
     cum_c_ylim = [0, 200_000]
     cum_c_insetylim = [50, 250_000]
+
+    diff_to_0 = num_days_data + diff_data_sim
 
     # interval for the plots with forecast
     start_date = conv_time_to_mpl_dates(-len(cases_obs) + 2) + diff_to_0
@@ -515,23 +543,19 @@ def get_label_dict():
     labels["sigma_obs"] = f"Scale (width)\nof the likelihood"
     labels["lambda_0"] = f"Initial rate"
     labels["lambda_1"] = f"Spreading rates"
-    labels["lambda_2"] = f""
-    labels["lambda_3"] = f""
-    labels["lambda_4"] = f""
     labels["transient_begin_0"] = f"Change times"
-    labels["transient_begin_1"] = f""
-    labels["transient_begin_2"] = f""
-    labels["transient_begin_3"] = f""
     labels["transient_len_0"] = f"Change duration"
-    labels["transient_len_1"] = f""
-    labels["transient_len_2"] = f""
-    labels["transient_len_3"] = f""
     labels["E_begin_scale"] = "Initial scale\nof exposed"
     labels["median_incubation"] = "Median\nincubation delay"
     labels["sigma_random_walk"] = "Std. of\nrandom walk"
     labels["weekend_factor"] = "Factor\nweekends discounted"
     labels["offset_modulation_rad"] = "Offset from sunday\nof the modulation"
     return labels
+
+
+def labels(key):
+    if key == "mu":
+        return f"Recovery rate"
 
 
 def create_figure_distributions(
@@ -608,6 +632,9 @@ def create_figure_distributions(
     if not len(additional_insets) % num_rows == 1:
         axpos["legend"] = axes[0][num_columns - 1]
 
+    # otherwise no renderer, needed for text position calculation
+    fig.canvas.draw()
+
     # render panels
     for key in axpos.keys():
         if "legend" in key:
@@ -620,12 +647,13 @@ def create_figure_distributions(
             data = data / np.pi / 2 * 7
 
         ax = axpos[key]
-        ax.set_xlabel(labels[key])
+        # using .get returns None when the key is not in the dict, and avoids KeyError
+        ax.set_xlabel(labels.get(key))
         ax.xaxis.set_label_position("top")
 
         # make some bold
         if key == "lambda_1" or key == "transient_begin_0" or key == "transient_len_0":
-            ax.set_xlabel(labels[key], fontweight="bold")
+            ax.set_xlabel(labels.get(key), fontweight="bold")
 
         # posteriors
         ax.hist(
@@ -692,47 +720,79 @@ def create_figure_distributions(
         else:
             text = print_median_CI(data, prec=1)
 
-        if False:
-            ax.text(
-                0.05,
+        if key in insets.keys():
+            # strip everything except the median value
+            text = text.replace("Median: ", "").replace("CI: ", "")
+            md = text.split("\n")[0]
+            ci = text.split("\n")[1]
+
+            # create the inset text and we want a bounding box around the compound
+            # text = insets[key] + md + "$" + "\n" + r"$\,$"
+            text = insets[key] + md + "$"
+            t_xl = ax.text(
+                0.6,
                 0.9,
                 text,
-                horizontalalignment="center",
-                verticalalignment="top",
-                transform=ax.transAxes,
-                bbox=dict(facecolor="white", alpha=0.3, edgecolor="none"),
                 fontsize=12,
+                transform=ax.transAxes,
+                verticalalignment="top",
+                horizontalalignment="center",
+                # bbox=dict(facecolor="white", alpha=0.5, edgecolor="none"),
+                zorder=100,
             )
-        else:
-            if key in insets.keys():
-                # strip everything except the median value
-                text = text.replace("Median: ", "").replace("CI: ", "")
-                md = text.split("\n")[0]
-                ci = text.split("\n")[1]
 
-                # matplotlib.rcParams['text.usetex'] = True
-                # with rc_context(rc={'text.usetex': True}):
-                text = insets[key] + md + "$" + "\n" + r"$\,$"
-                ax.text(
-                    0.6,
-                    0.9,
-                    text,
-                    fontsize=12,
-                    transform=ax.transAxes,
-                    verticalalignment="top",
-                    horizontalalignment="center",
-                    bbox=dict(facecolor="white", alpha=0.5, edgecolor="none"),
-                )
-                ax.text(
-                    0.6,
-                    0.6,
-                    ci,
-                    fontsize=9,
-                    transform=ax.transAxes,
-                    verticalalignment="top",
-                    horizontalalignment="center",
-                    # bbox=dict(facecolor="white", alpha=0.5, edgecolor="none"),
-                ),
+            x_l = None
+            x_r = None
+            y_r = 0.9
+            y_m = 0.6
+            try:
+                # get bounding box of big text to attach small text
+                transform = ax.transAxes.inverted()
+                bb = t_xl.get_window_extent(renderer=fig.canvas.renderer)
+                bb = bb.transformed(transform)
+                x_l = bb.get_points()[0][0]
+                x_r = bb.get_points()[1][0]
+                y_m = bb.get_points()[0][1]
+            except Exception as e:
+                pass
+
+            t_sm = ax.text(
+                0.6,
+                y_m,
+                ci,
+                fontsize=9,
+                transform=ax.transAxes,
+                verticalalignment="top",
+                horizontalalignment="center",
+                # bbox=dict(facecolor="white", alpha=0.5, edgecolor="none"),
+                zorder=101,
+            )
+            try:
+                # get bounding box of big text to attach small text
+                transform = ax.transAxes.inverted()
+                bb = t_sm.get_window_extent(renderer=fig.canvas.renderer)
+                bb = bb.transformed(transform)
+                x_l = np.fmin(x_l, bb.get_points()[0][0])
+                x_r = np.fmax(x_r, bb.get_points()[1][0])
+                y_l = bb.get_points()[0][1]
+            except Exception as e:
+                pass
+
+            global foo
+            foo = t_xl
+            print(x_l, x_r, y_l, y_r, x_r - x_l, y_r - y_l)
+
+            rect = patches.Rectangle(
+                (x_l, y_l),
+                x_r - x_l,
+                y_r - y_l,
+                facecolor="grey",
+                alpha=0.2,
+                transform=ax.transAxes,
+                zorder=99,
+            )
+
+            ax.add_patch(rect)
 
     # legend
     if "legend" in axpos:
