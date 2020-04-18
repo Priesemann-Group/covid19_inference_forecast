@@ -60,8 +60,11 @@ def plot_hist(model, trace, ax, varname, colors = ('tab:blue', 'tab:orange'), bi
             label='Posterior')
     limits = ax.get_xlim()
     x = np.linspace(*limits, num=100)
-    ax.plot(x, get_prior_distribution(model, x, varname), label='Prior',
-            color=colors[0], linewidth=3)
+    try:
+        ax.plot(x, get_prior_distribution(model, x, varname), label='Prior',
+                color=colors[0], linewidth=3)
+    except:
+        pass
     ax.set_xlim(*limits)
     ax.set_ylabel('Density')
     ax.set_xlabel(varname)

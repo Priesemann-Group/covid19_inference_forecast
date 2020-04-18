@@ -174,7 +174,7 @@ def get_rki(try_max = 10):
         Maximum number of tries for each query.
     '''
 
-    landkreise_max = 413
+    landkreise_max = 412
 
     #Gets all unique landkreis_id from data
     url_id = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/ArcGIS/rest/services/RKI_COVID19/FeatureServer/0/query?where=0%3D0&objectIds=&time=&resultType=none&outFields=idLandkreis&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=true&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token='
