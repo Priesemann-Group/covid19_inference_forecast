@@ -2,21 +2,21 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-04-20 13:29:00
+# @Last Modified: 2020-04-20 17:48:45
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
 # ------------------------------------------------------------------------------ #
 # Modeling three different scenarios around easter. (one, two, or three changes)
-# A) RED:    just a change around easter (an increaste in spreading)
+# A) ORANGE: the german government plans to relax measures on 04/19.
 # B) GREEN:  an improvement shortly after easter when the family visits are over
-# C) ORANGE: the german government plans to relax measures on 04/19.
 # ------------------------------------------------------------------------------ #
 
 
 import sys
 import copy
 import datetime
+import locale
 
 import numpy as np
 import pymc3 as pm
@@ -56,7 +56,7 @@ diff_data_sim = 16
 
 # we only want to predict until March 01 for now
 # num_days_future = (datetime.datetime(2020, 5, 2) - date_data_end).days
-num_days_future = 31
+num_days_future = 42
 date_begin_sim = date_data_begin - datetime.timedelta(days=diff_data_sim)
 date_end_sim = date_data_end + datetime.timedelta(days=num_days_future)
 num_days_sim = (date_end_sim - date_begin_sim).days
@@ -83,6 +83,9 @@ post_style = {
 # date_format = "%m/%d"  # 04/01
 date_format = "%b %-d"  # Apr 1
 # date_format = "%-d. %B" # 1. April
+
+# locale.setlocale(locale.LC_ALL,'en_US')
+locale.setlocale(locale.LC_ALL,'de_DE')
 
 # whether to show the minor ticks (for every day)
 date_show_minor_ticks = True
@@ -174,7 +177,7 @@ def create_figure_timeseries(
     plot_red_axis=True,
     axes=None,
     forecast_label="Forecast",
-    forecast_seperate=False,
+    add_more_later=False,
 ):
 
     axes_provided = False
@@ -202,6 +205,22 @@ def create_figure_timeseries(
     cum_c_ylim = [0, 300_000]
     cum_c_insetylim = [50, 300_000]
 
+    color_futu = color
+    color_past = color
+    if axes_provided:
+        fig = axes[0].get_figure()
+    else:
+        color_past = '#646464'
+        fig, axes = plt.subplots(
+            3,
+            1,
+            figsize=figsize,
+            gridspec_kw={"height_ratios": [2, 3, 3]},
+            constrained_layout=True,
+        )
+
+    insets = []
+
     diff_to_0 = num_days_data + diff_data_sim
 
     # interval for the plots with forecast
@@ -215,18 +234,6 @@ def create_figure_timeseries(
     time_futu = np.arange(0, num_days_futu_to_plot + 1)
     mpl_dates_past = conv_time_to_mpl_dates(time_past) + diff_to_0
     mpl_dates_futu = conv_time_to_mpl_dates(time_futu) + diff_to_0
-
-    if axes_provided:
-        fig = axes[0].get_figure()
-    else:
-        fig, axes = plt.subplots(
-            3,
-            1,
-            figsize=figsize,
-            gridspec_kw={"height_ratios": [2, 3, 3]},
-            constrained_layout=True,
-        )
-    insets = []
 
     # --------------------------------------------------------------------------- #
     # prepare data
@@ -254,7 +261,7 @@ def create_figure_timeseries(
     ax.plot(
         np.concatenate([mpl_dates_past[1:], mpl_dates_futu[1:]]),
         np.median(lambda_t - mu, axis=0),
-        color=color,
+        color=color_futu,
         linewidth=2,
     )
     if plot_par["draw_ci_95"] == True:
@@ -263,13 +270,13 @@ def create_figure_timeseries(
             np.percentile(lambda_t - mu, q=2.5, axis=0),
             np.percentile(lambda_t - mu, q=97.5, axis=0),
             alpha=0.15,
-            color=color,
+            color=color_futu,
             lw=0,
         )
 
     ax.set_ylabel(ylabel_lam)
     ax.set_ylim(*y_lim_lambda)
-    # xlim later, synchornized axes
+    # xlim at the end of the function, synchornized axes
 
     if not axes_provided:
         ax.text(
@@ -318,7 +325,7 @@ def create_figure_timeseries(
             mpl_dates_past[1:],
             np.median(new_c_past, axis=0),
             "-",
-            color=color,
+            color=color_past,
             linewidth=1.5,
             label="Fit",
             zorder=10,
@@ -329,23 +336,25 @@ def create_figure_timeseries(
                 np.percentile(new_c_past, q=2.5, axis=0),
                 np.percentile(new_c_past, q=97.5, axis=0),
                 alpha=0.1,
-                color=color,
+                color=color_past,
                 lw=0,
             )
         # dummy element to separate forecasts
-        if forecast_seperate:
-            ax.plot([], [],
-            "-",
-            linewidth=0,
-            label="Forecasts:",
-            # fontweight="bold"
-        )
+        if add_more_later:
+            ax.plot(
+                [],
+                [],
+                "-",
+                linewidth=0,
+                label="Forecasts:",
+                # fontweight="bold"
+            )
 
     ax.plot(
         mpl_dates_futu[1:],
         np.median(new_c_futu, axis=0),
         "--",
-        color=color,
+        color=color_futu,
         linewidth=3,
         label=forecast_label,
     )
@@ -355,7 +364,7 @@ def create_figure_timeseries(
             np.percentile(new_c_futu, q=2.5, axis=0),
             np.percentile(new_c_futu, q=97.5, axis=0),
             alpha=0.1,
-            color=color,
+            color=color_futu,
             lw=0,
         )
     if plot_par["draw_ci_75"] == True:
@@ -364,7 +373,7 @@ def create_figure_timeseries(
             np.percentile(new_c_futu, q=12.5, axis=0),
             np.percentile(new_c_futu, q=87.5, axis=0),
             alpha=0.2,
-            color=color,
+            color=color_futu,
             lw=0,
         )
     ax.set_ylabel(ylabel_new)
@@ -390,7 +399,7 @@ def create_figure_timeseries(
             mpl_dates_past[1:],
             np.median(new_c_past, axis=0),
             "-",
-            color=color,
+            color=color_past,
             label="Fit",
             zorder=10,
         )
@@ -400,7 +409,7 @@ def create_figure_timeseries(
                 np.percentile(new_c_past, q=2.5, axis=0),
                 np.percentile(new_c_past, q=97.5, axis=0),
                 alpha=0.1,
-                color=color,
+                color=color_past,
                 lw=0,
             )
         ax.set_yticks([1e1, 1e2, 1e3, 1e4, 1e5])
@@ -427,7 +436,7 @@ def create_figure_timeseries(
             mpl_dates_past[:],
             np.median(cum_c_past, axis=0),
             "-",
-            color=color,
+            color=color_past,
             linewidth=1.5,
             label="Fit",
             zorder=10,
@@ -438,23 +447,25 @@ def create_figure_timeseries(
                 np.percentile(cum_c_past, q=2.5, axis=0),
                 np.percentile(cum_c_past, q=97.5, axis=0),
                 alpha=0.1,
-                color=color,
+                color=color_past,
                 lw=0,
             )
         # dummy element to separate forecasts
-        if forecast_seperate:
-            ax.plot([], [],
-            "-",
-            linewidth=0,
-            label="Forecasts:",
-            # fontweight="bold"
-        )
+        if add_more_later:
+            ax.plot(
+                [],
+                [],
+                "-",
+                linewidth=0,
+                label="Forecasts:",
+                # fontweight="bold"
+            )
 
     ax.plot(
         mpl_dates_futu[1:],
         np.median(cum_c_futu[:, 1:], axis=0),
         "--",
-        color=color,
+        color=color_futu,
         linewidth=3,
         label=f"{forecast_label}",
     )
@@ -464,7 +475,7 @@ def create_figure_timeseries(
             np.percentile(cum_c_futu[:, 1:], q=2.5, axis=0),
             np.percentile(cum_c_futu[:, 1:], q=97.5, axis=0),
             alpha=0.1,
-            color=color,
+            color=color_futu,
             lw=0,
         )
     if plot_par["draw_ci_75"] == True:
@@ -473,7 +484,7 @@ def create_figure_timeseries(
             np.percentile(cum_c_futu[:, 1:], q=12.5, axis=0),
             np.percentile(cum_c_futu[:, 1:], q=87.5, axis=0),
             alpha=0.2,
-            color=color,
+            color=color_futu,
             lw=0,
         )
     ax.set_xlabel("Date")
@@ -495,7 +506,7 @@ def create_figure_timeseries(
             mpl_dates_past[:],
             np.median(cum_c_past, axis=0),
             "-",
-            color=color,
+            color=color_past,
             label="Fit",
             zorder=10,
         )
@@ -505,7 +516,7 @@ def create_figure_timeseries(
                 np.percentile(cum_c_past, q=2.5, axis=0),
                 np.percentile(cum_c_past, q=97.5, axis=0),
                 alpha=0.1,
-                color=color,
+                color=color_past,
                 lw=0,
             )
         ax.set_yticks([1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7])
@@ -853,7 +864,7 @@ def create_figure_distributions(
 # define change points for the three models
 # ------------------------------------------------------------------------------ #
 
-change_points_A = [
+change_points_B = [
     dict(  # initial change from lambda 0 to lambda 1
         pr_mean_date_begin_transient=datetime.datetime(2020, 3, 9), pr_median_lambda=0.2
     ),
@@ -870,27 +881,23 @@ change_points_A = [
         pr_sigma_lambda=0.2,
     ),
     dict(  # back to lambda 2 around easter.
-        pr_mean_date_begin_transient=datetime.datetime(2020, 4, 12),
+        pr_mean_date_begin_transient=datetime.datetime(2020, 4, 10),
         pr_sigma_date_begin_transient=1,
         pr_median_lambda=0.13,  # using the inferred value as of 04/20 and wider prior
         pr_sigma_lambda=0.3,
     ),
-]
-
-# add another change point in scenario B
-change_points_B = copy.deepcopy(change_points_A)
-change_points_B.append(
     dict(  # shortly after easter, people stop visiting and we might go back to lambda 3
         pr_mean_date_begin_transient=datetime.datetime(2020, 4, 14),
         pr_sigma_date_begin_transient=1,
         pr_median_lambda=0.08,  # using the inferred value as of 04/20 and wider prior
         pr_sigma_lambda=0.3,
     ),
-)
+]
 
-# add another change point in scenario C
-change_points_C = copy.deepcopy(change_points_B)
-change_points_C.append(
+
+# add another change point
+change_points_A = copy.deepcopy(change_points_B)
+change_points_A.append(
     dict(  # German government will relax restrictions on April 19
         pr_mean_date_begin_transient=datetime.datetime(2020, 4, 19),
         pr_sigma_date_begin_transient=1,
@@ -923,23 +930,11 @@ model_B = cov19.SIR_with_change_points(
     weekends_modulated=True,
     weekend_modulation_type="abs_sine",
 )
-model_C = cov19.SIR_with_change_points(
-    np.diff(cases_obs),
-    change_points_C,
-    date_begin_sim,
-    num_days_sim,
-    diff_data_sim,
-    N=83e6,
-    weekends_modulated=True,
-    weekend_modulation_type="abs_sine",
-)
 
 trace_A = pm.sample(model=model_A, init="advi", cores=12)
 print("Finished simulations for model A")
 trace_B = pm.sample(model=model_B, init="advi", cores=12)
 print("Finished simulations for model B")
-trace_C = pm.sample(model=model_C, init="advi", cores=12)
-print("Finished simulations for model C")
 
 
 # ------------------------------------------------------------------------------ #
@@ -948,7 +943,7 @@ print("Finished simulations for model C")
 
 create_figure_timeseries(
     trace_A,
-    color="tab:red",
+    color="tab:orange",
     num_days_futu_to_plot=num_days_future,
     save_to=save_path + "ts_A",
 )
@@ -958,42 +953,29 @@ create_figure_timeseries(
     num_days_futu_to_plot=num_days_future,
     save_to=save_path + "ts_B",
 )
-create_figure_timeseries(
-    trace_C,
-    color="tab:orange",
-    num_days_futu_to_plot=num_days_future,
-    save_to=save_path + "ts_C",
-)
 
 # have a combined plot, by providing the axes elements
 fig, axes = create_figure_timeseries(
     trace_A,
-    color="tab:red",
+    color="tab:orange",
     num_days_futu_to_plot=num_days_future,
     forecast_label="Scenario A",
-    forecast_seperate=True
+    add_more_later=True,
 )
 create_figure_timeseries(
     trace_B,
     color="tab:green",
     num_days_futu_to_plot=num_days_future,
     axes=axes,
+    save_to=save_path + "ts_merged",
     forecast_label="Scenario B",
 )
 
-create_figure_timeseries(
-    trace_C,
-    color="tab:orange",
-    num_days_futu_to_plot=num_days_future,
-    save_to=save_path + "ts_merged",
-    axes=axes,
-    forecast_label="Scenario C",
-)
 
 create_figure_distributions(
     model_A,
     trace_A,
-    color="tab:red",
+    color="tab:orange",
     num_changepoints=len(change_points_A),
     save_to=save_path + "dist_A",
 )
@@ -1003,11 +985,4 @@ create_figure_distributions(
     color="tab:green",
     num_changepoints=len(change_points_B),
     save_to=save_path + "dist_B",
-)
-create_figure_distributions(
-    model_C,
-    trace_C,
-    color="tab:orange",
-    num_changepoints=len(change_points_C),
-    save_to=save_path + "dist_C",
 )
