@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-04-20 17:48:45
+# @Last Modified: 2020-04-20 20:07:24
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
@@ -17,6 +17,7 @@ import sys
 import copy
 import datetime
 import locale
+import os
 
 import numpy as np
 import pymc3 as pm
@@ -28,6 +29,9 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 try:
     import covid19_inference as cov19
 except ModuleNotFoundError:
+    # imports are a bit picky when using native python
+    # https://stackoverflow.com/regquestions/29548587/import-fails-when-running-python-as-script-but-not-in-ipython
+    sys.path.append("")
     sys.path.append("../")
     sys.path.append("../../")
     sys.path.append("../../../")
@@ -38,8 +42,20 @@ except ModuleNotFoundError:
 # let's make them function arguments or attach them to model instances, soon
 # ------------------------------------------------------------------------------ #
 
-# set save path for figures, ideally use absolute path
-save_path = "./figures/easter_"
+
+# save path for figures, ideally use absolute path. 'None' tries the repo figure folder
+save_path = None
+
+if save_path is None:
+    try:
+        # only works when called from python, not reliable in interactive ipython etc.
+        os.chdir(os.path.dirname(__file__))
+        save_path = "../../../figures/easter_"
+    except:
+        # assume base directory
+        save_path = "./figures/easter_"
+print(f"saving figures to {os.path.abspath(save_path)}")
+
 
 confirmed_cases = cov19.get_jhu_confirmed_cases()
 
@@ -84,8 +100,8 @@ post_style = {
 date_format = "%b %-d"  # Apr 1
 # date_format = "%-d. %B" # 1. April
 
-# locale.setlocale(locale.LC_ALL,'en_US')
-locale.setlocale(locale.LC_ALL,'de_DE')
+locale.setlocale(locale.LC_ALL,'en_US')
+# locale.setlocale(locale.LC_ALL,'de_DE')
 
 # whether to show the minor ticks (for every day)
 date_show_minor_ticks = True
@@ -179,6 +195,41 @@ def create_figure_timeseries(
     forecast_label="Forecast",
     add_more_later=False,
 ):
+    """
+        Used for the generation of the timeseries forecast figure around easter on the
+        repo.
+
+        Requires the plot_par dict to be set globally.
+
+        Parameters
+        ----------
+        trace: trace instance
+            needed for the data
+        color: string
+            main color to use, default "tab:green"
+        save_to: string or None
+            path where to save the figures. default: None, not saving figures
+        num_days_futu_to_plot : int
+            how many days to plot into the future (not exceeding simulation)
+        y_lim_lambda : (float, float)
+            min, max values for lambda effective. default (-0.15, 0.45)
+        plot_red_axis : bool
+            show the unconstrained constrained annotation in lambda panel
+        axes : np.array of mpl axes
+            provide an array of existing axes (from previously calling this function)
+            to add more traces. Data will not be added again. Ideally call this first
+            with `add_more_later=True`
+        forecast_label : string
+            legend label for the forecast, default: "Forecast"
+        add_more_later : bool
+            set this to true if you plan to add multiple models to the plot. changes the layout (and the color of the fit to past data)
+
+        Returns
+        -------
+            fig : mpl figure
+            axes : np array of mpl axeses (insets not included)
+
+    """
 
     axes_provided = False
     if axes is not None:
@@ -210,7 +261,6 @@ def create_figure_timeseries(
     if axes_provided:
         fig = axes[0].get_figure()
     else:
-        color_past = '#646464'
         fig, axes = plt.subplots(
             3,
             1,
@@ -218,6 +268,8 @@ def create_figure_timeseries(
             gridspec_kw={"height_ratios": [2, 3, 3]},
             constrained_layout=True,
         )
+        if add_more_later:
+            color_past = '#646464'
 
     insets = []
 
