@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-04-20 20:07:24
+# @Last Modified: 2020-04-20 22:50:42
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
@@ -866,7 +866,7 @@ def create_figure_distributions(
 
             global foo
             foo = t_xl
-            print(x_l, x_r, y_l, y_r, x_r - x_l, y_r - y_l)
+            # print(x_l, x_r, y_l, y_r, x_r - x_l, y_r - y_l)
 
             rect = patches.Rectangle(
                 (x_l, y_l),
@@ -933,13 +933,13 @@ change_points_B = [
         pr_sigma_lambda=0.2,
     ),
     dict(  # back to lambda 2 around easter.
-        pr_mean_date_begin_transient=datetime.datetime(2020, 4, 10),
+        pr_mean_date_begin_transient=datetime.datetime(2020, 4, 7),
         pr_sigma_date_begin_transient=1,
         pr_median_lambda=0.13,  # using the inferred value as of 04/20 and wider prior
         pr_sigma_lambda=0.3,
     ),
     dict(  # shortly after easter, people stop visiting and we might go back to lambda 3
-        pr_mean_date_begin_transient=datetime.datetime(2020, 4, 14),
+        pr_mean_date_begin_transient=datetime.datetime(2020, 4, 12),
         pr_sigma_date_begin_transient=1,
         pr_median_lambda=0.08,  # using the inferred value as of 04/20 and wider prior
         pr_sigma_lambda=0.3,
