@@ -99,9 +99,11 @@ post_style = {
 # date_format = "%m/%d"  # 04/01
 date_format = "%b %-d"  # Apr 1
 # date_format = "%-d. %B" # 1. April
-
-locale.setlocale(locale.LC_ALL,'en_US')
-# locale.setlocale(locale.LC_ALL,'de_DE')
+try:
+    locale.setlocale(locale.LC_ALL,'en_US')
+    # locale.setlocale(locale.LC_ALL,'de_DE')
+except:
+    pass
 
 # whether to show the minor ticks (for every day)
 date_show_minor_ticks = True
