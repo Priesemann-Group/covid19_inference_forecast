@@ -53,7 +53,8 @@ if save_path is None:
         save_path = "../../../figures/easter_"
     except:
         # assume base directory
-        save_path = "./figures/easter_"
+        save_path = "../../../figures/easter_"
+
 print(f"saving figures to {os.path.abspath(save_path)}")
 
 
