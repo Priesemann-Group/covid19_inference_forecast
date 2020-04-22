@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-04-20 22:50:42
+# @Last Modified: 2020-04-22 19:46:22
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
@@ -101,7 +101,7 @@ post_style = {
 date_format = "%b %-d"  # Apr 1
 # date_format = "%-d. %B" # 1. April
 try:
-    locale.setlocale(locale.LC_ALL,'en_US')
+    locale.setlocale(locale.LC_ALL, "en_US")
     # locale.setlocale(locale.LC_ALL,'de_DE')
 except:
     pass
@@ -272,7 +272,7 @@ def create_figure_timeseries(
             constrained_layout=True,
         )
         if add_more_later:
-            color_past = '#646464'
+            color_past = "#646464"
 
     insets = []
 
@@ -608,6 +608,18 @@ def create_figure_timeseries(
     ax.get_legend().get_frame().set_facecolor("#F0F0F0")
 
     add_watermark(axes[1])
+
+    fig.suptitle(
+        # using script run time. could use last data point though.
+        f"Latest forecast\n({datetime.datetime.now().strftime('%Y/%m/%d')})",
+        x=.15,
+        y=1.075,
+        verticalalignment="top",
+        # fontsize="large",
+        fontweight="bold",
+        # loc="left",
+        # horizontalalignment="left",
+    )
 
     # plt.subplots_adjust(wspace=0.4, hspace=0.25)
     if save_to is not None:
