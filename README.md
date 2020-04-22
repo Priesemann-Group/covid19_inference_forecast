@@ -23,7 +23,7 @@ We want to quantify the effect of new policies on the spread of COVID-19. Crucia
 ### Summary
 
 <p float="left">
-  <img src="figures/easter_ts_merged.png" height="400">
+  <img src="figures/easter_ts_merged.png" height="425">
   <img src="figures/Fig_summary_forecast_orig.png" height="450" /> 
 </p>
 
