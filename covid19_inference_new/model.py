@@ -133,7 +133,8 @@ def modelcontext(model):
 
 
 def student_t_likelihood(
-    new_cases_inferred, pr_beta_sigma_obs=30, nu=4, offset_sigma=1, model=None
+    new_cases_inferred, pr_beta_sigma_obs=30, nu=4, offset_sigma=1, model=None,
+    data_obs = None, name_student_t = '_new_cases_studentT'
 ):
     """
         Set the likelihood to apply to the model observations (`model.new_cases_obs`)
@@ -141,7 +142,7 @@ def student_t_likelihood(
 
         Parameters
         ----------
-        new_cases_inferred : np.array
+        new_cases_inferred : array
             One or two dimensonal array.
             If 2 dimensional, the first dimension is time and the second are the
             regions/countries
@@ -157,6 +158,11 @@ def student_t_likelihood(
         model:
             The model on which we want to add the distribution
 
+        data_obs : array
+            The data that is observed. By default it is ``model.new_cases_ob``
+
+        name_student_t :
+            The name under which the studentT distribution is saved in the trace.
 
         Returns
         -------
@@ -175,13 +181,16 @@ def student_t_likelihood(
     len_sigma_obs = () if model.sim_ndim == 1 else model.sim_shape[1]
     sigma_obs = pm.HalfCauchy("sigma_obs", beta=pr_beta_sigma_obs, shape=len_sigma_obs)
 
+    if data_obs is None:
+        data_obs = model.new_cases_obs
+
     pm.StudentT(
-        name="_new_cases_studentT",
+        name=name_student_t,
         nu=nu,
-        mu=new_cases_inferred[: model.data_len],
-        sigma=tt.abs_(new_cases_inferred[: model.data_len] + offset_sigma) ** 0.5
+        mu=new_cases_inferred[: len(data_obs)],
+        sigma=tt.abs_(new_cases_inferred[: len(data_obs)] + offset_sigma) ** 0.5
         * sigma_obs,  # offset and tt.abs to avoid nans
-        observed=model.new_cases_obs,
+        observed=data_obs,
     )
 
 
@@ -431,6 +440,8 @@ def delay_cases(
     save_in_trace=True,
     name_delay="delay",
     name_delayed_cases="new_cases_raw",
+    len_output_arr = None,
+    diff_input_output = None
 ):
     r"""
         Convolves the input by a lognormal distribution, in order to model a delay:
@@ -468,6 +479,12 @@ def delay_cases(
         name_delayed_cases : str
             The name under which the delay is saved in the trace, suffixes and prefixes are added depending on which
             variable is saved.
+        len_output_arr : int
+            Length of the array returned. By default it set to the length of the cases_obs saved in the model plus
+            the number of days of the forecast.
+        diff_input_output : int
+            Number of days the returned array begins later then the input. Should be significantly larger than
+            the median delay. By default it is set to the ``model.sim_diff_data``.
 
         Returns
         -------
@@ -476,6 +493,11 @@ def delay_cases(
     """
 
     model = modelcontext(model)
+
+    if len_output_arr is None:
+        len_output_arr = model.data_len + model.fcast_len
+    if diff_input_output is None:
+        diff_input_output = model.sim_diff_data
 
     len_delay = () if model.sim_ndim == 1 else model.sim_shape[1]
     delay_L2_log, delay_L1_log = hierarchical_normal(
@@ -515,10 +537,10 @@ def delay_cases(
     new_cases_inferred = mh.delay_cases_lognormal(
         input_arr=new_I_t,
         len_input_arr=model.sim_len,
-        len_output_arr=model.data_len + model.fcast_len,
+        len_output_arr=len_output_arr,
         median_delay=tt.exp(delay_L2_log),
         scale_delay=tt.exp(scale_delay_L2_log),
-        delay_betw_input_output=model.sim_diff_data,
+        delay_betw_input_output=diff_input_output,
     )
     if save_in_trace:
         pm.Deterministic(name_delayed_cases, new_cases_inferred)
