@@ -352,10 +352,10 @@ def SEIR(
     # Prior distributions of starting populations (exposed, infectious, susceptibles)
     # We choose to consider the transitions of newly exposed people of the last 8 days.
     if num_regions == ():
-        new_E_begin = pm.HalfCauchy(name="E_begin", beta=pr_beta_new_E_begin, shape=9)
+        new_E_begin = pm.HalfCauchy(name="E_begin", beta=pr_beta_new_E_begin, shape=11)
     else:
         new_E_begin = pm.HalfCauchy(
-            name="E_begin", beta=pr_beta_new_E_begin, shape=(9, num_regions)
+            name="E_begin", beta=pr_beta_new_E_begin, shape=(11, num_regions)
         )
     I_begin = pm.HalfCauchy(name="I_begin", beta=pr_beta_I_begin, shape=num_regions)
     S_begin = N - I_begin - pm.math.sum(new_E_begin, axis=0)
@@ -365,15 +365,17 @@ def SEIR(
 
     # Choose transition rates (E to I) according to incubation period distribution
     if num_regions == ():
-        x = np.arange(1, 9)
+        x = np.arange(1, 11)
     else:
-        x = np.arange(1, 9)
-        x = np.tile(x, (2, 1))
+        x = np.arange(1, 11)[:, None]
+        median_incubation = median_incubation*tt.ones(num_regions)
+        sigma_incubation = sigma_incubation*tt.ones(sigma_incubation)
+
     beta = mh.tt_lognormal(x, tt.log(median_incubation), sigma_incubation)
 
     # Runs SEIR model:
     def next_day(
-        lambda_t, S_t, nE1, nE2, nE3, nE4, nE5, nE6, nE7, nE8, I_t, _, mu, beta, N
+        lambda_t, S_t, nE1, nE2, nE3, nE4, nE5, nE6, nE7, nE8, nE9, nE10, I_t, _, mu, beta, N
     ):
         new_E_t = lambda_t / N * I_t * S_t
         S_t = S_t - new_E_t
@@ -386,6 +388,8 @@ def SEIR(
             + beta[5] * nE6
             + beta[6] * nE7
             + beta[7] * nE8
+            + beta[8] * nE9
+            + beta[9] * nE10
         )
         I_t = I_t + new_I_t - mu * I_t
         I_t = tt.clip(I_t, 0, N)  # for stability
@@ -399,7 +403,7 @@ def SEIR(
         sequences=[lambda_t],
         outputs_info=[
             S_begin,
-            dict(initial=new_E_begin, taps=[-1, -2, -3, -4, -5, -6, -7, -8]),
+            dict(initial=new_E_begin, taps=[-1, -2, -3, -4, -5, -6, -7, -8, -9, -10]),
             I_begin,
             new_I_0,
         ],
