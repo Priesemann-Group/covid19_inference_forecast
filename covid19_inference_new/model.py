@@ -12,8 +12,8 @@ from . import model_helper as mh
 
 log = logging.getLogger(__name__)
 
-if platform.system() == 'Darwin':
-    theano.config.gcc.cxxflags = "-Wno-c++11-narrowing" # workaround for macos
+if platform.system() == "Darwin":
+    theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"  # workaround for macos
 
 
 class Cov19Model(Model):
@@ -133,8 +133,13 @@ def modelcontext(model):
 
 
 def student_t_likelihood(
-    new_cases_inferred, pr_beta_sigma_obs=30, nu=4, offset_sigma=1, model=None,
-    data_obs = None, name_student_t = '_new_cases_studentT'
+    new_cases_inferred,
+    pr_beta_sigma_obs=30,
+    nu=4,
+    offset_sigma=1,
+    model=None,
+    data_obs=None,
+    name_student_t="_new_cases_studentT",
 ):
     """
         Set the likelihood to apply to the model observations (`model.new_cases_obs`)
@@ -377,14 +382,30 @@ def SEIR(
         x = np.arange(1, 11)
     else:
         x = np.arange(1, 11)[:, None]
-        median_incubation = median_incubation*tt.ones(num_regions)
-        sigma_incubation = sigma_incubation*tt.ones(sigma_incubation)
+        median_incubation = median_incubation * tt.ones(num_regions)
+        sigma_incubation = sigma_incubation * tt.ones(sigma_incubation)
 
     beta = mh.tt_lognormal(x, tt.log(median_incubation), sigma_incubation)
 
     # Runs SEIR model:
     def next_day(
-        lambda_t, S_t, nE1, nE2, nE3, nE4, nE5, nE6, nE7, nE8, nE9, nE10, I_t, _, mu, beta, N
+        lambda_t,
+        S_t,
+        nE1,
+        nE2,
+        nE3,
+        nE4,
+        nE5,
+        nE6,
+        nE7,
+        nE8,
+        nE9,
+        nE10,
+        I_t,
+        _,
+        mu,
+        beta,
+        N,
     ):
         new_E_t = lambda_t / N * I_t * S_t
         S_t = S_t - new_E_t
@@ -440,8 +461,9 @@ def delay_cases(
     save_in_trace=True,
     name_delay="delay",
     name_delayed_cases="new_cases_raw",
-    len_output_arr = None,
-    diff_input_output = None
+    len_input_arr=None,
+    len_output_arr=None,
+    diff_input_output=None,
 ):
     r"""
         Convolves the input by a lognormal distribution, in order to model a delay:
@@ -479,6 +501,9 @@ def delay_cases(
         name_delayed_cases : str
             The name under which the delay is saved in the trace, suffixes and prefixes are added depending on which
             variable is saved.
+        len_input_arr :
+            Length of ``new_I_t``. By default equal to ``model.sim_len``. Necessary because the shape of theano
+            tensors are not defined at when the graph is built.
         len_output_arr : int
             Length of the array returned. By default it set to the length of the cases_obs saved in the model plus
             the number of days of the forecast.
@@ -498,6 +523,8 @@ def delay_cases(
         len_output_arr = model.data_len + model.fcast_len
     if diff_input_output is None:
         diff_input_output = model.sim_diff_data
+    if len_input_arr is None:
+        len_input_arr = model.sim_len
 
     len_delay = () if model.sim_ndim == 1 else model.sim_shape[1]
     delay_L2_log, delay_L1_log = hierarchical_normal(
@@ -536,7 +563,7 @@ def delay_cases(
 
     new_cases_inferred = mh.delay_cases_lognormal(
         input_arr=new_I_t,
-        len_input_arr=model.sim_len,
+        len_input_arr=len_input_arr,
         len_output_arr=len_output_arr,
         median_delay=tt.exp(delay_L2_log),
         scale_delay=tt.exp(scale_delay_L2_log),
