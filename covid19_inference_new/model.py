@@ -140,6 +140,7 @@ def student_t_likelihood(
     model=None,
     data_obs=None,
     name_student_t="_new_cases_studentT",
+    name_sigma_obs="sigma_obs"
 ):
     """
         Set the likelihood to apply to the model observations (`model.new_cases_obs`)
@@ -169,6 +170,9 @@ def student_t_likelihood(
         name_student_t :
             The name under which the studentT distribution is saved in the trace.
 
+        name_sigma_obs :
+            The name under which the distribution of the observable error is saved in the trace
+
         Returns
         -------
         None
@@ -184,7 +188,7 @@ def student_t_likelihood(
     model = modelcontext(model)
 
     len_sigma_obs = () if model.sim_ndim == 1 else model.sim_shape[1]
-    sigma_obs = pm.HalfCauchy("sigma_obs", beta=pr_beta_sigma_obs, shape=len_sigma_obs)
+    sigma_obs = pm.HalfCauchy(name_sigma_obs, beta=pr_beta_sigma_obs, shape=len_sigma_obs)
 
     if data_obs is None:
         data_obs = model.new_cases_obs
