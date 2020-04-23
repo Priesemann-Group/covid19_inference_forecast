@@ -433,7 +433,7 @@ def SEIR(
 def delay_cases(
     new_I_t,
     pr_median_delay=10,
-    pr_sigma_delay=0.2,
+    pr_sigma_median_delay=0.2,
     pr_median_scale_delay=0.3,
     pr_sigma_scale_delay=None,
     model=None,
@@ -467,7 +467,7 @@ def delay_cases(
             The prior of the median delay
         scale_delay : float
             The scale of the delay, that is how wide the distribution is.
-        pr_sigma_delay : float
+        pr_sigma_median_delay : float
             The prior for the sigma of the median delay distribution.
         model : :class:`Cov19Model`
             if none, it is retrieved from the context
@@ -504,7 +504,7 @@ def delay_cases(
         name_delay + "_log",
         "sigma_" + name_delay,
         np.log(pr_median_delay),
-        pr_sigma_delay,
+        pr_sigma_median_delay,
         len_delay,
         w=0.9,
         error_cauchy=False,
