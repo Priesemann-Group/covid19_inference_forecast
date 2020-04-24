@@ -1258,7 +1258,8 @@ def get_label_dict(version=0):
 
 def create_figure_3_distributions(model, trace, save_to=None, layout=2,
                                   additional_insets=None, xlim_lambda=(0, 0.53), color='tab:green',
-                                  num_changepoints=3, xlim_tbegin=4, trace_prior = None):
+                                  num_changepoints=3, xlim_tbegin=4, trace_prior = None,
+                                  name_trans_day = "transient_begin_"):
     if additional_insets is None:
         additional_insets = {}
     # model = models[3]
@@ -1288,9 +1289,9 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
     insets["lambda_1"] = r"$\lambda_1 \simeq "
     insets["lambda_2"] = r"$\lambda_2 \simeq "
     insets["lambda_3"] = r"$\lambda_3 \simeq "
-    insets["transient_begin_0"] = r"$t_1 \simeq "
-    insets["transient_begin_1"] = r"$t_2 \simeq "
-    insets["transient_begin_2"] = r"$t_3 \simeq "
+    insets[f"{name_trans_day}0"] = r"$t_1 \simeq "
+    insets[f"{name_trans_day}1"] = r"$t_2 \simeq "
+    insets[f"{name_trans_day}2"] = r"$t_3 \simeq "
     insets["transient_len_0"] = r"$\Delta t_1 \simeq "
     insets["transient_len_1"] = r"$\Delta t_2 \simeq "
     insets["transient_len_2"] = r"$\Delta t_3 \simeq "
@@ -1309,9 +1310,9 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
         axpos["lambda_1"] = axes[0][1]
         axpos["lambda_2"] = axes[0][2]
         axpos["lambda_3"] = axes[0][3]
-        axpos["transient_begin_0"] = axes[1][1]
-        axpos["transient_begin_1"] = axes[1][2]
-        axpos["transient_begin_2"] = axes[1][3]
+        axpos[f"{name_trans_day}0"] = axes[1][1]
+        axpos[f"{name_trans_day}1"] = axes[1][2]
+        axpos[f"{name_trans_day}2"] = axes[1][3]
         axpos["transient_len_0"] = axes[2][1]
         axpos["transient_len_1"] = axes[2][2]
         axpos["transient_len_2"] = axes[2][3]
@@ -1335,9 +1336,9 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
         axpos["lambda_1"] = axes[0][1]
         axpos["lambda_2"] = axes[0][2]
         axpos["lambda_3"] = axes[0][3]
-        axpos["transient_begin_0"] = axes[1][1]
-        axpos["transient_begin_1"] = axes[1][2]
-        axpos["transient_begin_2"] = axes[1][3]
+        axpos[f"{name_trans_day}0"] = axes[1][1]
+        axpos[f"{name_trans_day}1"] = axes[1][2]
+        axpos[f"{name_trans_day}2"] = axes[1][3]
         axpos["transient_len_0"] = axes[2][1]
         axpos["transient_len_1"] = axes[2][2]
         axpos["transient_len_2"] = axes[2][3]
@@ -1362,7 +1363,7 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
         axpos["lambda_0"] = axes[1][0]
         for i_cp in range(0, num_changepoints):
             axpos["lambda_{}".format(i_cp + 1)] = axes[i_cp + 2][0]
-            axpos["transient_begin_{}".format(i_cp)] = axes[i_cp + 2][1]
+            axpos[f"{name_trans_day}{i_cp}"] = axes[i_cp + 2][1]
             axpos["transient_len_{}".format(i_cp)] = axes[i_cp + 2][2]
 
         axpos["mu"] = axes[0][0]
@@ -1395,7 +1396,7 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
         if "legend" in key:
             continue
 
-        if "transient_begin" in key:
+        if name_trans_day in key:
             data = conv_time_to_mpl_dates(trace[key])
         else:
             data = trace[key]
@@ -1407,7 +1408,8 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
 
         # make some bold
         if layout == 2 and (
-                key == "lambda_1" or key == "transient_begin_0" or key == "transient_len_0"
+                key == "lambda_1" or key == "transient_begin_0" or key == "transient_len_0" or
+                key == name_trans_day + "0"
         ):
             ax.set_xlabel(labels[key], fontweight="bold")
 
@@ -1430,7 +1432,7 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
             ax.set_xlim(0)
         elif "transient_len" in key:
             ax.set_xlim(xlim_transt)
-        elif "transient_begin" in key:
+        elif name_trans_day in key:
             md = np.median(data)
             ax.set_xlim([int(md) - xlim_tbegin, int(md) + xlim_tbegin - 1])
             format_date_xticks(ax)
@@ -1478,7 +1480,7 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
         global text
         if "lambda" in key or "mu" == key or 'sigma_random_walk' == key:
             text = print_median_CI(data, prec=2)
-        elif "transient_begin" in key:
+        elif name_trans_day in key:
             text = print_median_CI(
                 data - matplotlib.dates.date2num(date_data_begin) + 1, prec=1
             )
