@@ -1258,7 +1258,7 @@ def get_label_dict(version=0):
 
 def create_figure_3_distributions(model, trace, save_to=None, layout=2,
                                   additional_insets=None, xlim_lambda=(0, 0.53), color='tab:green',
-                                  num_changepoints=3, xlim_tbegin=4):
+                                  num_changepoints=3, xlim_tbegin=4, trace_prior = None):
     if additional_insets is None:
         additional_insets = {}
     # model = models[3]
@@ -1446,10 +1446,17 @@ def create_figure_3_distributions(model, trace, save_to=None, layout=2,
             x_input = x
         if 'weekend_factor_rad' == key:
             x *=np.pi*2/7
+
+        if trace_prior is None:
+            prior_dist = cov19.plotting.get_prior_distribution(model, x_input, key)
+        else:
+            kde = scipy.stats.gaussian_kde(trace_prior[key])
+            prior_dist = kde.evaluate((x_input))
+
         ax.plot(
             x,
             # priors[key](x),
-            cov19.plotting.get_prior_distribution(model, x_input, key),
+            prior_dist,
             label="Prior",
             color=colors[0],
             linewidth=3,
