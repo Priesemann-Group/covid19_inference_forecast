@@ -20,7 +20,7 @@ It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
 
 We want to quantify the effect of new policies on the spread of COVID-19. Crucially, fitting an exponential function to the number of cases lacks an interpretability of the fitting error. We built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. At the example of Germany, we show that the two kinks in the last weeks correspond to two changes of policies, leading to a growth rate of about 0 now.
 
-### Current forecast due to the relaxation of the restrictions on April 19
+### Latest forecast due to the relaxation of the restrictions on April 19
 
 <img src="figures/easter_ts_merged.png" height="500">
 
@@ -28,26 +28,25 @@ We want to quantify the effect of new policies on the spread of COVID-19. Crucia
   * __Scenario B__: If the effective growth rate stays on the current (all-time low) value, we could achive 1 000 daily new cases by the end of May.
 
 The two current scenarios are based on the model with weekend correction (less cases reported on weekends).
+The distributions below correspond to the parameters the produce the time series.
 
 <p float="left">
   <img src="figures/easter_dist_A.png" height="450">
   <img src="figures/easter_dist_B.png" height="450" /> 
 </p>
 
-The distributions correspond to the parameters the produce the time series shown in the first figure.
-
-### Past forecast as of April 9, based on three change points
+### Past forecast as of April 9, comparing one, two and three change-point scenarios
 
 <img src="figures/Fig_summary_forecast_orig.png" height="500" /> 
 
-Original figure from the paper (with forecasts as of April 9), when three change points well described the data. Current data points were added for comparison but they were not considered by the model.
+Original figure from the paper (with forecasts as of April 9), when three change points well described the data. Current data points were added for comparison with real-world outcome but they were not considered by the model.
 
 * Note that, at the time of the forecasts (April 9), the third change point was still very recent (March 23). Clearly, the time difference exceeds the estimated reporting delay (~10 days) and enough data to determine the change point _should_ have been available. However, the model understimated the positive effect the last change point, which resulted in an overestimation of new cases.
 
 * While the observed data points are still close to the 95% confidence interval of the forecast (shaded green region, note that the confidence interval does not include observation noise), the overestimation of new cases in the forecast stresses the importance of the reporting delay - it hinders an immediate evaluation of an intervention.
 
 
-### Scenario assuming three change points
+### Scenario focus on three change points
 
 <p float="left">
   <img src="figures/Fig_S3.png" height="450" />
