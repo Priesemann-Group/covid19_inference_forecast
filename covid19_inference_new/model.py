@@ -420,7 +420,7 @@ def SEIR(
 
     median_incubation = pm.Normal(
         name_median_incubation,
-        mean=pr_mean_median_incubation,
+        mu=pr_mean_median_incubation,
         sigma=pr_sigma_median_incubation,
     )
 
