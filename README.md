@@ -39,7 +39,7 @@ The distributions below correspond to the parameters the produce the time series
 
 <img src="figures/Fig_summary_forecast_orig.png" height="500" /> 
 
-Original figure from the paper (with forecasts as of April 9), when three change points well described the data. Current data points were added for comparison with real-world outcome but they were not considered by the model.
+Original figure from the paper (with forecasts as of April 9), when three change points well described the data. Current data points were added for a comparison with the real-world outcome, but they were not considered by the model.
 
 * Note that, at the time of the forecasts (April 9), the third change point was still very recent (March 23). Clearly, the time difference exceeds the estimated reporting delay (~10 days) and enough data to determine the change point _should_ have been available. However, the model understimated the positive effect the last change point, which resulted in an overestimation of new cases.
 
