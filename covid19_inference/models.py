@@ -515,7 +515,7 @@ def SEIR_with_extensions(
         < priors_dict["pr_median_delay"]
         + 3 * priors_dict["pr_median_delay"] * priors_dict["pr_sigma_delay"]
     ):
-        raise RuntimeError("diff_data_sim is to small compared to the prior delay")
+        print("WARNING: diff_data_sim could be to small compared to the prior delay")
     if num_days_sim < len(new_cases_obs) + diff_data_sim:
         raise RuntimeError(
             "Simulation ends before the end of the data. Increase num_days_sim."
