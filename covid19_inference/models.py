@@ -662,6 +662,8 @@ def SEIR_with_extensions(
     N,
     priors_dict=None,
     with_random_walk=True,
+    weekends_modulated=False,
+    weekend_modulation_type='step'
 ):
     """
         This model includes 3 extensions to the `SIR_model_with_change_points`:
@@ -767,6 +769,9 @@ def SEIR_with_extensions(
         pr_sigma_median_incubation=1,
         sigma_incubation=0.418,
         #  https://www.ncbi.nlm.nih.gov/pubmed/32150748
+        week_end_days=(6, 7),
+        pr_mean_weekend_factor=0.7,
+        pr_sigma_weekend_factor=0.17
     )
     if not with_random_walk:
         del default_priors["pr_sigma_random_walk"]
@@ -941,6 +946,8 @@ def SEIR_with_extensions(
             # https://www.ncbi.nlm.nih.gov/pubmed/32150748
         )
 
+
+
         new_cases_inferred = mh.delay_cases_lognormal(
             input_arr=new_I_t,
             len_input_arr=num_days_sim,
@@ -949,17 +956,42 @@ def SEIR_with_extensions(
             scale_delay=priors_dict["scale_delay"],
             delay_betw_input_output=diff_data_sim,
         )
-        num_days_data = new_cases_obs.shape[-1]
+
+
+
+        if weekends_modulated:
+            week_end_factor = pm.Beta('weekend_factor', mu=priors_dict['pr_mean_weekend_factor'],
+                                                        sigma=priors_dict['pr_sigma_weekend_factor'])
+            if weekend_modulation_type == 'step':
+                modulation = np.zeros(num_days_sim - diff_data_sim)
+                for i in range(num_days_sim - diff_data_sim):
+                    date_curr = date_begin_simulation  + datetime.timedelta(days=i + diff_data_sim + 1)
+                    if date_curr.isoweekday() in priors_dict['week_end_days']:
+                        modulation[i] = 1
+            elif weekend_modulation_type == 'abs_sine':
+                offset_rad = pm.VonMises('offset_modulation_rad', mu = 0, kappa = 0.01)
+                offset = pm.Deterministic('offset_modulation', offset_rad/(2*np.pi)*7)
+                t = np.arange(num_days_sim - diff_data_sim)
+                date_begin = date_begin_simulation + datetime.timedelta(days=diff_data_sim + 1)
+                weekday_begin = date_begin.weekday()
+                t -= weekday_begin # Sunday is zero
+                modulation = 1-tt.abs_(tt.sin(t/7 * np.pi + offset_rad/2))
+
+            multiplication_vec = np.ones(num_days_sim - diff_data_sim) - (1 - week_end_factor) * modulation
+            new_cases_inferred_eff  = new_cases_inferred * multiplication_vec
+        else:
+            new_cases_inferred_eff = new_cases_inferred
 
         # likelihood of the model:
         # observed cases are distributed following studentT around the model.
         # we want to approximate a Poisson distribution of new cases.
         # we choose nu=4 to get heavy tails and robustness to outliers.
         # https://www.jstor.org/stable/2290063
+        num_days_data = new_cases_obs.shape[-1]
         pm.StudentT(
             name="_new_cases_studentT",
             nu=4,
-            mu=new_cases_inferred[:num_days_data],
+            mu=new_cases_inferred_eff[:num_days_data],
             sigma=tt.abs_(new_cases_inferred[:num_days_data] + 1) ** 0.5
             * sigma_obs,  # +1 and tt.abs to avoid nans
             observed=new_cases_obs,
@@ -968,7 +1000,9 @@ def SEIR_with_extensions(
         # add these observables to the model so we can extract a time series of them
         # later via e.g. `model.trace['lambda_t']`
         pm.Deterministic("lambda_t", lambda_t)
-        pm.Deterministic("new_cases", new_cases_inferred)
+        pm.Deterministic("new_cases", new_cases_inferred_eff)
+        pm.Deterministic("new_cases_raw", new_cases_inferred)
+
 
     return model
 
