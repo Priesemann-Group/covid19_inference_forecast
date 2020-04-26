@@ -1823,8 +1823,8 @@ def create_figure_distributions(
     insets["lambda_0"] = r"$\lambda_0 \simeq "
     for i in range(0, num_changepoints):
         insets[f"lambda_{i+1}"] = f"$\lambda_{i+1} \simeq "
-        insets[f"transient_begin_{i}"] = f"$t_{i} \simeq "
-        insets[f"transient_len_{i}"] = f"$\Delta t_{i} \simeq "
+        insets[f"transient_begin_{i}"] = f"$t_{i+1} \simeq "
+        insets[f"transient_len_{i}"] = f"$\Delta t_{i+1} \simeq "
 
     insets["mu"] = r"$\mu \simeq "
     insets["delay"] = r"$D \simeq "
