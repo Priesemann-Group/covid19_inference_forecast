@@ -577,7 +577,7 @@ def create_figure_timeseries(
     ylabel_cum = f"Total reported\ncases in {country}"
     ylabel_lam = f"Effective\ngrowth rate $\lambda^\\ast (t)$"
 
-    pos_letter = (-0.25, 1)
+    pos_letter = (-0.3, 1)
     titlesize = 16
     insetsize = ("25%", "50%")
     figsize = (4, 6)
@@ -587,7 +587,7 @@ def create_figure_timeseries(
     if plot_par["draw_insets_cases"] == True:
         leg_loc = "upper right"
 
-    new_c_ylim = [0, 12_000]
+    new_c_ylim = [0, 15_000]
     new_c_insetylim = [50, 17_000]
 
     cum_c_ylim = [0, 300_000]
@@ -772,7 +772,7 @@ def create_figure_timeseries(
     # NEW CASES LOG SCALE, skip forecast
     if plot_par["draw_insets_cases"] == True:
         ax = inset_axes(
-            ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=0.75
+            ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=1
         )
         insets.append(ax)
         if not axes_provided:
@@ -884,7 +884,7 @@ def create_figure_timeseries(
     # Total CASES LOG SCALE, skip forecast
     if plot_par["draw_insets_cases"] == True:
         ax = inset_axes(
-            ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=0.75
+            ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=1
         )
         insets.append(ax)
         if not axes_provided:
@@ -940,27 +940,38 @@ def create_figure_timeseries(
             format_date_xticks(ax)
             for label in ax.xaxis.get_ticklabels()[1:-1]:
                 label.set_visible(False)
-    insets[0].set_yticks([1e2, 1e3, 1e4,])
-    insets[1].set_yticks([1e2, 1e4, 1e6,])
+    insets[0].set_yticks(
+        [1e2, 1e3, 1e4,]
+    )
+    insets[1].set_yticks(
+        [1e2, 1e4, 1e6,]
+    )
+
+    # crammed data, disable some more tick labels
+    insets[0].xaxis.get_ticklabels()[-1].set_visible(False)
+    insets[0].yaxis.get_ticklabels()[0].set_visible(False)
 
     # legend
-    ax = axes[2]
+    ax = axes[1]
     ax.legend(loc=leg_loc)
     ax.get_legend().get_frame().set_linewidth(0.0)
     ax.get_legend().get_frame().set_facecolor("#F0F0F0")
 
-    add_watermark(axes[1])
+    # add_watermark(axes[1])
 
-    fig.suptitle(
-        # using script run time. could use last data point though.
-        f"Latest forecast\n({datetime.datetime.now().strftime('%Y/%m/%d')})",
-        x=0.15,
-        y=1.075,
-        verticalalignment="top",
-        # fontsize="large",
+    # fig.suptitle(
+    #     f"Latest forecast\n({datetime.datetime.now().strftime('%Y/%m/%d')})",
+    #     x=0.15,
+    #     y=1.075,
+    #     verticalalignment="top",
+    #     fontweight="bold",
+    # )
+
+    axes[1].set_title(
+        f"Data until {date_data_end.strftime('%B %-d')}",
+        loc="right",
         fontweight="bold",
-        # loc="left",
-        # horizontalalignment="left",
+        fontsize="small"
     )
 
     # plt.subplots_adjust(wspace=0.4, hspace=0.25)
@@ -1295,7 +1306,6 @@ def create_figure_timeserie_old(
         plt.savefig(
             save_to + ".png", dpi=300, bbox_inches="tight", pad_inches=0,
         )
-
 
 
 def create_figure_3_timeseries(save_to=None):
@@ -1715,7 +1725,10 @@ def get_mpl_text_coordinates(text, ax):
 
     # get bounding box of text
     transform = ax.transAxes.inverted()
-    bb = text.get_window_extent()
+    try:
+        bb = text.get_window_extent(renderer=fig.canvas.get_renderer())
+    except:
+        bb = text.get_window_extent()
     bb = bb.transformed(transform)
     x_min = bb.get_points()[0][0]
     x_max = bb.get_points()[1][0]
