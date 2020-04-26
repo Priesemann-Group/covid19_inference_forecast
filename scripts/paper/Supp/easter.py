@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-04-22 19:46:22
+# @Last Modified: 2020-04-26 10:32:27
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
@@ -117,6 +117,7 @@ plot_par = dict()
 plot_par["draw_insets_cases"] = False
 plot_par["draw_ci_95"] = True
 plot_par["draw_ci_75"] = False
+plot_par["insets_only_two_ticks"] = True
 
 # ------------------------------------------------------------------------------ #
 # Formatting helpers
@@ -246,8 +247,8 @@ def create_figure_timeseries(
     pos_letter = (-0.25, 1)
     titlesize = 16
     insetsize = ("25%", "50%")
-    # figsize = (4, 6)
-    figsize = (6, 6)
+    figsize = (4, 6)
+    # figsize = (6, 6)
 
     leg_loc = "upper left"
     if plot_par["draw_insets_cases"] == True:
@@ -596,10 +597,16 @@ def create_figure_timeseries(
     for ax in insets:
         ax.set_xlim(start_date, mid_date)
         ax.yaxis.tick_right()
-        format_date_xticks(ax)
         ax.set_yscale("log")
-        for label in ax.xaxis.get_ticklabels()[1:-1]:
-            label.set_visible(False)
+        if plot_par["insets_only_two_ticks"] is True:
+            format_date_xticks(ax, minor=False)
+            for label in ax.xaxis.get_ticklabels()[1:-1]:
+                label.set_visible(False)
+            print(ax.xticks)
+        else:
+            format_date_xticks(ax)
+            for label in ax.xaxis.get_ticklabels()[1:-1]:
+                label.set_visible(False)
 
     # legend
     ax = axes[2]
@@ -612,7 +619,7 @@ def create_figure_timeseries(
     fig.suptitle(
         # using script run time. could use last data point though.
         f"Latest forecast\n({datetime.datetime.now().strftime('%Y/%m/%d')})",
-        x=.15,
+        x=0.15,
         y=1.075,
         verticalalignment="top",
         # fontsize="large",
@@ -659,6 +666,87 @@ def labels(key):
         return f"Recovery rate"
 
 
+def get_mpl_text_coordinates(text, ax):
+    """
+        helper to get a coordinates of a text object in the coordinates of the
+        axes element.
+        used for the rectangle backdrop.
+
+        Returns:
+        x_min, x_max, y_min, y_max
+    """
+    fig = ax.get_figure()
+
+    try:
+        fig.canvas.renderer
+    except Exception as e:
+        # print(e)
+        # otherwise no renderer, needed for text position calculation
+        fig.canvas.draw()
+
+    x_min = None
+    x_max = None
+    y_min = None
+    y_max = None
+
+    # get bounding box of text
+    transform = ax.transAxes.inverted()
+    bb = text.get_window_extent(renderer=fig.canvas.get_renderer())
+    bb = bb.transformed(transform)
+    x_min = bb.get_points()[0][0]
+    x_max = bb.get_points()[1][0]
+    y_min = bb.get_points()[0][1]
+    y_max = bb.get_points()[1][1]
+
+    return x_min, x_max, y_min, y_max
+
+
+def add_mpl_rect_around_text(text_list, ax, **kwargs):
+    """
+        add a rectangle to the axes (behind the text)
+
+        provide a list of text elements and possible options passed to patches.Rectangle
+
+        e.g.
+        facecolor="grey",
+        alpha=0.2,
+        zorder=99,
+
+    """
+
+    x_gmin = 1
+    y_gmin = 1
+    x_gmax = 0
+    y_gmax = 0
+
+    for text in text_list:
+        x_min, x_max, y_min, y_max = get_mpl_text_coordinates(text, ax)
+        if x_min < x_gmin:
+            x_gmin = x_min
+        if y_min < y_gmin:
+            y_gmin = y_min
+        if x_max > x_gmax:
+            x_gmax = x_max
+        if y_max > y_gmax:
+            y_gmax = y_max
+
+    pad_percent = 10
+    # x_gmin *= 1 - pad_percent / 100
+    y_gmin *= 1 - pad_percent / 100
+    # x_gmax *= 1 + pad_percent / 100
+    y_gmax *= 1 + pad_percent / 100
+
+    rect = patches.Rectangle(
+        (x_gmin, y_gmin),
+        x_gmax - x_gmin,
+        y_gmax - y_gmin,
+        transform=ax.transAxes,
+        **kwargs,
+    )
+
+    ax.add_patch(rect)
+
+
 def create_figure_distributions(
     model,
     trace,
@@ -669,6 +757,9 @@ def create_figure_distributions(
     num_changepoints=3,
     xlim_tbegin=4,
 ):
+    """
+        create the distribution overview plot.
+    """
     if additional_insets is None:
         additional_insets = {}
     colors = ["#708090", color]
@@ -732,9 +823,6 @@ def create_figure_distributions(
         axes[i][col].set_visible(False)
     if not len(additional_insets) % num_rows == 1:
         axpos["legend"] = axes[0][num_columns - 1]
-
-    # otherwise no renderer, needed for text position calculation
-    fig.canvas.draw()
 
     # render panels
     for key in axpos.keys():
@@ -842,24 +930,11 @@ def create_figure_distributions(
                 zorder=100,
             )
 
-            x_l = None
-            x_r = None
-            y_r = 0.9
-            y_m = 0.6
-            try:
-                # get bounding box of big text to attach small text
-                transform = ax.transAxes.inverted()
-                bb = t_xl.get_window_extent(renderer=fig.canvas.renderer)
-                bb = bb.transformed(transform)
-                x_l = bb.get_points()[0][0]
-                x_r = bb.get_points()[1][0]
-                y_m = bb.get_points()[0][1]
-            except Exception as e:
-                pass
+            x_min, x_max, y_min, y_max = get_mpl_text_coordinates(t_xl, ax)
 
             t_sm = ax.text(
                 0.6,
-                y_m,
+                y_min,
                 ci,
                 fontsize=9,
                 transform=ax.transAxes,
@@ -868,32 +943,10 @@ def create_figure_distributions(
                 # bbox=dict(facecolor="white", alpha=0.5, edgecolor="none"),
                 zorder=101,
             )
-            try:
-                # get bounding box of big text to attach small text
-                transform = ax.transAxes.inverted()
-                bb = t_sm.get_window_extent(renderer=fig.canvas.renderer)
-                bb = bb.transformed(transform)
-                x_l = np.fmin(x_l, bb.get_points()[0][0])
-                x_r = np.fmax(x_r, bb.get_points()[1][0])
-                y_l = bb.get_points()[0][1]
-            except Exception as e:
-                pass
 
-            global foo
-            foo = t_xl
-            # print(x_l, x_r, y_l, y_r, x_r - x_l, y_r - y_l)
-
-            rect = patches.Rectangle(
-                (x_l, y_l),
-                x_r - x_l,
-                y_r - y_l,
-                facecolor="grey",
-                alpha=0.2,
-                transform=ax.transAxes,
-                zorder=99,
+            add_mpl_rect_around_text(
+                [t_xl, t_sm], ax, facecolor="white", alpha=0.5, zorder=99,
             )
-
-            ax.add_patch(rect)
 
     # legend
     if "legend" in axpos:
