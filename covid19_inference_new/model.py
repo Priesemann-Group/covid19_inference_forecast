@@ -140,7 +140,7 @@ def student_t_likelihood(
     model=None,
     data_obs=None,
     name_student_t="_new_cases_studentT",
-    name_sigma_obs="sigma_obs"
+    name_sigma_obs="sigma_obs",
 ):
     """
         Set the likelihood to apply to the model observations (`model.new_cases_obs`)
@@ -188,7 +188,9 @@ def student_t_likelihood(
     model = modelcontext(model)
 
     len_sigma_obs = () if model.sim_ndim == 1 else model.sim_shape[1]
-    sigma_obs = pm.HalfCauchy(name_sigma_obs, beta=pr_beta_sigma_obs, shape=len_sigma_obs)
+    sigma_obs = pm.HalfCauchy(
+        name_sigma_obs, beta=pr_beta_sigma_obs, shape=len_sigma_obs
+    )
 
     if data_obs is None:
         data_obs = model.new_cases_obs
@@ -251,11 +253,11 @@ def SIR(
         Returns
         -------
 
-        new_I_t : array
+        new_I_t : :class:`~theano.tensor.TensorVariable`
             time series of the number daily newly infected persons.
-        I_t : array
+        I_t : :class:`~theano.tensor.TensorVariable`
             time series of the infected (if return_all set to True)
-        S_t : array
+        S_t : :class:`~theano.tensor.TensorVariable`
             time series of the susceptible (if return_all set to True)
 
     """
@@ -311,46 +313,81 @@ def SEIR(
     pr_beta_I_begin=100,
     pr_beta_new_E_begin=50,
     pr_median_mu=1 / 8,
-    median_incubation=5,
+    pr_mean_median_incubation=5,
+    pr_sigma_median_incubation=1,
     sigma_incubation=0.418,
     pr_sigma_mu=0.2,
     model=None,
     return_all=False,
     save_all=False,
+    name_median_incubation="median_incubation",
 ):
-    """
-        Implements the susceptible-exposed-infected-recovered model
+    r"""
+        Implements a model similar to the susceptible-exposed-infected-recovered model. Instead of a exponential decaying
+        incubation period, the length of the period is lognormal distributed. The complete equation is:
+
+         .. math::
+
+            E_{\text{new}}(t) &= \lambda_t I(t-1) \frac{S(t)}{N}   \\
+            S(t) &= S(t-1) - E_{\text{new}}(t)  \\
+            I_\text{new}(t) &= \sum_{k=1}^{10} \beta(k) E_{\text{new}}(t-k)   \\
+            I(t) &= I(t-1) + I_{\text{new}}(t) - \mu  I(t) \\
+            \beta(k) & = LogNormal(\text{log}(d_{\text{incubation}})), \text{sigma\_incubation})(k)
+
+        The recovery rate :math:`\mu` and the incubation period is the same for all regions and follow respectively:
+
+        .. math::
+
+             \mu &\sim LogNormal(\text{log(pr\_median\_mu)), pr\_sigma\_mu}) \\
+             d_{\text{incubation}} &\sim Normal(\text{pr\_mean\_median\_incubation, pr\_sigma\_median\_incubation})
+
+        The initial number of infected and newly exposed differ for each region and follow prior
+        :class:`~pymc3.distributions.continuous.HalfCauchy` distributions:
+
+        .. math::
+
+             E(t)  &\sim HalfCauchy(\text{pr\_beta\_E\_begin}) \:\: \text{ for} \: t \in \{-9, -8, ..., 0\}\\
+             I(0)  &\sim HalfCauchy(\text{pr\_beta\_I\_begin}).
+
 
         Parameters
         ----------
-        lambda_t_log : 1 or 2d theano tensor
-            time series of the logarithm of the spreading rate
-        pr_beta_I_begin : int
-            scale parameter value for prior distribution of starting number of infectious population
-        pr_beta_new_E_begin : int
-            scale parameter value for prior distribution of starting number of newly exposed population
-            assumed smaller than total infectious population
-        pr_median_mu : float
-            median recovery rate; parameter value for prior distribution of recovery rate
-        pr_sigma_mu : float
-            scale parameter value for prior distribution of recovery rate
-
+        lambda_t_log : :class:`~theano.tensor.TensorVariable`
+            time series of the logarithm of the spreading rate, 1 or 2-dimensional. If 2-dimensional, the first
+            dimension is time.
+        pr_beta_I_begin : float or array_like
+            Prior beta of the :class:`~pymc3.distributions.continuous.HalfCauchy` distribution of :math:`I(0)`.
+        pr_beta_new_E_begin : float or array_like
+            Prior beta of the :class:`~pymc3.distributions.continuous.HalfCauchy` distribution of :math:`E(0)`.
+        pr_median_mu : float or array_like
+            Prior for the median of the :class:`~pymc3.distributions.continuous.Lognormal` distribution of the recovery rate :math:`\mu`.
+        pr_mean_median_incubation :
+            Prior mean of the :class:`~pymc3.distributions.continuous.Normal` distribution of the median incubation delay  :math:`d_{\text{incubation}}`.
+        pr_sigma_median_incubation :
+            Prior sigma of the :class:`~pymc3.distributions.continuous.Normal` distribution of the median incubation delay  :math:`d_{\text{incubation}}`.
+        sigma_incubation :
+            Scale parameter of the :class:`~pymc3.distributions.continuous.Lognormal` distribution of the incubation time
+        pr_sigma_mu : float or array_like
+            Prior for the sigma of the lognormal distribution of recovery rate :math:`\mu`.
         model : :class:`Cov19Model`
-            if none, it is retrieved from the context
-
-        return_all : Bool
-            if True, returns new_I_t, I_t, S_t otherwise returns only new_I_t
-        save_all : Bool
-            if True, saves new_I_t, I_t, S_t in the trace, otherwise it saves only new_I_t
+          if none, it is retrieved from the context
+        return_all : bool
+            if True, returns ``new_I_t``, ``new_E_t``,  ``I_t``, ``S_t`` otherwise returns only ``new_I_t``
+        save_all : bool
+            if True, saves ``new_I_t``, ``new_E_t``, ``I_t``, ``S_t`` in the trace, otherwise it saves only ``new_I_t``
+        name_median_incubation : str
+            The name under which the median incubation time is saved in the trace
 
         Returns
         -------
 
-        new_I_t : array
-            time series of the new infected
-        I_t : array
+        new_I_t : :class:`~theano.tensor.TensorVariable`
+            time series of the number daily newly infected persons.
+        new_E_t : :class:`~theano.tensor.TensorVariable`
+            time series of the number daily newly exposed persons. (if return_all set to True)
+        I_t : :class:`~theano.tensor.TensorVariable`
             time series of the infected (if return_all set to True)
-        S_t : array
+        S_t : :class:`~theano.tensor.TensorVariable`
             time series of the susceptible (if return_all set to True)
     """
     model = modelcontext(model)
@@ -368,7 +405,7 @@ def SEIR(
     num_regions = () if model.sim_ndim == 1 else model.sim_shape[1]
 
     # Prior distributions of starting populations (exposed, infectious, susceptibles)
-    # We choose to consider the transitions of newly exposed people of the last 8 days.
+    # We choose to consider the transitions of newly exposed people of the last 10 days.
     if num_regions == ():
         new_E_begin = pm.HalfCauchy(name="E_begin", beta=pr_beta_new_E_begin, shape=11)
     else:
@@ -381,13 +418,17 @@ def SEIR(
     lambda_t = tt.exp(lambda_t_log)
     new_I_0 = tt.zeros_like(I_begin)
 
+    median_incubation = pm.Normal(
+        name_median_incubation,
+        mu=pr_mean_median_incubation,
+        sigma=pr_sigma_median_incubation,
+    )
+
     # Choose transition rates (E to I) according to incubation period distribution
-    if num_regions == ():
+    if not num_regions:
         x = np.arange(1, 11)
     else:
         x = np.arange(1, 11)[:, None]
-        median_incubation = median_incubation * tt.ones(num_regions)
-        sigma_incubation = sigma_incubation * tt.ones(sigma_incubation)
 
     beta = mh.tt_lognormal(x, tt.log(median_incubation), sigma_incubation)
 
@@ -443,14 +484,15 @@ def SEIR(
         ],
         non_sequences=[mu, beta, N],
     )
-    S_t, nE, I_t, new_I_t = outputs
+    S_t, new_E_t, I_t, new_I_t = outputs
     pm.Deterministic("new_I_t", new_I_t)
     if save_all:
         pm.Deterministic("S_t", S_t)
         pm.Deterministic("I_t", I_t)
+        pm.Deterministic("new_E_t", new_E_t)
 
     if return_all:
-        return new_I_t, I_t, S_t
+        return new_I_t, new_E_t, I_t, S_t
     else:
         return new_I_t
 
@@ -896,3 +938,5 @@ def hierarchical_beta(name, name_sigma, pr_mean, pr_sigma, len_L2):
         )
 
     return Y, X
+
+
