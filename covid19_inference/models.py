@@ -184,8 +184,7 @@ def SIR_with_change_points(
                 raise RuntimeError("Dates of change points are not temporally ordered")
 
             prior_mean = (
-                dt_begin_transient - date_begin_simulation
-            ).days  # convert the provided date format (argument) into days (a number)
+                dt_begin_transient - date_begin_simulation).days - 1  # convert the provided date format (argument) into days (a number)
 
             tr_begin = pm.Normal(
                 name=f"transient_begin_{i}",
@@ -355,7 +354,6 @@ def _SIR_model(lambda_t, mu, S_begin, I_begin, N):
         outputs_info=[S_begin, I_begin, new_I_0],
         non_sequences=[mu, N],
     )
-
     return outputs
 
 
@@ -561,7 +559,7 @@ def SEIR_with_extensions(
             date_begin_transient = cp["pr_mean_date_begin_transient"]
             if dt_before is not None and dt_before > date_begin_transient:
                 raise RuntimeError("Dates of change points are not temporally ordered")
-            prior = (date_begin_transient - date_begin_simulation).days
+            prior = (date_begin_transient - date_begin_simulation).days - 1
             tr_begin = pm.Normal(
                 name="transient_begin_{}".format(i),
                 mu=prior,
