@@ -1,3 +1,4 @@
+# %load figures_revised
 import datetime
 import time as time_module
 import sys
@@ -1853,10 +1854,10 @@ def create_figure_distributions(
     axpos["offset_modulation_rad"] = axes[0][1]
 
     # this is new, stretching legend over two panels
-    for ax in axes[0:2, -1]:
+    for ax in axes[0:2, 2]:
         ax.remove()
     gs = axes[0,0].get_gridspec()
-    axpos["legend"] = fig.add_subplot(gs[0:2, -1])
+    axpos["legend"] = fig.add_subplot(gs[0:2, 2])
     # axpos["legend"] = axes[1][2]
 
     letters["weekend_factor"] = r"D"
