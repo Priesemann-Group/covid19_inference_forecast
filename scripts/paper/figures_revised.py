@@ -1837,7 +1837,7 @@ def create_figure_distributions(
         insets[key] = inset
 
     # layout 2
-    pos_letter = (-0.2, 1.1)
+    pos_letter = (-0.4, 1.1)
     labels = get_label_dict()
     axpos["lambda_0"] = axes[2][0]
     for i_cp in range(0, num_changepoints):
