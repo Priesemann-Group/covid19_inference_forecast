@@ -1946,8 +1946,7 @@ def create_figure_distributions(
             text = print_median_CI(data, prec=2)
         elif "transient_begin" in key:
             text = print_median_CI(
-                data - matplotlib.dates.date2num(date_data_begin) + 1, prec=1
-            )
+                data - matplotlib.dates.date2num(date_data_begin) + 1, prec=1)
         else:
             text = print_median_CI(data, prec=1)
 
@@ -1999,6 +1998,10 @@ def create_figure_distributions(
         ax.legend(loc="center left")
         ax.get_legend().get_frame().set_linewidth(0.0)
         ax.get_legend().get_frame().set_facecolor("#F0F0F0")
+        ax.get_legend().set_title(
+            f"Data until\n{date_data_end.strftime('%B %-d')}",
+            prop=dict(weight="bold")
+        )
 
     # dirty hack to get some space at the bottom to align with timeseries
     if not num_changepoints == 1:

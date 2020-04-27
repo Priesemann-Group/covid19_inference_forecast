@@ -974,10 +974,10 @@ def create_figure_timeseries(
     # plt.subplots_adjust(wspace=0.4, hspace=0.25)
     if save_to is not None:
         plt.savefig(
-            save_to + ".pdf", dpi=300, bbox_inches="tight", pad_inches=0,
+            save_to + ".pdf", dpi=300, bbox_inches="tight", pad_inches=0.05,
         )
         plt.savefig(
-            save_to + ".png", dpi=300, bbox_inches="tight", pad_inches=0,
+            save_to + ".png", dpi=300, bbox_inches="tight", pad_inches=0.05,
         )
 
     # add insets to returned axes. maybe not, general axes style would be applied
@@ -2043,8 +2043,8 @@ def create_figure_distributions(
     # plt.subplots_adjust(wspace=0.2, hspace=0.9)
 
     if save_to is not None:
-        plt.savefig(save_to + ".pdf", bbox_inches="tight", pad_inches=0, dpi=300)
-        plt.savefig(save_to + ".png", bbox_inches="tight", pad_inches=0, dpi=300)
+        plt.savefig(save_to + ".pdf", bbox_inches="tight", pad_inches=0.05, dpi=300)
+        plt.savefig(save_to + ".png", bbox_inches="tight", pad_inches=0.05, dpi=300)
 
 
 def create_figure_distributions_old(
