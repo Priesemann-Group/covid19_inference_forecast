@@ -91,7 +91,7 @@ def get_jhu_confirmed_cases():
         print("Failed to download current data, using local copy.")
         this_dir = os.path.dirname(__file__)
         confirmed_cases = pd.read_csv(
-            this_dir + "/../data/confirmed_global_fallback_2020-04-07.csv", sep=","
+            this_dir + "/../data/confirmed_global_fallback_2020-04-28.csv", sep=","
         )
 
     return confirmed_cases
@@ -116,7 +116,7 @@ def get_jhu_deaths():
         print("Failed to download current data, using local copy.")
         this_dir = os.path.dirname(__file__)
         deaths = pd.read_csv(
-            this_dir + "/../data/confirmed_global_fallback_2020-04-07.csv", sep=","
+            this_dir + "/../data/confirmed_global_fallback_2020-04-28.csv", sep=","
         )
 
     return deaths
@@ -162,12 +162,12 @@ def get_rki(try_max = 10):
 
     '''
     Downloads Robert Koch Institute data, separated by region (landkreis)
-    
+
     Returns
     -------
     dataframe
         dataframe containing all the RKI data from arcgis.
-    
+
     Parameters
     ----------
     try_max : int, optional
@@ -195,7 +195,7 @@ def get_rki(try_max = 10):
 
         #Fills DF with data from all landkreise
         for idlandkreis in unique_ids:
-            
+
             url_str = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/ArcGIS/rest/services/RKI_COVID19/FeatureServer/0//query?where=IdLandkreis%3D'+ idlandkreis + '&objectIds=&time=&resultType=none&outFields=Bundesland%2C+Landkreis%2C+Altersgruppe%2C+Geschlecht%2C+AnzahlFall%2C+AnzahlTodesfall%2C+Meldedatum%2C+NeuerFall%2C+NeuGenesen%2C+AnzahlGenesen&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token='
 
             count_try = 0
@@ -215,17 +215,17 @@ def get_rki(try_max = 10):
                     break
 
                 except:
-                    count_try += 1           
+                    count_try += 1
 
             if count_try == try_max:
                 raise ValueError('Maximum limit of tries exceeded.')
 
             df_temp = pd.DataFrame(data_flat)
-        
+
             #Very inneficient, but it will do
             df = pd.concat([df, df_temp], ignore_index=True)
 
-        df['date'] = df['Meldedatum'].apply(lambda x: datetime.datetime.fromtimestamp(x/1e3))   
+        df['date'] = df['Meldedatum'].apply(lambda x: datetime.datetime.fromtimestamp(x/1e3))
 
     else:
 
@@ -238,7 +238,7 @@ def get_rki(try_max = 10):
 
 def filter_rki(df, begin_date, end_date, variable = 'AnzahlFall', level = None, value = None):
     """Filters the RKI dataframe.
-    
+
     Parameters
     ----------
     df : dataframe
@@ -253,7 +253,7 @@ def filter_rki(df, begin_date, end_date, variable = 'AnzahlFall', level = None, 
         whether to return data from all Germany (None), a state ("Bundesland") or a region ("Landkreis")
     value : None, optional
         string of the state/region
-    
+
     Returns
     -------
     np.array
@@ -277,8 +277,8 @@ def filter_rki(df, begin_date, end_date, variable = 'AnzahlFall', level = None, 
 
 def filter_rki_all_bundesland(df, begin_date, end_date, variable = 'AnzahlFall'):
 
-    """Filters the full RKI dataset     
-    
+    """Filters the full RKI dataset
+
     Parameters
     ----------
     df : DataFrame
@@ -289,12 +289,12 @@ def filter_rki_all_bundesland(df, begin_date, end_date, variable = 'AnzahlFall')
         last date to return, in 'YYYY-MM-DD'
     variable : str, optional
         type of variable to return: cases ("AnzahlFall"), deaths ("AnzahlTodesfall"), recovered ("AnzahlGenesen")
-    
+
     Returns
     -------
     DataFrame
         DataFrame with datetime dates as index, and all German Bundesland as columns
-    """   
+    """
 
     if variable not in ['AnzahlFall', 'AnzahlTodesfall', 'AnzahlGenesen']:
         ValueError('Invalid variable. Valid options: "AnzahlFall", "AnzahlTodesfall", "AnzahlGenesen"')
