@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+
 def get_all_free_RVs_names(model):
     """
     Returns the names of all free parameters of the model
@@ -33,6 +34,7 @@ def get_prior_distribution(model, x, varname):
     : array
     """
     return np.exp(model[varname].distribution.logp(x).eval())
+
 
 def plot_hist(model, trace, ax, varname, colors = ('tab:blue', 'tab:orange'), bins = 50):
     """
