@@ -1765,8 +1765,8 @@ def add_mpl_rect_around_text(text_list, ax, **kwargs):
             y_gmax = y_max
 
     # coords between 0 and 1 (relative to axes) add 10% margin
-    y_gmin = np.clip(y_gmin - .15, 0, 1)
-    y_gmax = np.clip(y_gmax + .15, 0, 1)
+    y_gmin = np.clip(y_gmin - 0.15, 0, 1)
+    y_gmax = np.clip(y_gmax + 0.15, 0, 1)
     # x_gmin *= 1 - pad_percent / 100
     # x_gmax *= 1 + pad_percent / 100
 
@@ -1856,7 +1856,7 @@ def create_figure_distributions(
     # this is new, stretching legend over two panels
     for ax in axes[0:2, 2]:
         ax.remove()
-    gs = axes[0,0].get_gridspec()
+    gs = axes[0, 0].get_gridspec()
     axpos["legend"] = fig.add_subplot(gs[0:2, 2])
     # axpos["legend"] = axes[1][2]
 
@@ -1875,7 +1875,7 @@ def create_figure_distributions(
     #     axes[i][col].set_visible(False)
 
     # if not len(additional_insets) % num_rows == 1:
-        # axpos["legend"] = axes[0][num_columns - 1]
+    # axpos["legend"] = axes[0][num_columns - 1]
 
     # render panels
     for key in axpos.keys():
@@ -1990,7 +1990,7 @@ def create_figure_distributions(
 
             t_sm = ax.text(
                 0.6,
-                y_min*0.9, # let's have a ten perecent margin or so
+                y_min * 0.9,  # let's have a ten perecent margin or so
                 ci,
                 fontsize=9,
                 transform=ax.transAxes,
@@ -2004,8 +2004,6 @@ def create_figure_distributions(
                 [t_xl, t_sm], ax, facecolor="white", alpha=0.5, zorder=99,
             )
 
-
-
     # legend
     if "legend" in axpos:
         ax = axpos["legend"]
@@ -2016,8 +2014,7 @@ def create_figure_distributions(
         ax.get_legend().get_frame().set_linewidth(0.0)
         ax.get_legend().get_frame().set_facecolor("#F0F0F0")
         ax.get_legend().set_title(
-            f"Data until\n{date_data_end.strftime('%B %-d')}",
-            prop=dict(weight="bold")
+            f"Data until\n{date_data_end.strftime('%B %-d')}", prop=dict(weight="bold")
         )
 
     # dont draw empty panels
@@ -2032,7 +2029,7 @@ def create_figure_distributions(
 
     for jdx, ax_row in enumerate(axes):
         for idx, ax in enumerate(ax_row):
-            if idx == 0 and jdx == num_rows-1:
+            if idx == 0 and jdx == num_rows - 1:
                 ax.set_ylabel("Density")
             ax.tick_params(labelleft=False)
             ax.locator_params(nbins=4)

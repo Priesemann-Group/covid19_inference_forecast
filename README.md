@@ -19,7 +19,7 @@ It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
 
 ## Modeling forecast scenarios in Germany (updated figures of the paper)
 
-We want to quantify the effect of new policies on the spread of COVID-19. Crucially, fitting an exponential function to the number of cases lacks an interpretability of the fitting error. We built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. At the example of Germany, we show that the two kinks in the last weeks correspond to two changes of policies, leading to a growth rate of about 0 now.
+We want to quantify the effect of new policies on the spread of COVID-19. Crucially, fitting an exponential function to the number of cases lacks an interpretability of the fitting error. We built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. While the first two change points were not sufficient to switch from growth of novel cases to a decline, the third change point (the strict contact ban initiated around March 23) brought this crucial reversal.
 
 ### Latest forecast due to the relaxation of the restrictions on April 19
 
@@ -29,7 +29,7 @@ We want to quantify the effect of new policies on the spread of COVID-19. Crucia
   * __Scenario B__: If the effective growth rate stays on the current (all-time low) value, we could achive 1 000 daily new cases by the end of May.
 
 The two current scenarios are based on the model with weekend correction (less cases reported on weekends).
-The distributions below correspond to the parameters the produce the time series.
+The distributions below correspond to the parameters the produce the time series. 
 
 <p float="left">
   <img src="figures/easter_dist_A.png" height="450">
