@@ -17,34 +17,24 @@ It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
 
 * __Please take notice of our [disclaimer](disclaimer.md).__
 
-## Modeling forecast scenarios in Germany (updated figures of the paper)
+## Modeling forecast scenarios in Germany (updated figures of the [paper](https://arxiv.org/abs/2004.01105))
 
-We want to quantify the effect of new policies on the spread of COVID-19. Crucially, fitting an exponential function to the number of cases lacks an interpretability of the fitting error. We built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. While the first two change points were not sufficient to switch from growth of novel cases to a decline, the third change point (the strict contact ban initiated around March 23) brought this crucial reversal.
+Our aim is to quantify the effects of intervention policies on the spread of COVID-19. To that end, we built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. While the first two change points were not sufficient to switch from growth of novel cases to a decline, the third change point (the strict contact ban initiated around March 23) brought this crucial reversal. - Now, since April 19, a number of stores have been opened and policies have been loosened on the one hand, which may lead to increased spreading (increased $\lambda^\ast$). On the other hand, masks are now widely used and contact tracing might start to show effect, which both may reduce the spread of the virus (decrease $\lambda^\ast$). We will only start to see the joint effects of the novel govenrmental policies and collective behavior with a delay of 2-3 weeks. Therefore we show alternative future scenarios here.
 
-### Latest forecast due to the relaxation of the restrictions on April 19
+### Alternative forecast scenarios, projecting the relaxation of restrictions on April 19
 
 <img src="figures/easter_ts_merged.png" height="500">
 
   * __Scenario A__: If the relaxation of restrictions causes even a mild increase in effective growth rate, the daily new reported cases will increase again.
-  * __Scenario B__: If the effective growth rate stays on the current (all-time low) value, we could achive 1 000 daily new cases by the end of May.
+  * __Scenario B__: If the effective growth rate stays on the current (all-time low) value, new cases will further decrease. A low number of new daily cases might bring a full control of the spread within reach ([see our position paper by the four German research associations](https://www.mpg.de/14759871/corona-stellungnahme); [Endorsement](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_01.pdf); [Position paper](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_02.pdf)).
 
-The two current scenarios are based on the model with weekend correction (less cases reported on weekends).
+The two current scenarios are based on the model that incorporates weekly reporting modulation (less cases reported on weekends).
 The distributions below correspond to the parameters the produce the time series. 
 
 <p float="left">
   <img src="figures/easter_dist_A.png" height="450">
   <img src="figures/easter_dist_B.png" height="450" /> 
 </p>
-
-### Past forecast as of April 9, comparing one, two and three change-point scenarios
-
-<img src="figures/Fig_summary_forecast_orig.png" height="500" /> 
-
-Original figure from the paper (with forecasts as of April 9), when three change points well described the data. Current data points were added for a comparison with the real-world outcome, but they were not considered by the model.
-
-* Note that, at the time of the forecasts (April 9), the third change point was still very recent (March 23). Clearly, the time difference exceeds the estimated reporting delay (~10 days) and enough data to determine the change point _should_ have been available. However, the model understimated the positive effect the last change point, which resulted in an overestimation of new cases.
-
-* While the observed data points are still close to the 95% confidence interval of the forecast (shaded green region, note that the confidence interval does not include observation noise), the overestimation of new cases in the forecast stresses the importance of the reporting delay - it hinders an immediate evaluation of an intervention.
 
 
 ### Scenario focus on three change points
@@ -69,4 +59,8 @@ What if the growth would have continued with less change points?
 <img src="figures/what_if_forecast.png" width="500">
 
 We fitted the four scenarios to the number of new cases until respectively March 18th, March 25th, April 1st and April 7th.
+
+This figure was used widely in German media, including TV, to illustrate the magnitude of the different change points.
+
+
 
