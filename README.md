@@ -6,8 +6,9 @@
 
 * __Current code development takes place in the [new repository.](https://github.com/Priesemann-Group/covid19_inference/)__
 
-* __Here, we keep updating figures and provide the original paper code.__
-For the paper revised on 2020/04/29
+* __Updated figures are in the current [master](https://github.com/Priesemann-Group/covid19_inference_forecast/)__
+
+* __Here, we provide the original paper code.__
 see [SIR_with_delay_Germany_without_sine_weekend.ipynb](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/SIR_with_delay_Germany_without_sine_weekend.ipynb) (for Fig. 3) and [scripts/paper200429/](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/) (the directory of all scripts used for the paper).
 It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
 
