@@ -247,8 +247,8 @@ def create_figure_timeseries(
     pos_letter = (-0.25, 1)
     titlesize = 16
     insetsize = ("25%", "50%")
-    figsize = (4, 6)
-    # figsize = (6, 6)
+    # figsize = (4, 6)
+    figsize = (6, 6)
 
     leg_loc = "upper left"
     if plot_par["draw_insets_cases"] == True:
