@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-05-02 11:34:02
+# @Last Modified: 2020-05-04 17:05:16
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
@@ -768,10 +768,11 @@ def create_figure_distributions(
     additional_dists = len(additional_insets)
     num_columns = int(np.ceil((additional_dists + 14) / 5))
     num_rows = num_changepoints + 2
-    width_col = 4.5 / 3 * num_columns
-    height_fig = 6 if not num_changepoints == 1 else 5
+    fig_width = 4.5 / 3 * num_columns
+    # around 1 inch height per panel looked fine
+    fig_height = num_rows * 1
     fig, axes = plt.subplots(
-        num_rows, num_columns, figsize=(width_col, 6), constrained_layout=True
+        num_rows, num_columns, figsize=(fig_width, fig_height), constrained_layout=True
     )
 
     xlim_transt = (0, 7)
@@ -1014,7 +1015,7 @@ for i, day in enumerate(
             dict(  # one possible change point every sunday
                 pr_mean_date_begin_transient=day,
                 pr_sigma_date_begin_transient=1,
-                pr_median_lambda=0.01,  # we dont know, give it wiggley room, but zero
+                pr_median_lambda=0.1,  # we dont know, give it wiggley room, but zero
                 pr_sigma_lambda=0.3,  # gives pymc3 a hard time
             )
         )
@@ -1036,7 +1037,7 @@ model = cov19.SIR_with_change_points(
 )
 
 
-trace = pm.sample(model=model, init="advi", cores=12)
+trace = pm.sample(model=model, init="advi", tune=1000, draws=1000)
 print("Finished simulations for model")
 
 
