@@ -2,14 +2,13 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-04-26 10:32:27
+# @Last Modified: 2020-05-02 11:34:02
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
 # ------------------------------------------------------------------------------ #
-# Modeling three different scenarios around easter. (one, two, or three changes)
-# A) ORANGE: the german government plans to relax measures on 04/19.
-# B) GREEN:  an improvement shortly after easter when the family visits are over
+# After our initial three change points around March 9, 16, 23 we have a weekly
+# change point.
 # ------------------------------------------------------------------------------ #
 
 
@@ -21,6 +20,7 @@ import os
 
 import numpy as np
 import pymc3 as pm
+import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -50,10 +50,10 @@ if save_path is None:
     try:
         # only works when called from python, not reliable in interactive ipython etc.
         os.chdir(os.path.dirname(__file__))
-        save_path = "../../../figures/easter_"
+        save_path = "../../../figures/weekly_cps_"
     except:
         # assume base directory
-        save_path = "../../../figures/easter_"
+        save_path = "../../../figures/weekly_cps_"
 
 print(f"saving figures to {os.path.abspath(save_path)}")
 
@@ -98,11 +98,12 @@ post_style = {
 
 # format the date on the x axis (see https://strftime.org/) example April 1 2020
 # date_format = "%m/%d"  # 04/01
-date_format = "%b %-d"  # Apr 1
-# date_format = "%-d. %B" # 1. April
+# date_format = "%b %-d"  # Apr 1
+# date_format = "%-d. %B"  # 1. April
+date_format = "%-d.%b"
 try:
-    locale.setlocale(locale.LC_ALL, "en_US")
-    # locale.setlocale(locale.LC_ALL,'de_DE')
+    # locale.setlocale(locale.LC_ALL, "en_US")
+    locale.setlocale(locale.LC_ALL, "de_DE")
 except:
     pass
 
@@ -631,10 +632,10 @@ def create_figure_timeseries(
     # plt.subplots_adjust(wspace=0.4, hspace=0.25)
     if save_to is not None:
         plt.savefig(
-            save_to + ".pdf", dpi=300, bbox_inches="tight", pad_inches=0,
+            save_to + ".pdf", dpi=300, bbox_inches="tight", pad_inches=0.05,
         )
         plt.savefig(
-            save_to + ".png", dpi=300, bbox_inches="tight", pad_inches=0,
+            save_to + ".png", dpi=300, bbox_inches="tight", pad_inches=0.05,
         )
 
     # add insets to returned axes. maybe not, general axes style would be applied
@@ -976,15 +977,15 @@ def create_figure_distributions(
     # plt.subplots_adjust(wspace=0.2, hspace=0.9)
 
     if save_to is not None:
-        plt.savefig(save_to + ".pdf", bbox_inches="tight", pad_inches=0, dpi=300)
-        plt.savefig(save_to + ".png", bbox_inches="tight", pad_inches=0, dpi=300)
+        plt.savefig(save_to + ".pdf", bbox_inches="tight", pad_inches=0.05, dpi=300)
+        plt.savefig(save_to + ".png", bbox_inches="tight", pad_inches=0.05, dpi=300)
 
 
 # ------------------------------------------------------------------------------ #
-# define change points for the three models
+# define change points
 # ------------------------------------------------------------------------------ #
 
-change_points_B = [
+change_points = [
     dict(  # initial change from lambda 0 to lambda 1
         pr_mean_date_begin_transient=datetime.datetime(2020, 3, 9), pr_median_lambda=0.2
     ),
@@ -1000,49 +1001,32 @@ change_points_B = [
         pr_median_lambda=1 / 8 / 2,
         pr_sigma_lambda=0.2,
     ),
-    dict(  # back to lambda 2 around easter.
-        pr_mean_date_begin_transient=datetime.datetime(2020, 4, 7),
-        pr_sigma_date_begin_transient=1,
-        pr_median_lambda=0.13,  # using the inferred value as of 04/20 and wider prior
-        pr_sigma_lambda=0.3,
-    ),
-    dict(  # shortly after easter, people stop visiting and we might go back to lambda 3
-        pr_mean_date_begin_transient=datetime.datetime(2020, 4, 12),
-        pr_sigma_date_begin_transient=1,
-        pr_median_lambda=0.08,  # using the inferred value as of 04/20 and wider prior
-        pr_sigma_lambda=0.3,
-    ),
 ]
 
+print(f"adding possible change points at:")
+for i, day in enumerate(
+    pd.date_range(start=datetime.datetime(2020, 3, 24), end=datetime.date.today())
+):
+    if day.weekday() == 6:
+        print(f"\t{day}")
 
-# add another change point
-change_points_A = copy.deepcopy(change_points_B)
-change_points_A.append(
-    dict(  # German government will relax restrictions on April 19
-        pr_mean_date_begin_transient=datetime.datetime(2020, 4, 19),
-        pr_sigma_date_begin_transient=1,
-        pr_median_lambda=0.13,  # using the inferred value as of 04/20 and wider prior
-        pr_sigma_lambda=0.3,
-    ),
-)
+        change_points.append(
+            dict(  # one possible change point every sunday
+                pr_mean_date_begin_transient=day,
+                pr_sigma_date_begin_transient=1,
+                pr_median_lambda=0.01,  # we dont know, give it wiggley room, but zero
+                pr_sigma_lambda=0.3,  # gives pymc3 a hard time
+            )
+        )
+
 
 # ------------------------------------------------------------------------------ #
 # set and run the three models
 # ------------------------------------------------------------------------------ #
 
-model_A = cov19.SIR_with_change_points(
+model = cov19.SIR_with_change_points(
     np.diff(cases_obs),
-    change_points_A,
-    date_begin_sim,
-    num_days_sim,
-    diff_data_sim,
-    N=83e6,
-    weekends_modulated=True,
-    weekend_modulation_type="abs_sine",
-)
-model_B = cov19.SIR_with_change_points(
-    np.diff(cases_obs),
-    change_points_B,
+    change_points,
     date_begin_sim,
     num_days_sim,
     diff_data_sim,
@@ -1051,10 +1035,9 @@ model_B = cov19.SIR_with_change_points(
     weekend_modulation_type="abs_sine",
 )
 
-trace_A = pm.sample(model=model_A, init="advi", cores=12)
-print("Finished simulations for model A")
-trace_B = pm.sample(model=model_B, init="advi", cores=12)
-print("Finished simulations for model B")
+
+trace = pm.sample(model=model, init="advi", cores=12)
+print("Finished simulations for model")
 
 
 # ------------------------------------------------------------------------------ #
@@ -1062,47 +1045,34 @@ print("Finished simulations for model B")
 # ------------------------------------------------------------------------------ #
 
 create_figure_timeseries(
-    trace_A,
+    trace,
     color="tab:orange",
     num_days_futu_to_plot=num_days_future,
-    save_to=save_path + "ts_A",
-)
-create_figure_timeseries(
-    trace_B,
-    color="tab:green",
-    num_days_futu_to_plot=num_days_future,
-    save_to=save_path + "ts_B",
+    save_to=save_path + "ts",
 )
 
 # have a combined plot, by providing the axes elements
-fig, axes = create_figure_timeseries(
-    trace_A,
-    color="tab:orange",
-    num_days_futu_to_plot=num_days_future,
-    forecast_label="Scenario A",
-    add_more_later=True,
-)
-create_figure_timeseries(
-    trace_B,
-    color="tab:green",
-    num_days_futu_to_plot=num_days_future,
-    axes=axes,
-    save_to=save_path + "ts_merged",
-    forecast_label="Scenario B",
-)
+# fig, axes = create_figure_timeseries(
+#     trace_A,
+#     color="tab:orange",
+#     num_days_futu_to_plot=num_days_future,
+#     forecast_label="Scenario A",
+#     add_more_later=True,
+# )
+# create_figure_timeseries(
+#     trace_C,
+#     color="tab:red",
+#     num_days_futu_to_plot=num_days_future,
+#     axes=axes,
+#     save_to=save_path + "ts_merged",
+#     forecast_label="Scenario C",
+# )
 
 
 create_figure_distributions(
-    model_A,
-    trace_A,
+    model,
+    trace,
     color="tab:orange",
-    num_changepoints=len(change_points_A),
-    save_to=save_path + "dist_A",
-)
-create_figure_distributions(
-    model_B,
-    trace_B,
-    color="tab:green",
-    num_changepoints=len(change_points_B),
-    save_to=save_path + "dist_B",
+    num_changepoints=len(change_points),
+    save_to=save_path + "dist",
 )
