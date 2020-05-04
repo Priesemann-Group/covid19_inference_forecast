@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-04-29 23:04:50
+# @Last Modified: 2020-05-04 17:04:58
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
@@ -1072,11 +1072,11 @@ model_C = cov19.SIR_with_change_points(
     weekend_modulation_type="abs_sine",
 )
 
-trace_A = pm.sample(model=model_A, init="advi", cores=12)
+trace_A = pm.sample(model=model_A, init="advi", tune=1000, draw=1000)
 print("Finished simulations for model A")
-trace_B = pm.sample(model=model_B, init="advi", cores=12)
+trace_B = pm.sample(model=model_B, init="advi", tune=1000, draw=1000)
 print("Finished simulations for model B")
-trace_C = pm.sample(model=model_C, init="advi", cores=12)
+trace_C = pm.sample(model=model_C, init="advi", tune=1000, draw=1000)
 print("Finished simulations for model C")
 
 

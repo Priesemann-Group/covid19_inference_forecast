@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-05-04 12:52:01
+# @Last Modified: 2020-05-04 17:05:16
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
@@ -1037,7 +1037,7 @@ model = cov19.SIR_with_change_points(
 )
 
 
-trace = pm.sample(model=model, init="advi", cores=12)
+trace = pm.sample(model=model, init="advi", tune=1000, draws=1000)
 print("Finished simulations for model")
 
 
