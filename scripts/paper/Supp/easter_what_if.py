@@ -50,10 +50,10 @@ if save_path is None:
     try:
         # only works when called from python, not reliable in interactive ipython etc.
         os.chdir(os.path.dirname(__file__))
-        save_path = "../../../figures/easter_"
+        save_path = "../../../figures/easter_3scen_"
     except:
         # assume base directory
-        save_path = "../../../figures/easter_"
+        save_path = "../../../figures/easter_3scen_"
 
 print(f"saving figures to {os.path.abspath(save_path)}")
 
@@ -1072,11 +1072,11 @@ model_C = cov19.SIR_with_change_points(
     weekend_modulation_type="abs_sine",
 )
 
-trace_A = pm.sample(model=model_A, init="advi", tune=1000, draw=1000)
+trace_A = pm.sample(model=model_A, init="advi", tune=1000, draws=1000)
 print("Finished simulations for model A")
-trace_B = pm.sample(model=model_B, init="advi", tune=1000, draw=1000)
+trace_B = pm.sample(model=model_B, init="advi", tune=1000, draws=1000)
 print("Finished simulations for model B")
-trace_C = pm.sample(model=model_C, init="advi", tune=1000, draw=1000)
+trace_C = pm.sample(model=model_C, init="advi", tune=1000, draws=1000)
 print("Finished simulations for model C")
 
 
