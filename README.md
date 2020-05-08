@@ -24,17 +24,26 @@ Our aim is to quantify the effects of intervention policies on the spread of COV
 
 ### Alternative forecast scenarios, projecting the relaxation of restrictions on April 19
 
-<img src="figures/easter_ts_merged.png" height="500">
+<img src="figures/easter_3scen_ts_merged.png" height="500">
 
-  * __Scenario A__: If the relaxation of restrictions causes even a mild increase in effective growth rate, the daily new reported cases will increase again.
+
   * __Scenario B__: If the effective growth rate stays on the current (all-time low) value, new cases will further decrease. A low number of new daily cases might bring a full control of the spread within reach ([see our position paper by the four German research associations](https://www.mpg.de/14759871/corona-stellungnahme); [Endorsement](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_01.pdf); [Position paper](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_02.pdf)).
+  
+  * __Scenario C__: If the relaxation of restrictions causes even an increase in effective growth rate, the daily new   reported cases will increase again.
 
 The two current scenarios are based on the model that incorporates weekly reporting modulation (less cases reported on weekends).
 The distributions below correspond to the parameters the produce the time series. 
 
 <p float="left">
-  <img src="figures/easter_dist_A.png" height="450">
-  <img src="figures/easter_dist_B.png" height="450" /> 
+  <img src="figures/easter_3scen_dist_A.png" height="450">
+  <img src="figures/easter_3scen_dist_C.png" height="450" /> 
+</p>
+
+### Scenario with a weekly new change point
+
+<p float="left">
+  <img src="figures/weekly_cps_ts.png" height="450" />
+  <img src="figures/weekly_cps_dist.png" height="450" /> 
 </p>
 
 
@@ -51,6 +60,7 @@ The distributions below correspond to the parameters the produce the time series
   <img src="figures/Fig_cases_sine_weekend.png" height="450">
   <img src="figures/Fig_distr_sine_weekend.png" height="450">
 </p>
+
 
 
 ## What-if scenarios
