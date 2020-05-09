@@ -7,12 +7,11 @@
 
 * __Current code development takes place in the [new repository.](https://github.com/Priesemann-Group/covid19_inference/)__
 
-* __Here, we keep updating figures and provide the original paper code.__
-For the paper revised on 2020/04/29
-see [SIR_with_delay_Germany_without_sine_weekend.ipynb](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/SIR_with_delay_Germany_without_sine_weekend.ipynb) (for Fig. 3) and [scripts/paper200429/](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/) (the directory of all scripts used for the paper).
-It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
+* __The research article [is available on arXiv](https://arxiv.org/abs/2004.01105).__
 
-* __The research article [is available on arXiv](https://arxiv.org/abs/2004.01105) (updated on April 13).__
+* __Here, we keep updating figures and provide the original code for the research article.__
+To get started, see [SIR_with_delay_Germany_without_sine_weekend.ipynb](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/SIR_with_delay_Germany_without_sine_weekend.ipynb), which generates Fig. 3 of the research article, and [scripts/paper200429/](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/), which is the directory of all scripts used for the article.
+It runs e.g. in Google Colab. Requirement is PyMC3 >= 3.7.
 
 * __Documentation is available for [this repo](https://covid19-inference-forecast.readthedocs.io/en/latest/) as well as the [new repo](https://covid19-inference.readthedocs.io/en/latest/doc/gettingstarted.html).__
 
@@ -20,19 +19,19 @@ It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
 
 ## Modeling forecast scenarios in Germany (updated figures of the [paper](https://arxiv.org/abs/2004.01105))
 
-Our aim is to quantify the effects of intervention policies on the spread of COVID-19. To that end, we built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. While the first two change points were not sufficient to switch from growth of novel cases to a decline, the third change point (the strict contact ban initiated around March 23) brought this crucial reversal. - Now, since April 19, a number of stores have been opened and policies have been loosened on the one hand, which may lead to increased spreading (increased ![$\lambda^\ast$](https://render.githubusercontent.com/render/math?math=%24%5Clambda%5E%5Cast%24)). On the other hand, masks are now widely used and contact tracing might start to show effect, which both may reduce the spread of the virus (decrease ![$\lambda^\ast$](https://render.githubusercontent.com/render/math?math=%24%5Clambda%5E%5Cast%24)). We will only start to see the joint effects of the novel govenrmental policies and collective behavior with a delay of 2-3 weeks. Therefore we show alternative future scenarios here.
+Our aim is to quantify the effects of intervention policies on the spread of COVID-19. To that end, we built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. While the first two change points were not sufficient to switch from growth of novel cases to a decline, the third change point (the strict contact ban initiated around March 23) brought this crucial reversal. - Now, since April 19, a number of stores have been opened and policies have been loosened on the one hand, which may lead to increased spreading (increased ![$\lambda^\ast$](https://render.githubusercontent.com/render/math?math=%24%5Clambda%5E%5Cast%24)). On the other hand, masks are now widely used and contact tracing might start to show effect, which both may reduce the spread of the virus (decrease ![$\lambda^\ast$](https://render.githubusercontent.com/render/math?math=%24%5Clambda%5E%5Cast%24)). We will only start to see the joint effects of the novel govenrmental policies and collective behavior with a delay of 2-3 weeks. Therefore, we show alternative future scenarios here.
 
 ### Alternative forecast scenarios, projecting the relaxation of restrictions on April 19
 
 <img src="figures/easter_3scen_ts_merged.png" height="500">
 
 
-  * __Scenario B__: If the effective growth rate stays on the current (all-time low) value, new cases will further decrease. A low number of new daily cases might bring a full control of the spread within reach ([see our position paper by the four German research associations](https://www.mpg.de/14759871/corona-stellungnahme); [Endorsement](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_01.pdf); [Position paper](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_02.pdf)).
+  * If the effective growth rate stays on the current (all-time low) value, new cases will further decrease. A low number of new daily cases might bring a full control of the spread within reach ([see our position paper by the four German research associations](https://www.mpg.de/14759871/corona-stellungnahme); [Endorsement](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_01.pdf); [Position paper](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_02.pdf)).
   
-  * __Scenario C__: If the relaxation of restrictions causes even an increase in effective growth rate, the daily new   reported cases will increase again.
+  * If the relaxation of restrictions causes an increase in effective growth rate $\lambda^\ast$ above zero, the daily new reported cases will increase again.
 
-The two current scenarios are based on the model that incorporates weekly reporting modulation (less cases reported on weekends).
-The distributions below correspond to the parameters the produce the time series. 
+The current scenarios are based on the model that incorporates weekly reporting modulation (less cases reported on weekends).
+The distributions below display to the parameters the produce the time series. 
 
 <p float="left">
   <img src="figures/easter_3scen_dist_A.png" height="450">
