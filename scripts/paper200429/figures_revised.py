@@ -1,4 +1,5 @@
 # %load figures_revised
+print("Hi")
 import datetime
 import time as time_module
 import sys
@@ -1884,7 +1885,7 @@ def create_figure_distributions(
 
         data = trace[key]
         if "transient_begin" in key:
-            data = conv_time_to_mpl_dates(trace[key])
+            data = conv_time_to_mpl_dates(trace[key]) + 1
         elif "weekend_factor_rad" == key:
             data = data / np.pi / 2 * 7
 
@@ -1928,12 +1929,17 @@ def create_figure_distributions(
         if "transient_begin" in key:
             beg_x = matplotlib.dates.num2date(x_for_ax[0])
             diff_dates_x = (beg_x.replace(tzinfo=None) - date_begin_sim).days
-            x_for_pr = x_for_ax - x_for_ax[0] + diff_dates_x
+            x_for_pr = x_for_ax - x_for_ax[0] + diff_dates_x - 1
         if "weekend_factor_rad" == key:
             x_for_ax *= np.pi * 2 / 7
 
         if trace_prior is None:
-            prior_dist = cov19.plotting.get_prior_distribution(model, x_for_pr, key)
+            if "transient_begin" in key:
+                prior_dist = cov19.plotting.get_prior_distribution(
+                    model, x_for_pr - 1, key
+                )
+            else:
+                prior_dist = cov19.plotting.get_prior_distribution(model, x_for_pr, key)
         else:
             kde = scipy.stats.gaussian_kde(trace_prior[key])
             prior_dist = kde.evaluate((x_for_pr))
@@ -1959,8 +1965,14 @@ def create_figure_distributions(
         if "lambda" in key or "mu" == key or "sigma_random_walk" == key:
             text = print_median_CI(data, prec=2)
         elif "transient_begin" in key:
+            med_d = matplotlib.dates.num2date(np.median(data))
             text = print_median_CI(
-                data - matplotlib.dates.date2num(date_data_begin) + 1, prec=1
+                data
+                - matplotlib.dates.date2num(
+                    datetime.datetime(year=med_d.year, month=med_d.month, day=1)
+                )
+                + 1,
+                prec=1,
             )
         else:
             text = print_median_CI(data, prec=1)
