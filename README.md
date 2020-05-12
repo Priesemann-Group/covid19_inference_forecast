@@ -2,16 +2,17 @@
 
 [![Documentation Status](https://readthedocs.org/projects/covid19-inference-forecast/badge/?version=latest)](https://covid19-inference-forecast.readthedocs.io/en/latest/?badge=latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3780722.svg)](https://doi.org/10.5281/zenodo.3780722)
 
 
 * __Current code development takes place in the [new repository.](https://github.com/Priesemann-Group/covid19_inference/)__
 
-* __The research article [is available on arXiv](https://arxiv.org/abs/2004.01105).__
+* __Updated figures are in the current [master](https://github.com/Priesemann-Group/covid19_inference_forecast/)__
 
-* __Here, we keep updating figures and provide the original code for the research article.__
-To get started, see [SIR_with_delay_Germany_without_sine_weekend.ipynb](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/SIR_with_delay_Germany_without_sine_weekend.ipynb), which generates Fig. 3 of the research article, and [scripts/paper200429/](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/), which is the directory of all scripts used for the article.
-It runs e.g. in Google Colab. Requirement is PyMC3 >= 3.7.
+* __Here, we provide the original paper code.__
+see [SIR_with_delay_Germany_without_sine_weekend.ipynb](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/SIR_with_delay_Germany_without_sine_weekend.ipynb) (for Fig. 3) and [scripts/paper200429/](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/) (the directory of all scripts used for the paper).
+It is runnable in Google Colab. Requirement is PyMC3 >= 3.7.
+
+* __The research article [is available on arXiv](https://arxiv.org/abs/2004.01105).__
 
 * __Documentation is available for [this repo](https://covid19-inference-forecast.readthedocs.io/en/latest/) as well as the [new repo](https://covid19-inference.readthedocs.io/en/latest/doc/gettingstarted.html).__
 
