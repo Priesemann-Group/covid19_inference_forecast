@@ -1,0 +1,45 @@
+{
+    "description": "<p>Code repository for the paper&nbsp; &quot;Inferring change points in the spread of COVID-19 reveals the effectiveness of interventions&quot;</p>", 
+    "license": "GPL-2.0+", 
+    "title": "Inferring change points in the spread of COVID-19 reveals the effectiveness of interventions", 
+    "upload_type": "software", 
+    "communities": [
+        {
+            "identifier": "covid-19"
+        }, 
+        {
+            "identifier": "zenodo"
+        }
+    ], 
+    "creators": [
+        {
+            "affiliation": "Max Planck Institute for Dynamics and Self-Organization", 
+            "name": "Jonas Dehning"
+        }, 
+        {
+            "affiliation": "Max Planck Institute for Dynamics and Self-Organization", 
+            "name": "F. Paul Spitzner"
+        }, 
+        {
+            "affiliation": "Max Planck Institute for Dynamics and Self-Organization", 
+            "name": "Johannes Zierenberg"
+        }, 
+        {
+            "affiliation": "Universit\u00e4t G\u00f6ttingen", 
+            "name": "Michael Wibral"
+        }, 
+        {
+            "affiliation": "Max Planck Institute for Dynamics and Self-Organization", 
+            "name": "Joao Pinheiro Neto"
+        }, 
+        {
+            "affiliation": "Max Planck Institute for Dynamics and Self-Organization", 
+            "name": "Michael Wilczek"
+        }, 
+        {
+            "affiliation": "Max Planck Institute for Dynamics and Self-Organization", 
+            "name": "Viola Priesemann"
+        }
+    ], 
+    "access_right": "open"
+}
