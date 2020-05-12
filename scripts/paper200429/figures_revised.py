@@ -1,5 +1,4 @@
 # %load figures_revised
-print("Hi")
 import datetime
 import time as time_module
 import sys
@@ -1922,6 +1921,11 @@ def create_figure_distributions(
             ax.set_xlim([int(md) - xlim_tbegin, int(md) + xlim_tbegin - 1])
             format_date_xticks(ax)
 
+            # md = np.median(trace[key])
+            # x_for_pr = np.linspace(
+            #    int(md) - xlim_tbegin, int(md) + xlim_tbegin - 1, num=100
+            # )
+
         # priors
         limits = ax.get_xlim()
         x_for_ax = np.linspace(*limits, num=100)
@@ -1934,12 +1938,7 @@ def create_figure_distributions(
             x_for_ax *= np.pi * 2 / 7
 
         if trace_prior is None:
-            if "transient_begin" in key:
-                prior_dist = cov19.plotting.get_prior_distribution(
-                    model, x_for_pr - 1, key
-                )
-            else:
-                prior_dist = cov19.plotting.get_prior_distribution(model, x_for_pr, key)
+            prior_dist = cov19.plotting.get_prior_distribution(model, x_for_pr, key)
         else:
             kde = scipy.stats.gaussian_kde(trace_prior[key])
             prior_dist = kde.evaluate((x_for_pr))
