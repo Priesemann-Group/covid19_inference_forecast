@@ -2,7 +2,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/covid19-inference-forecast/badge/?version=latest)](https://covid19-inference-forecast.readthedocs.io/en/latest/?badge=latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3780722.svg)](https://doi.org/10.5281/zenodo.3780722)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3823382.svg)](https://doi.org/10.5281/zenodo.3823382)
 
 
 * __Current code development takes place in the [new repository.](https://github.com/Priesemann-Group/covid19_inference/)__
@@ -10,7 +10,7 @@
 * __The research article [is available on arXiv](https://arxiv.org/abs/2004.01105).__
 
 * __Here, we keep updating figures and provide the original code for the research article.__
-To get started, see [SIR_with_delay_Germany_without_sine_weekend.ipynb](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/SIR_with_delay_Germany_without_sine_weekend.ipynb), which generates Fig. 3 of the research article, and [scripts/paper200429/](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/), which is the directory of all scripts used for the article.
+To get started, see [SIR_Germany_3scenarios_with_sine_weekend.ipynb](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/SIR_Germany_3scenarios_with_sine_weekend.ipynb), which generates Fig. 3 of the research article, and [scripts/paper200429/](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/), which is the directory of all scripts used for the article.
 It runs e.g. in Google Colab. Requirement is PyMC3 >= 3.7.
 
 * __Documentation is available for [this repo](https://covid19-inference-forecast.readthedocs.io/en/latest/) as well as the [new repo](https://covid19-inference.readthedocs.io/en/latest/doc/gettingstarted.html).__
@@ -27,22 +27,22 @@ Our aim is to quantify the effects of intervention policies on the spread of COV
 
 
   * If the effective growth rate stays on the current (all-time low) value, new cases will further decrease. A low number of new daily cases might bring a full control of the spread within reach ([see our position paper by the four German research associations](https://www.mpg.de/14759871/corona-stellungnahme); [Endorsement](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_01.pdf); [Position paper](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_02.pdf)).
-  
+
   * If the relaxation of restrictions causes an increase in effective growth rate $\lambda^\ast$ above zero, the daily new reported cases will increase again.
 
 The current scenarios are based on the model that incorporates weekly reporting modulation (less cases reported on weekends).
-The distributions below display to the parameters the produce the time series. 
+The distributions below display to the parameters the produce the time series.
 
 <p float="left">
   <img src="figures/easter_3scen_dist_A.png" height="450">
-  <img src="figures/easter_3scen_dist_C.png" height="450" /> 
+  <img src="figures/easter_3scen_dist_C.png" height="450" />
 </p>
 
 ### Scenario with a weekly new change point
 
 <p float="left">
   <img src="figures/weekly_cps_ts.png" height="450" />
-  <img src="figures/weekly_cps_dist.png" height="450" /> 
+  <img src="figures/weekly_cps_dist.png" height="450" />
 </p>
 
 
@@ -50,7 +50,7 @@ The distributions below display to the parameters the produce the time series.
 
 <p float="left">
   <img src="figures/Fig_S3.png" height="450" />
-  <img src="figures/Fig_S4.png" height="450" /> 
+  <img src="figures/Fig_S4.png" height="450" />
 </p>
 
 ### Scenario assuming three change points with a weekly modulation of reported cases

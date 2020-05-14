@@ -771,9 +771,7 @@ def create_figure_timeseries(
 
     # NEW CASES LOG SCALE, skip forecast
     if plot_par["draw_insets_cases"] == True:
-        ax = inset_axes(
-            ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=1
-        )
+        ax = inset_axes(ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=1)
         insets.append(ax)
         if not axes_provided:
             ax.plot(
@@ -883,9 +881,7 @@ def create_figure_timeseries(
 
     # Total CASES LOG SCALE, skip forecast
     if plot_par["draw_insets_cases"] == True:
-        ax = inset_axes(
-            ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=1
-        )
+        ax = inset_axes(ax, width=insetsize[0], height=insetsize[1], loc=2, borderpad=1)
         insets.append(ax)
         if not axes_provided:
             ax.plot(
@@ -971,7 +967,7 @@ def create_figure_timeseries(
         f"Data until {date_data_end.strftime('%B %-d')}",
         loc="right",
         fontweight="bold",
-        fontsize="small"
+        fontsize="small",
     )
 
     # plt.subplots_adjust(wspace=0.4, hspace=0.25)
@@ -1870,7 +1866,7 @@ def create_figure_distributions(
 
         data = trace[key]
         if "transient_begin" in key:
-            data = conv_time_to_mpl_dates(trace[key])
+            data = conv_time_to_mpl_dates(trace[key]) + 1
         elif "weekend_factor_rad" == key:
             data = data / np.pi / 2 * 7
 
@@ -1914,7 +1910,7 @@ def create_figure_distributions(
         if "transient_begin" in key:
             beg_x = matplotlib.dates.num2date(x_for_ax[0])
             diff_dates_x = (beg_x.replace(tzinfo=None) - date_begin_sim).days
-            x_for_pr = x_for_ax - x_for_ax[0] + diff_dates_x
+            x_for_pr = x_for_ax - x_for_ax[0] + diff_dates_x - 1
         if "weekend_factor_rad" == key:
             x_for_ax *= np.pi * 2 / 7
 
@@ -1946,7 +1942,8 @@ def create_figure_distributions(
             text = print_median_CI(data, prec=2)
         elif "transient_begin" in key:
             text = print_median_CI(
-                data - matplotlib.dates.date2num(date_data_begin) + 1, prec=1)
+                data - matplotlib.dates.date2num(date_data_begin) + 1, prec=1
+            )
         else:
             text = print_median_CI(data, prec=1)
 
@@ -1999,8 +1996,7 @@ def create_figure_distributions(
         ax.get_legend().get_frame().set_linewidth(0.0)
         ax.get_legend().get_frame().set_facecolor("#F0F0F0")
         ax.get_legend().set_title(
-            f"Data until\n{date_data_end.strftime('%B %-d')}",
-            prop=dict(weight="bold")
+            f"Data until\n{date_data_end.strftime('%B %-d')}", prop=dict(weight="bold")
         )
 
     # dirty hack to get some space at the bottom to align with timeseries
