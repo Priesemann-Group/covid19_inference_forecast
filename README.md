@@ -23,12 +23,13 @@ Our aim is to quantify the effects of intervention policies on the spread of COV
 
 ### Alternative forecast scenarios, projecting the relaxation of restrictions on April 19
 
-<img src="figures/easter_3scen_ts_merged.png" height="500">
+<img src="figures/what_if_english.png" height="500">
 
 
-  * If the effective growth rate stays on the current (all-time low) value, new cases will further decrease. A low number of new daily cases might bring a full control of the spread within reach ([see our position paper by the four German research associations](https://www.mpg.de/14759871/corona-stellungnahme); [Endorsement](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_01.pdf); [Position paper](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_02.pdf)).
+  * If the effective growth rate stays on the current (all-time low) value, new cases will further decrease (green). A low number of new daily cases might bring a full control of the spread within reach ([see our position paper by the four German research associations](https://www.mpg.de/14759871/corona-stellungnahme); [Endorsement](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_01.pdf); [Position paper](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_02.pdf)).
 
-  * If the relaxation of restrictions causes an increase in effective growth rate $\lambda^\ast$ above zero, the daily new reported cases will increase again.
+  * If the relaxation of restrictions causes an increase in effective growth rate $\lambda^\ast$ above zero, the daily new reported cases will increase again (red).
+
 
 The current scenarios are based on the model that incorporates weekly reporting modulation (less cases reported on weekends).
 The distributions below display to the parameters the produce the time series.
