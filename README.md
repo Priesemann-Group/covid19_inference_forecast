@@ -32,12 +32,6 @@ Our aim is to quantify the effects of intervention policies on the spread of COV
 
 
 The current scenarios are based on the model that incorporates weekly reporting modulation (less cases reported on weekends).
-The distributions below display to the parameters the produce the time series.
-
-<p float="left">
-  <img src="figures/easter_3scen_dist_A.png" height="450">
-  <img src="figures/easter_3scen_dist_C.png" height="450" />
-</p>
 
 ### Scenario with a weekly new change point
 
