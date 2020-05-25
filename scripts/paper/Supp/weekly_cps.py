@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-05-24 23:32:24
+# @Last Modified: 2020-05-25 16:38:59
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
@@ -833,7 +833,7 @@ def create_figure_distributions(
 
         data = trace[key]
         if "transient_begin" in key:
-            data = conv_time_to_mpl_dates(trace[key])
+            data = conv_time_to_mpl_dates(trace[key]) + 1 
         elif "weekend_factor_rad" == key:
             data = data / np.pi / 2 * 7
 
@@ -877,7 +877,7 @@ def create_figure_distributions(
         if "transient_begin" in key:
             beg_x = matplotlib.dates.num2date(x_for_ax[0])
             diff_dates_x = (beg_x.replace(tzinfo=None) - date_begin_sim).days
-            x_for_pr = x_for_ax - x_for_ax[0] + diff_dates_x
+            x_for_pr = x_for_ax - x_for_ax[0] + diff_dates_x - 1
         if "weekend_factor_rad" == key:
             x_for_ax *= np.pi * 2 / 7
         ax.plot(
