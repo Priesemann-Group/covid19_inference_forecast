@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-17 17:02:32
-# @Last Modified: 2020-05-04 17:05:16
+# @Last Modified: 2020-05-24 23:32:24
 # ------------------------------------------------------------------------------ #
 # I am reincluding the figure-plotting routines so the script is a bit more
 # selfcontained. (also, figures.py is in a bad state currently)
@@ -619,7 +619,7 @@ def create_figure_timeseries(
 
     fig.suptitle(
         # using script run time. could use last data point though.
-        f"Latest forecast\n({datetime.datetime.now().strftime('%Y/%m/%d')})",
+        f"Data until\n{(datetime.datetime.now()-datetime.timedelta(days=1)).strftime('%Y/%m/%d')}", #Dirty hack to get the same dates for both (this and the 3cp plot)
         x=0.15,
         y=1.075,
         verticalalignment="top",
@@ -999,7 +999,7 @@ change_points = [
     dict(  # towards lambda 3, finally below-zero growth
         pr_mean_date_begin_transient=datetime.datetime(2020, 3, 23),
         pr_sigma_date_begin_transient=1,
-        pr_median_lambda=1 / 8 / 2,
+        pr_median_lambda=1 / 16,
         pr_sigma_lambda=0.2,
     ),
 ]
