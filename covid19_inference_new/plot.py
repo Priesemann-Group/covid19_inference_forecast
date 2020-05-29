@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-20 18:50:13
-# @Last Modified: 2020-05-15 10:12:55
+# @Last Modified: 2020-05-29 10:45:43
 # ------------------------------------------------------------------------------ #
 # Callable in your scripts as e.g. `cov.plot.timeseries()`
 # Plot functions and helper classes
@@ -599,7 +599,9 @@ def _get_array_from_trace_via_date(
     """
 
     ref = model.sim_begin
-    # the variable `new_cases` and some others (?) have different bounds
+    # the variable `new_cases` and some others (?) used to have different bounds
+    # 20-05-27: not anymore, we made things consistent. let's remove this at some point
+    # 20-05-29: still broken idk
     if "new_cases" in var:
         ref = model.data_begin
 
@@ -817,7 +819,7 @@ def _distribution(model, trace, key, ax=None, color=None, draw_prior=True):
     else:
         text_md, text_ci = _string_median_CI(data, prec=1)
 
-    text_md = _math_for_varname(key) + "$ = " + text_md + "$"
+    text_md = _math_for_varname(key) + r"$ \simeq " + text_md + "$"
 
     # create the inset text elements, and we want a bounding box around the compound
     try:
@@ -881,7 +883,10 @@ def _label_for_varname(key):
         res = "Delay"
     elif re.fullmatch("mu.*", key):
         res = "Recovery rate"
-
+    elif key == "sigma_obs":
+        res = "Scale (width)\n of the likelihood"
+    elif key == "I_begin":
+        res = "Initial infections"
     return res
 
 
@@ -958,7 +963,7 @@ def _math_for_varname(key):
     # change-point keys, give lower index
     if is_cp:
         # get cp index
-        res = res + f"_{_rx_cp_id(key)}"
+        res = res + r"_{"+_rx_cp_id(key)+"}"
 
     # hierarchical, give upper index
     if is_hc:

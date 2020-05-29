@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-21 08:57:53
-# @Last Modified: 2020-04-30 17:02:00
+# @Last Modified: 2020-05-20 10:48:23
 # ------------------------------------------------------------------------------ #
 # Let's have a dummy instance of model and trace so we can play around with the
 # interface and plotting.
@@ -13,7 +13,7 @@ import logging
 
 import numpy as np
 import pymc3 as pm
-
+import datetime
 
 from .model import *
 from . import data_retrieval
@@ -91,9 +91,7 @@ def create_example_instance(num_change_points=3):
 
         new_I_t = SIR(lambda_t_log, mu=0.13)
 
-        new_cases_inferred_raw = delay_cases(
-            new_I_t, pr_median_delay=10, pr_median_scale_delay=0.3
-        )
+        new_cases_inferred_raw = delay_cases(new_I_t)
 
         new_cases_inferred = week_modulation(new_cases_inferred_raw)
 
