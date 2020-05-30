@@ -248,7 +248,7 @@ for i in range(num_rows):
         axes[i, 2].get_legend().get_frame().set_facecolor("#F0F0F0")
     elif i == 1:
         cov19.plot._distribution(this_model, trace, f"delay", axes[i, 2])
-        axes[i, 2].set_xlabel("Rep")
+        axes[i, 2].set_xlabel("Reporting delay")
     else:
         # Plot transient_len_i and remove the xlable, we add one big label later.
         cov19.plot._distribution(this_model, trace, f"transient_len_{i-1}", axes[i, 2])
