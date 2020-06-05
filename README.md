@@ -7,7 +7,7 @@
 
 * __Current code development takes place in the [new repository.](https://github.com/Priesemann-Group/covid19_inference/)__
 
-* __The research article [is available on arXiv](https://arxiv.org/abs/2004.01105) and is in press [at Science](https://science.sciencemag.org/content/early/2020/05/14/science.abb9789). In addition we published technical notes, answering some common questions: [technical report](technical_notes_dehning_2020.pdf)__
+* __The research article [is available on arXiv](https://arxiv.org/abs/2004.01105) and is in press [at Science](https://science.sciencemag.org/content/early/2020/05/14/science.abb9789). In addition we published technical notes, answering some common questions: [technical notes](technical_notes_dehning_etal_2020.pdf).__
 
 * __Here, we keep updating figures and provide the original code for the research article.__
 To get started, see [SIR_Germany_3scenarios_with_sine_weekend.ipynb](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/SIR_Germany_3scenarios_with_sine_weekend.ipynb), which generates Fig. 3 of the research article, and [scripts/paper200429/](https://github.com/Priesemann-Group/covid19_inference_forecast/blob/master/scripts/paper200429/), which is the directory of all scripts used for the article.
