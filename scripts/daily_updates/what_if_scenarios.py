@@ -1,5 +1,4 @@
-""" # Example for weekly changepoints
-
+""" # Example for what if scenarios
     Runtime ~ 3-5h
 
     ## Importing modules
