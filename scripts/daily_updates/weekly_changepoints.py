@@ -78,7 +78,7 @@ print(f"Adding possible change points at:")
 for i, day in enumerate(
     pd.date_range(start=prior_date_contact_ban_begin, end=datetime.datetime.now())
 ):
-    if day.weekday() == 6:
+    if day.weekday() == 6 and (datetime.datetime.today()-day).days > 14:
         print(f"\t{day}")
 
         # Prior factor to previous
@@ -86,9 +86,8 @@ for i, day in enumerate(
             dict(  # one possible change point every sunday
                 pr_mean_date_transient=day,
                 pr_sigma_date_transient=1,
-                pr_median_lambda=0.1,  # we dont know, give it wiggley room, but zero
-                pr_sigma_lambda=0.3,  # gives pymc3 a hard time
-                relative_to_previous=False,
+                pr_sigma_lambda=0.1, #wiggle compared to previous point
+                relative_to_previous=True,
                 pr_factor_to_previous=1,
             )
         )
