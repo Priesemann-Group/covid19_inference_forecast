@@ -78,15 +78,15 @@ print(f"Adding possible change points at:")
 for i, day in enumerate(
     pd.date_range(start=prior_date_contact_ban_begin, end=datetime.datetime.now())
 ):
-    if day.weekday() == 6 and (datetime.datetime.today()-day).days > 14:
+    if day.weekday() == 6 and (datetime.datetime.today() - day).days > 14:
         print(f"\t{day}")
 
         # Prior factor to previous
         change_points.append(
             dict(  # one possible change point every sunday
                 pr_mean_date_transient=day,
-                pr_sigma_date_transient=1,
-                pr_sigma_lambda=0.1, #wiggle compared to previous point
+                pr_sigma_date_transient=1.5,
+                pr_sigma_lambda=0.2,  # wiggle compared to previous point
                 relative_to_previous=True,
                 pr_factor_to_previous=1,
             )
@@ -194,6 +194,10 @@ except:
 cov19.plot.rcParams["color_model"] = "tab:orange"
 fig, axes = cov19.plot.timeseries_overview(this_model, trace, offset=total_cases_obs[0])
 
+# Add vline for today
+axes[0].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
+axes[1].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
+axes[2].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
 # ts for timeseries
 plt.savefig(
     save_to + "ts.pdf", dpi=300, bbox_inches="tight", pad_inches=0.05,
@@ -268,8 +272,16 @@ axes[2, 0].text(s="F", transform=axes[2, 0].transAxes, **letter_kwargs)
 
 # dist for distributions
 plt.savefig(
-    save_to + "dist.pdf", dpi=300, bbox_inches="tight", pad_inches=0.05,
+    save_to + "dist.pdf",
+    dpi=300,
+    bbox_inches="tight",
+    pad_inches=0.05,
+    transparent=True,
 )
 plt.savefig(
-    save_to + "dist.png", dpi=300, bbox_inches="tight", pad_inches=0.05,
+    save_to + "dist.png",
+    dpi=300,
+    bbox_inches="tight",
+    pad_inches=0.05,
+    transparent=True,
 )
