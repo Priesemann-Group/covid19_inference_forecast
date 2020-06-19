@@ -23,7 +23,14 @@ Our aim is to quantify the effects of intervention policies on the spread of COV
 
 ### Alternative forecast scenarios, projecting the relaxation of restrictions on May 11
 
-<img src="figures/what_if_english_ts.png" height="500">
+<p float="left">
+  <img src="figures/what_if_english_ts.png" height="450"/>
+</p>
+<p float="left">
+  <img src="figures/what_if_english_dist_optimistisch.png" height="450" />
+  <img src="figures/what_if_english_dist_neutral.png" height="450"/>
+  <img src="figures/what_if_english_dist_pessimistisch.png" height="450" />
+</p>
 
 
   * If the effective growth rate stays on the current (all-time low) value, new cases will further decrease (green). A low number of new daily cases might bring a full control of the spread within reach ([see our position paper by the four German research associations](https://www.mpg.de/14759871/corona-stellungnahme); [Endorsement](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_01.pdf); [Position paper](https://www.mpg.de/14760439/28-04-2020_Stellungnahme_Teil_02.pdf)).
