@@ -195,9 +195,9 @@ cov19.plot.rcParams["color_model"] = "tab:orange"
 fig, axes = cov19.plot.timeseries_overview(this_model, trace, offset=total_cases_obs[0])
 
 # Add vline for today
-axes[0].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
-axes[1].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
-axes[2].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
+# axes[0].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
+# axes[1].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
+# axes[2].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
 # ts for timeseries
 plt.savefig(
     save_to + "ts.pdf", dpi=300, bbox_inches="tight", pad_inches=0.05,
