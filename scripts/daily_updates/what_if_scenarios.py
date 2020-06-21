@@ -367,6 +367,7 @@ for this_model, trace, change_points, color, name in zip(
     axes[1, 0].text(s="E", transform=axes[1, 0].transAxes, **letter_kwargs)
     axes[2, 0].text(s="F", transform=axes[2, 0].transAxes, **letter_kwargs)
 
+    # Save to file
     fig.savefig(
         save_path + "english_dist_" + name + ".pdf",
         dpi=300,
@@ -381,23 +382,3 @@ for this_model, trace, change_points, color, name in zip(
         pad_inches=0.05,
         transparent=True,
     )
-
-
-"""
-
-# dist for distributions
-plt.savefig(
-    save_to + "dist.pdf",
-    dpi=300,
-    bbox_inches="tight",
-    pad_inches=0.05,
-    transparent=True,
-)
-plt.savefig(
-    save_to + "dist.png",
-    dpi=300,
-    bbox_inches="tight",
-    pad_inches=0.05,
-    transparent=True,
-)
-"""
