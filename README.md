@@ -30,13 +30,13 @@ Our aim is to quantify the effects of intervention policies on the spread of COV
   <img src="figures/weekly_cps_dist.png" height="450" />
 </p>
 
-#### Scenario using weekly changepoints and Nowcasting data
+#### Scenario using weekly changepoints and nowcasting data from Robert Koch Institute
 <p float="left">
   <img src="figures/weekly_cps_nowcast_ts.png" height="450" />
   <img src="figures/weekly_cps_nowcast_dist.png" height="450" />
 </p>
                                                              
-* Daily(?) updated nowcasting data is available at the [Robert Koch Institute](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx).
+* Daily updated nowcasting data is available at the [Robert Koch Institute](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx).
 
 ### Alternative forecast scenarios, projecting the relaxation of restrictions on May 11
 

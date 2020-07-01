@@ -27,7 +27,7 @@ except ModuleNotFoundError:
 """ ## Data retrieval
 """
 jhu = cov19.data_retrieval.JHU(True)
-data_begin = datetime.datetime(2020, 3, 1)
+data_begin = datetime.datetime(2020, 3, 2)
 data_end = datetime.datetime.now()
 
 new_cases_obs = jhu.get_new(country="Germany", data_begin=data_begin, data_end=data_end)

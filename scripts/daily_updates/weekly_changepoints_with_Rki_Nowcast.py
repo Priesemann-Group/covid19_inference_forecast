@@ -219,10 +219,10 @@ fig, axes = cov19.plot.timeseries_overview(this_model, trace, offset=total_cases
 mu = np.mean(trace["mu"])
 cov19.plot._timeseries(
     x=df["Punktschätzer des 7-Tage-R Wertes"].dropna().index,
-    y=df["Punktschätzer des 7-Tage-R Wertes"].dropna() * mu - mu,  # R*mu=lambda
+    y=df["Punktschätzer des 7-Tage-R Wertes"].dropna() ** 0.25 - 1,  # R*mu=lambda
     ax=axes[0],
     color="tab:purple",
-    label="Nowcasting data from \n Rki 7-days average",
+    label=r"$\sqrt[4]R_{RKI}-1$",
     what="model",
     ls="--",
 )
@@ -232,10 +232,12 @@ axes[0].fill_between(
     df["Untere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"]
     .dropna()
     .index,
-    df["Untere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"].dropna() * mu
-    - mu,
-    df["Obere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"].dropna() * mu
-    - mu,
+    df["Untere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"].dropna()
+    ** 0.25
+    - 1,
+    df["Obere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"].dropna()
+    ** 0.25
+    - 1,
     alpha=0.1,
     lw=0,
     color="tab:purple",
