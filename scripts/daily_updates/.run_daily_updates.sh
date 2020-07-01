@@ -3,6 +3,9 @@
 # @Last Modified by:   Sebastian
 # @Last Modified time: 2020-05-30 10:28:41
 
+#Change dir to this directory
+this_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $thisDIR
 # Pull from git
 git pull
 # Run the two scripts
