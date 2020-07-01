@@ -222,7 +222,7 @@ cov19.plot._timeseries(
     y=df["Punktschätzer des 7-Tage-R Wertes"].dropna() ** 0.25 - 1,  # R*mu=lambda
     ax=axes[0],
     color="tab:purple",
-    label=r"$\sqrt[4]R_{RKI}-1$",
+    label=r"$\sqrt[4]{R_{RKI}}-1$",
     what="model",
     ls="--",
 )
