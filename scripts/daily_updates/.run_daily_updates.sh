@@ -14,7 +14,7 @@ which python
 git pull
 # Run the two scripts
 /home/smohr/anaconda3/bin/python weekly_changepoints.py
-/home/smohr/anaconda3/bin/python weekly_changepoints_with_RKI_Nowcast.py
+/home/smohr/anaconda3/bin/python weekly_changepoints_with_Rki_Nowcast.py
 # Commit figures
 git add "../../figures/*"
 git commit -m "automatic figures update"
