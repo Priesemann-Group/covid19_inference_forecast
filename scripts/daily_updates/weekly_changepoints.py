@@ -174,7 +174,7 @@ with cov19.model.Cov19Model(**params_model) as this_model:
 """ ## MCMC sampling
 """
 
-trace = pm.sample(model=this_model, init="advi", tune=100, draws=100)
+trace = pm.sample(model=this_model, init="advi", tune=1000, draws=1000)
 
 """ ## Plotting
     
