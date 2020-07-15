@@ -216,6 +216,9 @@ except:
 cov19.plot.rcParams["color_model"] = "tab:orange"
 fig, axes = cov19.plot.timeseries_overview(this_model, trace, offset=total_cases_obs[0])
 
+for ax in axes:
+    ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=7 * 20))
+
 mu = np.mean(trace["mu"])
 cov19.plot._timeseries(
     x=df["Punktschätzer des 7-Tage-R Wertes"].dropna().index,
