@@ -195,7 +195,7 @@ cov19.plot.rcParams["color_model"] = "tab:orange"
 fig, axes = cov19.plot.timeseries_overview(this_model, trace, offset=total_cases_obs[0])
 
 for ax in axes:
-    ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=7 * 20))
+    ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=7 * 18))
 
 # Add vline for today
 # axes[0].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
