@@ -78,7 +78,7 @@ print(f"Adding possible change points at:")
 for i, day in enumerate(
     pd.date_range(start=prior_date_contact_ban_begin, end=datetime.datetime.now())
 ):
-    if day.weekday() == 6 and (datetime.datetime.today() - day).days > 14:
+    if day.weekday() == 6 and (datetime.datetime.today() - day).days > 9:
         print(f"\t{day}")
 
         # Prior factor to previous
@@ -195,7 +195,7 @@ cov19.plot.rcParams["color_model"] = "tab:orange"
 fig, axes = cov19.plot.timeseries_overview(this_model, trace, offset=total_cases_obs[0])
 
 for ax in axes:
-    ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=7 * 18))
+    ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=7 * 17))
 
 # Add vline for today
 # axes[0].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
