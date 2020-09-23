@@ -174,7 +174,7 @@ with cov19.model.Cov19Model(**params_model) as this_model:
 """ ## MCMC sampling
 """
 
-trace = pm.sample(model=this_model, init="advi", tune=1000, draws=1000)
+trace = pm.sample(model=this_model, init="advi", tune=100, draws=100)
 
 """ ## Plotting
     
@@ -195,8 +195,9 @@ cov19.plot.rcParams["color_model"] = "tab:orange"
 fig, axes = cov19.plot.timeseries_overview(this_model, trace, offset=total_cases_obs[0])
 
 for ax in axes:
-    ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=7 * 17))
-
+    ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=4 * 17))
+# Set y lim for effective growth rate
+axes[0].set_ylim(-0.1, 0.2)
 # Add vline for today
 # axes[0].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
 # axes[1].axvline(datetime.datetime.today(), ls=":", color="tab:gray")

@@ -217,7 +217,9 @@ cov19.plot.rcParams["color_model"] = "tab:orange"
 fig, axes = cov19.plot.timeseries_overview(this_model, trace, offset=total_cases_obs[0])
 
 for ax in axes:
-    ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=7 * 17))
+    ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=4 * 17))
+# Set y lim for effective growth rate
+axes[0].set_ylim(-0.1, 0.2)
 
 mu = np.mean(trace["mu"])
 cov19.plot._timeseries(
