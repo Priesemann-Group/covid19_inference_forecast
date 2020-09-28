@@ -174,7 +174,7 @@ with cov19.model.Cov19Model(**params_model) as this_model:
 """ ## MCMC sampling
 """
 
-trace = pm.sample(model=this_model, init="advi", tune=100, draws=100)
+trace = pm.sample(model=this_model, init="advi", tune=1000, draws=1000)
 
 """ ## Plotting
     
@@ -220,7 +220,7 @@ fig, axes = plt.subplots(
     num_rows, num_columns, figsize=(fig_width, fig_height), constrained_layout=True
 )
 # Left row we want mu and all lambda_i!
-for i in range(num_rows):
+for i in range(num_rows, num_rows - 6):
     if i == 0:
         cov19.plot._distribution(this_model, trace, "mu", axes[0, 0])
     elif i == 1:
@@ -232,7 +232,7 @@ for i in range(num_rows):
         cov19.plot._distribution(this_model, trace, f"lambda_{i-1}", axes[i, 0])
         axes[i, 0].set_xlabel("")
 # middle row
-for i in range(num_rows):
+for i in range(num_rows, num_rows - 6):
     if i == 0:
         cov19.plot._distribution(this_model, trace, "sigma_obs", axes[i, 1])
     elif i == 1:
@@ -242,7 +242,7 @@ for i in range(num_rows):
         cov19.plot._distribution(this_model, trace, f"transient_day_{i-1}", axes[i, 1])
         axes[i, 1].set_xlabel("")
 # right row
-for i in range(num_rows):
+for i in range(num_rows, num_rows - 6):
     if i == 0:
         # Create legend for everything
         axes[i, 2].set_axis_off()
