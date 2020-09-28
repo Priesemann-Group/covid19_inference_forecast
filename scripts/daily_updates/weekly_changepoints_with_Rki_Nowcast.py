@@ -274,7 +274,19 @@ fig, axes = plt.subplots(
     num_rows, num_columns, figsize=(fig_width, fig_height), constrained_layout=True
 )
 # Left row we want mu and all lambda_i!
-for i in range(num_rows, num_rows - 6):
+
+rows = [
+    0,
+    1,
+    num_rows,
+    num_rows - 1,
+    num_rows - 2,
+    num_rows - 3,
+    num_rows - 4,
+    num_rows - 5,
+    num_rows - 6,
+]
+for i in rows:
     if i == 0:
         cov19.plot._distribution(this_model, trace, "mu", axes[0, 0])
     elif i == 1:
@@ -286,7 +298,7 @@ for i in range(num_rows, num_rows - 6):
         cov19.plot._distribution(this_model, trace, f"lambda_{i-1}", axes[i, 0])
         axes[i, 0].set_xlabel("")
 # middle row
-for i in range(num_rows, num_rows - 6):
+for i in rows:
     if i == 0:
         cov19.plot._distribution(this_model, trace, "sigma_obs", axes[i, 1])
     elif i == 1:
@@ -296,7 +308,7 @@ for i in range(num_rows, num_rows - 6):
         cov19.plot._distribution(this_model, trace, f"transient_day_{i-1}", axes[i, 1])
         axes[i, 1].set_xlabel("")
 # right row
-for i in range(num_rows, num_rows - 6):
+for i in rows:
     if i == 0:
         # Create legend for everything
         axes[i, 2].set_axis_off()
