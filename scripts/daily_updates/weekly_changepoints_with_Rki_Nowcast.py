@@ -268,16 +268,15 @@ plt.savefig(
 num_rows = len(change_points) + 1 + 1
 num_columns = int(np.ceil(14 / 5))
 fig_width = 4.5 / 3 * num_columns
-fig_height = num_rows * 1
+fig_height = 8 * 1
 
 fig, axes = plt.subplots(
-    num_rows, num_columns, figsize=(fig_width, fig_height), constrained_layout=True
+    8, num_columns, figsize=(fig_width, fig_height), constrained_layout=True
 )
 # Left row we want mu and all lambda_i!
 
 rows = [
     0,
-    1,
     num_rows,
     num_rows - 1,
     num_rows - 2,
@@ -291,12 +290,14 @@ for i in rows:
         cov19.plot._distribution(this_model, trace, "mu", axes[0, 0])
     elif i == num_rows:
         # Plot lambda_i and remove the xlable, we add one big label later.
-        cov19.plot._distribution(this_model, trace, f"lambda_{i-1}", axes[1, 0])
+        cov19.plot._distribution(this_model, trace, f"lambda_{0}", axes[1, 0])
         axes[1, 0].set_xlabel("Inital rate")
     else:
         # Plot lambda_i and remove the xlable, we add one big label later.
-        cov19.plot._distribution(this_model, trace, f"lambda_{i-1}", axes[-i+num_rows+1, 0])
-        axes[-i+num_rows+1, 0].set_xlabel("")
+        cov19.plot._distribution(
+            this_model, trace, f"lambda_{i-2}", axes[-i + num_rows + 1, 0]
+        )
+        axes[-i + num_rows + 1, 0].set_xlabel("")
 # middle row
 for i in rows:
     if i == 0:
@@ -305,8 +306,10 @@ for i in rows:
         cov19.plot._distribution(this_model, trace, "I_begin", axes[1, 1])
     else:
         # Plot transient_day_i and remove the xlable, we add one big label later.
-        cov19.plot._distribution(this_model, trace, f"transient_day_{i-1}", axes[-i+num_rows+1, 1])
-        axes[-i+num_rows+1, 1].set_xlabel("")
+        cov19.plot._distribution(
+            this_model, trace, f"transient_day_{i-2}", axes[-i + num_rows + 1, 1]
+        )
+        axes[-i + num_rows + 1, 1].set_xlabel("")
 # right row
 for i in rows:
     if i == 0:
@@ -324,8 +327,10 @@ for i in rows:
         axes[1, 2].set_xlabel("Reporting delay")
     else:
         # Plot transient_len_i and remove the xlable, we add one big label later.
-        cov19.plot._distribution(this_model, trace, f"transient_len_{i-1}", axes[-i+num_rows, 2])
-        axes[-i+num_rows+1, 2].set_xlabel("")
+        cov19.plot._distribution(
+            this_model, trace, f"transient_len_{i-2}", axes[-i + num_rows + 1, 2]
+        )
+        axes[-i + num_rows + 1, 2].set_xlabel("")
 
 # Add ylabel for the first axes
 axes[0, 0].set_ylabel("Density")
