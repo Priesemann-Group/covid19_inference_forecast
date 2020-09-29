@@ -84,3 +84,6 @@ target/
 
 # Mypy cache
 .mypy_cache/
+
+# Daily downloaded nowcasting data xlsx
+*.xlsx
