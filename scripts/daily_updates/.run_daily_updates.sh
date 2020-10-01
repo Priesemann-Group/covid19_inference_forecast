@@ -8,6 +8,10 @@
 this_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cd $this_DIR
+# >>>  conda initialize >>>
+. /home/smohr/anaconda3/etc/profile.d/conda.sh
+conda activate base
+# >>>  conda initialize >>>
 
 which python
 # Pull from git
