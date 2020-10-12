@@ -26,7 +26,8 @@ except ModuleNotFoundError:
 
 """ ## Data retrieval
 """
-jhu = cov19.data_retrieval.JHU(True)
+jhu = cov19.data_retrieval.JHU()
+jhu.download_all_available_data(force_download=True)
 data_begin = datetime.datetime(2020, 3, 2)
 data_end = datetime.datetime.now()
 
