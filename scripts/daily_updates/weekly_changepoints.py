@@ -199,7 +199,40 @@ for ax in axes:
     ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=4 * 17))
 # Set y lim for effective growth rate
 axes[0].set_ylim(-0.1, 0.2)
+axes[1].set_ylim(0, new_cases_obs.max() + 5000)
 # Add vline for today
+
+# --------------------------------------------------------------------------- #
+# inset new cases
+# --------------------------------------------------------------------------- #
+# Add inset for march to juli
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
+
+axins = axes[1].inset_axes(bounds=[0.1, 0.5, 0.4, 0.4])
+for line in axes[1].lines:
+    axins.lines.append(line)
+
+ax = axins
+
+y_past, x_past = cov19.plot._get_array_from_trace_via_date(
+    this_model, trace, "new_cases", this_model.data_begin, this_model.data_end
+)
+y_past = y_past[:, :, ...]
+
+# model fit
+cov19.plot._timeseries(
+    x=x_past, y=y_past, ax=ax, what="model", color="tab:orange",
+)
+
+# ax.set_ylim(ylim_new)
+prec = 1.0 / (np.log10(ax.get_ylim()[1]) - 2.5)
+if prec < 2.0 and prec >= 0:
+    ax.yaxis.set_major_formatter(
+        mpl.ticker.FuncFormatter(cov19.plot._format_k(int(prec)))
+    )
+    ticks = ax.get_xticks()
+    ax.set_xticks(ticks=[x_past.min(), x_past.max()])
+
 # axes[0].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
 # axes[1].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
 # axes[2].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
