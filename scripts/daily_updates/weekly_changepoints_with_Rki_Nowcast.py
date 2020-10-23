@@ -27,14 +27,13 @@ except ModuleNotFoundError:
 """ ## Data retrieval
 """
 
-# Retrieve nowcasting data from rki source
-
-import requests
+# Retrieve nowcasting data from rki source using cloudscraper .... because new cloudflare protection wow
 
 url = "https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx?__blob=publicationFile"
+import cloudscraper
 
-myfile = requests.get(url)
-
+scraper = cloudscraper.create_scraper()
+myfile = scraper.get(url)
 open(
     "Nowcasting_data_" + datetime.datetime.today().strftime("%Y_%m_%d") + ".xlsx", "wb"
 ).write(myfile.content)
