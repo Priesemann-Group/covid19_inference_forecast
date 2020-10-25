@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-20 18:50:13
-# @Last Modified: 2020-06-30 18:27:41
+# @Last Modified: 2020-10-25 18:28:41
 # ------------------------------------------------------------------------------ #
 # Callable in your scripts as e.g. `cov.plot.timeseries()`
 # Plot functions and helper classes
@@ -491,7 +491,7 @@ def _timeseries(
         if "color" not in kwargs:
             kwargs = dict(kwargs, color=rcParams["color_model"])
         if "ls" not in kwargs and "linestyle" not in kwargs:
-            kwargs = dict(kwargs, ls="--")
+            kwargs = dict(kwargs, ls=rcParams["fcast_ls"])
     elif what is "model":
         if "color" not in kwargs:
             kwargs = dict(kwargs, color=rcParams["color_model"])
@@ -1106,6 +1106,7 @@ def get_rcparams_default():
         color_data="tab:blue",
         color_prior="#708090",
         color_annot="#646464",
+        fcast_ls="--",
     )
 
     return par
@@ -1257,7 +1258,7 @@ def _string_median_CI(arr, prec=2):
     return f"{med}", f"[{perc1}, {perc2}]"
 
 
-def _add_watermark(ax, mark="Dehning et al. arXiv:2004.01105"):
+def _add_watermark(ax, mark="Model nach Dehning et al. arXiv:2004.01105"):
     """
         Add our arxive url to an axes as (upper right) title
     """

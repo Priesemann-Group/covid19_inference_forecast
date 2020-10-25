@@ -229,6 +229,7 @@ cov19.plot.set_rcparams(cov19.plot.get_rcparams_default())
 cov19.plot.rcParams.draw_ci_50 = False
 cov19.plot.rcParams.locale = "de_DE"
 cov19.plot.rcParams.date_format = "%-d. %b"
+cov19.plot.rcParams.fcast_ls = "-"
 
 fig, axes = cov19.plot.timeseries_overview(
     mod_a,
@@ -266,7 +267,7 @@ fig, axes = cov19.plot.timeseries_overview(
 )
 
 axes[0].set_ylim(-0.07, 0.3)
-axes[1].set_ylim(0, 50_000)
+axes[1].set_ylim(0, 100_000)
 axes[2].set_ylim(0, 220_000)
 
 axes[1].set_ylabel("Neue Erkrankungen\n(RKI Nowcasting Zahlen)")
@@ -277,7 +278,7 @@ fig.savefig(save_to + "german_ts.svg", dpi=300, bbox_inches="tight", pad_inches=
 fig.savefig(save_to + "german_ts.png", dpi=300, bbox_inches="tight", pad_inches=0.05)
 """
 
-cov19.plot.rcParams["color_model"] = "tab:orange"
+rcParams["color_model"] = "tab:orange"
 fig, axes = cov19.plot.timeseries_overview(this_model, trace, offset=total_cases_obs[0])
 
 for ax in axes:
