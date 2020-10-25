@@ -2,7 +2,7 @@
 # @Author:        F. Paul Spitzner
 # @Email:         paul.spitzner@ds.mpg.de
 # @Created:       2020-04-20 18:50:13
-# @Last Modified: 2020-10-25 18:28:41
+# @Last Modified: 2020-10-25 21:33:13
 # ------------------------------------------------------------------------------ #
 # Callable in your scripts as e.g. `cov.plot.timeseries()`
 # Plot functions and helper classes
@@ -235,7 +235,7 @@ def timeseries_overview(
         )
         # model fit
         _timeseries(
-            x=x_past, y=y_past, ax=ax, what="model", color=color_past, label="Fit",
+            x=x_past, y=y_past, ax=ax, what="model", color=color_past,  # label="Fit",
         )
         if add_more_later:
             # dummy element to separate forecasts
@@ -297,7 +297,7 @@ def timeseries_overview(
         )
         # model fit
         _timeseries(
-            x=x_past, y=y_past, ax=ax, what="model", color=color_past, label="Fit",
+            x=x_past, y=y_past, ax=ax, what="model", color=color_past,  # label="Fit",
         )
         if add_more_later:
             # dummy element to separate forecasts

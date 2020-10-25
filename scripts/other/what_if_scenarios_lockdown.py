@@ -181,7 +181,7 @@ def create_model(change_points, params_model):
 # Should be significantly larger than the expected delay in order to always fit the same number of data points.
 diff_data_sim = 16
 # Number of days in the future (after date_end_data) to forecast cases
-num_days_forecast = 65
+num_days_forecast = 80
 params_model = dict(
     new_cases_obs=new_cases_obs[:],
     data_begin=data_begin,
@@ -197,9 +197,9 @@ mod_c = create_model(cp_c, params_model)
 
 """ ## MCMC sampling
 """
-tr_a = pm.sample(model=mod_a, tune=500, draws=400, init="advi+adapt_diag")
-tr_b = pm.sample(model=mod_b, tune=500, draws=400, init="advi+adapt_diag")
-tr_c = pm.sample(model=mod_c, tune=500, draws=400, init="advi+adapt_diag")
+tr_a = pm.sample(model=mod_a, tune=1000, draws=1000, init="advi+adapt_diag")
+tr_b = pm.sample(model=mod_b, tune=1000, draws=1000, init="advi+adapt_diag")
+tr_c = pm.sample(model=mod_c, tune=1000, draws=1000, init="advi+adapt_diag")
 
 import pickle
 
@@ -209,7 +209,7 @@ pickle.dump(
 )
 
 """
-with open(".data/what_if_lockdown.pickled", "rb") as f:
+with open("./data/what_if_lockdown.pickled", "rb") as f:
     [(mod_a, mod_b, mod_c), (tr_a, tr_b, tr_c)] = pickle.load(f)
 """
 
@@ -232,20 +232,20 @@ except:
 
 cov19.plot.set_rcparams(cov19.plot.get_rcparams_default())
 cov19.plot.rcParams.draw_ci_50 = False
+cov19.plot.rcParams.draw_ci_75 = False
+cov19.plot.rcParams.draw_ci_95 = False
 cov19.plot.rcParams.locale = "de_DE"
-cov19.plot.rcParams.date_format = "%-d. %b"
+cov19.plot.rcParams.date_format = "%d. %b"
 cov19.plot.rcParams.fcast_ls = "-"
 
+
+# Create plots
 fig, axes = cov19.plot.timeseries_overview(
-    mod_a,
-    tr_a,
+    mod_c,
+    tr_c,
     offset=total_cases_obs[0],
-    forecast_label="Lockdown am 1. November (3 Wochen lang)",
-    forecast_heading=r"$\bf Szenarien\!:$",
-    add_more_later=True,
-    color="tab:green",
-    start=datetime.datetime(2020, 10, 1),
-    end=datetime.datetime(2020, 12, 24),
+    forecast_label="Kein Lockdown",
+    color="tab:red",
 )
 
 
@@ -254,30 +254,167 @@ fig, axes = cov19.plot.timeseries_overview(
     tr_b,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label="Lockdown am 11. November (3 Wochen lang)",
+    forecast_label=f"Lockdown am {datetime.datetime(2020,11,11).strftime(cov19.plot.rcParams.date_format)} (3 Wochen lang)",
     color="tab:orange",
-    start=datetime.datetime(2020, 10, 1),
-    end=datetime.datetime(2020, 12, 24),
 )
 
 fig, axes = cov19.plot.timeseries_overview(
-    mod_c,
-    tr_c,
+    mod_a,
+    tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label="Kein Lockdown",
-    color="tab:red",
+    forecast_label=f"Lockdown am {datetime.datetime(2020,11,1).strftime(cov19.plot.rcParams.date_format)} (3 Wochen lang)",
+    forecast_heading=r"$\bf Szenarien\!:$",
+    add_more_later=True,
+    color="tab:green",
     start=datetime.datetime(2020, 10, 1),
-    end=datetime.datetime(2020, 12, 24),
+    end=datetime.datetime(2020, 12, 31),
 )
 
-axes[0].set_ylim(-0.07, 0.3)
-axes[1].set_ylim(0, 100_000)
+axes[0].set_ylim(-0.07, 0.2)
+axes[1].set_ylim(0, 140_000)
 axes[2].set_ylim(0, 220_000)
 
-axes[1].set_ylabel("Täglich neue Fallzahlen\n(Meldedatum RKI)")
+axes[1].set_ylabel("Täglich neue Fallzahlen")
 axes[1].set_xlabel("Datum")
 
+# Disable last axes visuals
+axes[2].get_xaxis().set_visible(False)
+axes[2].get_yaxis().set_visible(False)
+axes[2].spines["bottom"].set_visible(False)
+axes[2].spines["left"].set_visible(False)
+axes[2].texts[0].set_visible(False)  # Remove C letter
+legend = axes[2].get_legend()
+legend._loc = 10  # center legend
+legend.get_texts()[0].set_text("Daten (RKI Meldedatum)")  # Add to Data legend
 
-fig.savefig(save_to + "german_ts.svg", dpi=300, bbox_inches="tight", pad_inches=0.05)
-fig.savefig(save_to + "german_ts.png", dpi=300, bbox_inches="tight", pad_inches=0.05)
+# Change size of plot
+fig.set_size_inches(6, 6)
+# Set ratios
+fig._gridspecs[0].set_height_ratios([1, 4, 1.5])
+
+
+fig.savefig(
+    save_to + "german_ts.svg",
+    dpi=300,
+    bbox_inches="tight",
+    pad_inches=0.05,
+    transparent=True,
+)
+fig.savefig(
+    save_to + "german_ts.png",
+    dpi=300,
+    bbox_inches="tight",
+    pad_inches=0.05,
+    transparent=True,
+)
+
+""" ### Distributions
+
+    Do for each of the 3 models
+"""
+
+for this_model, trace, change_points, color, name in zip(
+    [mod_a, mod_b, mod_c],
+    [tr_a, tr_b, tr_c],
+    [cp_a, cp_b, cp_c],
+    ["tab:red", "tab:orange", "tab:green"],
+    ["lockdown_1", "lockdown_2", "lockdown_3"],
+):
+
+    num_rows = len(change_points) + 1 + 1
+    num_columns = 3
+    fig_width = 4.5 / 3 * num_columns
+    fig_height = num_rows * 1
+
+    fig, axes = plt.subplots(
+        num_rows, num_columns, figsize=(fig_width, fig_height), constrained_layout=True
+    )
+    # Left row we want mu and all lambda_i!
+    for i in range(num_rows):
+        if i == 0:
+            cov19.plot._distribution(this_model, trace, "mu", axes[0, 0], color=color)
+        elif i == 1:
+            # Plot lambda_i and remove the xlable, we add one big label later.
+            cov19.plot._distribution(
+                this_model, trace, f"lambda_{i-1}", axes[i, 0], color=color
+            )
+            axes[i, 0].set_xlabel("Inital rate")
+        else:
+            # Plot lambda_i and remove the xlable, we add one big label later.
+            cov19.plot._distribution(
+                this_model, trace, f"lambda_{i-1}", axes[i, 0], color=color
+            )
+            axes[i, 0].set_xlabel("")
+    # middle row
+    for i in range(num_rows):
+        if i == 0:
+            cov19.plot._distribution(
+                this_model, trace, "sigma_obs", axes[i, 1], color=color
+            )
+        elif i == 1:
+            cov19.plot._distribution(
+                this_model, trace, "I_begin", axes[i, 1], color=color
+            )
+        else:
+            # Plot transient_day_i and remove the xlable, we add one big label later.
+            cov19.plot._distribution(
+                this_model, trace, f"transient_day_{i-1}", axes[i, 1], color=color
+            )
+            axes[i, 1].set_xlabel("")
+    # right row
+    for i in range(num_rows):
+        if i == 0:
+            # Create legend for everything
+            axes[i, 2].set_axis_off()
+            axes[i, 2].plot(
+                [],
+                [],
+                color=cov19.plot.rcParams["color_prior"],
+                linewidth=3,
+                label="Prior",
+            )
+            axes[i, 2].hist([], color=color, label="Posterior")
+            axes[i, 2].legend(loc="center left")
+            axes[i, 2].get_legend().get_frame().set_linewidth(0.0)
+            axes[i, 2].get_legend().get_frame().set_facecolor("#F0F0F0")
+        elif i == 1:
+            cov19.plot._distribution(
+                this_model, trace, f"delay", axes[i, 2], color=color
+            )
+            axes[i, 2].set_xlabel("Reporting delay")
+        else:
+            # Plot transient_len_i and remove the xlable, we add one big label later.
+            cov19.plot._distribution(
+                this_model, trace, f"transient_len_{i-1}", axes[i, 2], color=color
+            )
+            axes[i, 2].set_xlabel("")
+
+    # Add ylabel for the first axes
+    axes[0, 0].set_ylabel("Density")
+    # Set bold xlabel for Spreading rates Change times and Change durations
+    axes[2, 0].set_xlabel("Spreading rates", fontweight="bold")
+    axes[2, 1].set_xlabel("Change times", fontweight="bold")
+    axes[2, 2].set_xlabel("Change duration", fontweight="bold")
+
+    # Letters
+    letter_kwargs = dict(x=-0.3, y=1.1, size="x-large")
+    axes[0, 0].text(s="D", transform=axes[0, 0].transAxes, **letter_kwargs)
+    axes[1, 0].text(s="E", transform=axes[1, 0].transAxes, **letter_kwargs)
+    axes[2, 0].text(s="F", transform=axes[2, 0].transAxes, **letter_kwargs)
+
+    # Save to file
+    fig.savefig(
+        save_to + "dist_" + name + ".svg",
+        dpi=300,
+        bbox_inches="tight",
+        pad_inches=0.05,
+        transparent=True,
+    )
+    fig.savefig(
+        save_to + "dist_" + name + ".png",
+        dpi=300,
+        bbox_inches="tight",
+        pad_inches=0.05,
+        transparent=True,
+    )
