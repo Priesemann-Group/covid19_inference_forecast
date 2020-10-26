@@ -254,7 +254,7 @@ fig, axes = cov19.plot.timeseries_overview(
     tr_b,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Lockdown am {datetime.datetime(2020,11,11).strftime(cov19.plot.rcParams.date_format)} (3 Wochen lang)",
+    forecast_label=f"Lockdown am {datetime.datetime(2020,11,15).strftime(cov19.plot.rcParams.date_format)} (3 Wochen lang)",
     color="tab:orange",
 )
 
@@ -289,9 +289,9 @@ legend._loc = 10  # center legend
 legend.get_texts()[0].set_text("Daten (RKI Meldedatum)")  # Add to Data legend
 
 # Change size of plot
-fig.set_size_inches(6, 6)
+fig.set_size_inches(5, 5)
 # Set ratios
-fig._gridspecs[0].set_height_ratios([1, 4, 1.5])
+fig._gridspecs[0].set_height_ratios([1, 3.5, 1.5])
 
 
 fig.savefig(
