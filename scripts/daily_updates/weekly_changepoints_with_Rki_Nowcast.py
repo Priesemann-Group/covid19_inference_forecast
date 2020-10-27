@@ -48,7 +48,7 @@ df = df.set_index(df["date"])
 df["new_cases"] = df["Punktschätzer der Anzahl Neuerkrankungen (ohne Glättung)"]
 df["total_cases"] = df["new_cases"].cumsum(axis=0)
 
-data_begin = datetime.datetime(2020, 3, 2)
+data_begin = datetime.datetime(2020, 7, 13)
 data_end = df["new_cases"].index[-1]
 
 
@@ -62,36 +62,15 @@ total_cases_obs = df["total_cases"]
 """
 
 # Change point midpoint dates
-prior_date_mild_dist_begin = datetime.datetime(2020, 3, 11)
-prior_date_strong_dist_begin = datetime.datetime(2020, 3, 18)
-prior_date_contact_ban_begin = datetime.datetime(2020, 3, 25)
 
 # Structures change points in a dict. Variables not passed will assume default values.
 change_points = [
     dict(
-        pr_mean_date_transient=prior_date_mild_dist_begin,
+        pr_mean_date_transient=data_begin,
         pr_sigma_date_transient=1.5,
-        pr_median_lambda=0.2,
+        pr_median_lambda=0.12,
         pr_sigma_lambda=0.5,
         pr_sigma_transient_len=0.5,
-    ),
-    dict(
-        pr_mean_date_transient=prior_date_strong_dist_begin,
-        pr_sigma_date_transient=1.5,
-        pr_median_lambda=1 / 8,
-        pr_sigma_lambda=0.5,
-        pr_sigma_transient_len=0.5,
-        relative_to_previous=False,
-        pr_factor_to_previous=1,
-    ),
-    dict(
-        pr_mean_date_transient=prior_date_contact_ban_begin,
-        pr_sigma_date_transient=1.5,
-        pr_median_lambda=1 / 8 / 2,
-        pr_sigma_lambda=0.5,
-        pr_sigma_transient_len=0.5,
-        relative_to_previous=False,
-        pr_factor_to_previous=1,
     ),
 ]
 print(f"Adding possible change points at:")

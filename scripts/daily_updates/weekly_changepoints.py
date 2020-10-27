@@ -28,7 +28,7 @@ except ModuleNotFoundError:
 """
 jhu = cov19.data_retrieval.JHU()
 jhu.download_all_available_data(force_download=True)
-data_begin = datetime.datetime(2020, 3, 2)
+data_begin = datetime.datetime(2020, 7, 13)
 data_end = datetime.datetime.now()
 
 new_cases_obs = jhu.get_new(country="Germany", data_begin=data_begin, data_end=data_end)
@@ -42,43 +42,18 @@ total_cases_obs = jhu.get_total(
         Get relative_to_previous working
 """
 
-# Change point midpoint dates
-prior_date_mild_dist_begin = datetime.datetime(2020, 3, 11)
-prior_date_strong_dist_begin = datetime.datetime(2020, 3, 18)
-prior_date_contact_ban_begin = datetime.datetime(2020, 3, 25)
-
 # Structures change points in a dict. Variables not passed will assume default values.
 change_points = [
     dict(
-        pr_mean_date_transient=prior_date_mild_dist_begin,
+        pr_mean_date_transient=data_begin + datetime.timedelta(days=5),
         pr_sigma_date_transient=1.5,
-        pr_median_lambda=0.2,
+        pr_median_lambda=0.12,
         pr_sigma_lambda=0.5,
         pr_sigma_transient_len=0.5,
-    ),
-    dict(
-        pr_mean_date_transient=prior_date_strong_dist_begin,
-        pr_sigma_date_transient=1.5,
-        pr_median_lambda=1 / 8,
-        pr_sigma_lambda=0.5,
-        pr_sigma_transient_len=0.5,
-        relative_to_previous=False,
-        pr_factor_to_previous=1,
-    ),
-    dict(
-        pr_mean_date_transient=prior_date_contact_ban_begin,
-        pr_sigma_date_transient=1.5,
-        pr_median_lambda=1 / 8 / 2,
-        pr_sigma_lambda=0.5,
-        pr_sigma_transient_len=0.5,
-        relative_to_previous=False,
-        pr_factor_to_previous=1,
     ),
 ]
 print(f"Adding possible change points at:")
-for i, day in enumerate(
-    pd.date_range(start=prior_date_contact_ban_begin, end=datetime.datetime.now())
-):
+for i, day in enumerate(pd.date_range(start=data_begin, end=datetime.datetime.now())):
     if day.weekday() == 6 and (datetime.datetime.today() - day).days > 9:
         print(f"\t{day}")
 
