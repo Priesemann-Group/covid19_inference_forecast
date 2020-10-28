@@ -45,7 +45,7 @@ total_cases_obs = jhu.get_total(
 # Structures change points in a dict. Variables not passed will assume default values.
 change_points = [
     dict(
-        pr_mean_date_transient=data_begin + datetime.timedelta(days=5),
+        pr_mean_date_transient=data_begin - datetime.timedelta(days=1),
         pr_sigma_date_transient=1.5,
         pr_median_lambda=0.12,
         pr_sigma_lambda=0.5,
