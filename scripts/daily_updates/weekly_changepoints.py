@@ -26,15 +26,13 @@ except ModuleNotFoundError:
 
 """ ## Data retrieval
 """
-jhu = cov19.data_retrieval.JHU()
-jhu.download_all_available_data(force_download=True)
+rki = cov19.data_retrieval.RKI()
+rki.download_all_available_data(force_download=True)
 data_begin = datetime.datetime(2020, 7, 13)
 data_end = datetime.datetime.now()
 
-new_cases_obs = jhu.get_new(country="Germany", data_begin=data_begin, data_end=data_end)
-total_cases_obs = jhu.get_total(
-    country="Germany", data_begin=data_begin, data_end=data_end
-)
+new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)
+total_cases_obs = rki.get_total("confirmed", data_begin=data_begin, data_end=data_end)
 
 """ ## Create weekly changepoints
 
@@ -189,29 +187,24 @@ for line in axes[1].lines:
 
 ax = axins
 
-y_past, x_past = cov19.plot._get_array_from_trace_via_date(
-    this_model, trace, "new_cases", this_model.data_begin, this_model.data_end
+new_cases_inset = rki.get_new(
+    country="Germany", data_begin=datetime.datetime(2020, 4, 2), data_end=data_end
 )
-y_past = y_past[:, :, ...]
 
 # model fit
 cov19.plot._timeseries(
-    x=x_past, y=y_past, ax=ax, what="model", color="tab:orange",
+    x=new_cases_inset.index, y=new_cases_inset, ax=ax, what="model", color="tab:orange",
 )
-
-# ax.set_ylim(ylim_new)
 prec = 1.0 / (np.log10(ax.get_ylim()[1]) - 2.5)
 if prec < 2.0 and prec >= 0:
     ax.yaxis.set_major_formatter(
         mpl.ticker.FuncFormatter(cov19.plot._format_k(int(prec)))
     )
     ticks = ax.get_xticks()
-    ax.set_xticks(ticks=[x_past.min(), x_past.max()])
+    ax.set_xticks(ticks=[new_cases_inset.index.min(), new_cases_inset.index.max()])
 
-# axes[0].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
-# axes[1].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
-# axes[2].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
-# ts for timeseries
+
+# save: ts for timeseries
 plt.savefig(
     save_to + "ts.pdf", dpi=300, bbox_inches="tight", pad_inches=0.05,
 )
