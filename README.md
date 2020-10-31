@@ -23,20 +23,22 @@ Our aim is to quantify the effects of intervention policies on the spread of COV
 
 
 ### Daily updated scenarios
-
-#### Scenario using weekly changepoints and JHU data
+The following scenarios are run daily and should use up to date data from the Robert Koch Institute.
+#### Scenario using weekly changepoints and reporting date data
 <p float="left">
   <img src="figures/weekly_cps_ts.png" height="450" />
   <img src="figures/weekly_cps_dist.png" height="450" />
 </p>
 
-#### Scenario using weekly changepoints and nowcasting data from Robert Koch Institute
+* Daily updated cases by reporting date are retrieved from the [arcgis](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0) dashboard.
+
+#### Scenario using weekly changepoints and nowcasting data
 <p float="left">
   <img src="figures/weekly_cps_nowcast_ts.png" height="450" />
   <img src="figures/weekly_cps_nowcast_dist.png" height="450" />
 </p>
                                                              
-* Daily updated nowcasting data is available at the [Robert Koch Institute](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx), but is delayed by approximetly one week.
+* Daily updated nowcasting data is available at the [Robert Koch Institute](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx), but is delayed by four days to one week.
 
 ### Alternative forecast scenarios, projecting the relaxation of restrictions on May 11
 
