@@ -29,7 +29,9 @@ except ModuleNotFoundError:
 rki = cov19.data_retrieval.RKI()
 rki.download_all_available_data(force_download=True)
 data_begin = datetime.datetime(2020, 7, 13)
-data_end = datetime.datetime.now()
+data_end = datetime.datetime.today() - datetime.timedelta(
+    days=2
+)  # Last rki datapoints are wrong most of the time
 
 new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)
 total_cases_obs = rki.get_total("confirmed", data_begin=data_begin, data_end=data_end)
@@ -188,7 +190,7 @@ for line in axes[1].lines:
 ax = axins
 
 new_cases_inset = rki.get_new(
-    "confirmed",data_begin=datetime.datetime(2020, 4, 2), data_end=data_end
+    "confirmed", data_begin=datetime.datetime(2020, 4, 2), data_end=data_end
 )
 
 # model fit

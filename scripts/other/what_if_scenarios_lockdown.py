@@ -29,7 +29,7 @@ log = logging.getLogger(__name__)
 """ ## Data retrieval
 """
 data_begin = datetime.datetime(2020, 9, 1)
-data_end = datetime.datetime.now()
+data_end = datetime.datetime.now() - datetime.timedelta(days=2)
 rki = cov19.data_retrieval.RKI(True)
 rki.download_all_available_data(force_download=True)
 new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)
