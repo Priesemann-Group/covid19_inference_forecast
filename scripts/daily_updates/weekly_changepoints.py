@@ -30,7 +30,7 @@ rki = cov19.data_retrieval.RKI()
 rki.download_all_available_data(force_download=True)
 data_begin = datetime.datetime(2020, 7, 13)
 data_end = datetime.datetime.today() - datetime.timedelta(
-    days=2
+    days=4
 )  # Last rki datapoints are wrong most of the time
 
 new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)

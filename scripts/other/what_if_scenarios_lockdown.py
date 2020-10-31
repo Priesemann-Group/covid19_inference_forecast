@@ -29,7 +29,7 @@ log = logging.getLogger(__name__)
 """ ## Data retrieval
 """
 data_begin = datetime.datetime(2020, 9, 1)
-data_end = datetime.datetime.now() - datetime.timedelta(days=2)
+data_end = datetime.datetime.now() - datetime.timedelta(days=4)
 rki = cov19.data_retrieval.RKI(True)
 rki.download_all_available_data(force_download=True)
 new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)
@@ -74,12 +74,12 @@ cp_b = copy.copy(change_points)
 cp_c = copy.copy(change_points)
 
 
-cp_a.append(  # Lockdown start now
+cp_a.append(  # Lockdown mild
     dict(
         pr_mean_date_transient=datetime.datetime(2020, 11, 2)
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
-        pr_median_lambda=0.11,
+        pr_median_lambda=1 / 8,
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
@@ -96,12 +96,12 @@ log.info(
 )
 
 
-cp_b.append(  # Lockdown start in 2 weeks
+cp_b.append(  # Lockdown streng
     dict(
         pr_mean_date_transient=datetime.datetime(2020, 11, 2)
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
-        pr_median_lambda=0.08,
+        pr_median_lambda=0.075,
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
@@ -233,14 +233,16 @@ except:
 cov19.plot.set_rcparams(cov19.plot.get_rcparams_default())
 cov19.plot.rcParams.draw_ci_50 = False
 cov19.plot.rcParams.draw_ci_75 = False
-cov19.plot.rcParams.draw_ci_95 = False
+cov19.plot.rcParams.draw_ci_95 = True
 cov19.plot.rcParams.locale = "de_DE"
 cov19.plot.rcParams.date_format = "%d. %b"
 cov19.plot.rcParams.fcast_ls = "-"
 
 
 # Create plots
-fig, axes = cov19.plot.timeseries_overview(
+from plot_scenarios import create_plot_scenarios
+
+fig, axes = create_plot_scenarios(
     mod_c,
     tr_c,
     offset=total_cases_obs[0],
@@ -248,8 +250,7 @@ fig, axes = cov19.plot.timeseries_overview(
     color="tab:red",
 )
 
-
-fig, axes = cov19.plot.timeseries_overview(
+fig, axes = create_plot_scenarios(
     mod_b,
     tr_b,
     axes=axes,
@@ -258,7 +259,7 @@ fig, axes = cov19.plot.timeseries_overview(
     color="tab:green",
 )
 
-fig, axes = cov19.plot.timeseries_overview(
+fig, axes = create_plot_scenarios(
     mod_a,
     tr_a,
     axes=axes,
@@ -272,10 +273,10 @@ fig, axes = cov19.plot.timeseries_overview(
 )
 
 axes[0].set_ylim(-0.07, 0.2)
-axes[1].set_ylim(0, 75_000)
+axes[1].set_ylim(0, 2000)
 axes[2].set_ylim(0, 220_000)
 
-axes[1].set_ylabel("Täglich neue Fallzahlen")
+axes[1].set_ylabel("Fallzahlen\n pro 1.000.000EW")
 axes[1].set_xlabel("Datum")
 
 # Disable last axes visuals
