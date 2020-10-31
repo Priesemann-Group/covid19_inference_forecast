@@ -76,16 +76,16 @@ cp_c = copy.copy(change_points)
 
 cp_a.append(  # Lockdown start now
     dict(
-        pr_mean_date_transient=datetime.datetime(2020, 11, 1)
+        pr_mean_date_transient=datetime.datetime(2020, 11, 2)
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
-        pr_median_lambda=0.08,
+        pr_median_lambda=0.11,
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
 cp_a.append(  # Lockdown end in two weeks
     dict(
-        pr_mean_date_transient=datetime.datetime(2020, 11, 22),
+        pr_mean_date_transient=datetime.datetime(2020, 11, 23),
         pr_sigma_date_transient=5,
         pr_median_lambda=1 / 8,
         pr_sigma_lambda=0.02,  # No wiggle
@@ -98,7 +98,7 @@ log.info(
 
 cp_b.append(  # Lockdown start in 2 weeks
     dict(
-        pr_mean_date_transient=datetime.datetime(2020, 11, 15)
+        pr_mean_date_transient=datetime.datetime(2020, 11, 2)
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
         pr_median_lambda=0.08,
@@ -107,7 +107,7 @@ cp_b.append(  # Lockdown start in 2 weeks
 )
 cp_b.append(  # Lockdown start in 2 weeks
     dict(
-        pr_mean_date_transient=datetime.datetime(2020, 12, 6),
+        pr_mean_date_transient=datetime.datetime(2020, 11, 23),
         pr_sigma_date_transient=5,
         pr_median_lambda=1 / 8,
         pr_sigma_lambda=0.02,  # No wiggle
@@ -197,9 +197,9 @@ mod_c = create_model(cp_c, params_model)
 
 """ ## MCMC sampling
 """
-tr_a = pm.sample(model=mod_a, tune=1000, draws=1000, init="advi+adapt_diag")
-tr_b = pm.sample(model=mod_b, tune=1000, draws=1000, init="advi+adapt_diag")
-tr_c = pm.sample(model=mod_c, tune=1000, draws=1000, init="advi+adapt_diag")
+tr_a = pm.sample(model=mod_a, tune=100, draws=100, init="advi+adapt_diag")
+tr_b = pm.sample(model=mod_b, tune=100, draws=100, init="advi+adapt_diag")
+tr_c = pm.sample(model=mod_c, tune=100, draws=100, init="advi+adapt_diag")
 
 import pickle
 
@@ -254,8 +254,8 @@ fig, axes = cov19.plot.timeseries_overview(
     tr_b,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Lockdown am {datetime.datetime(2020,11,15).strftime(cov19.plot.rcParams.date_format)} (3 Wochen lang)",
-    color="tab:orange",
+    forecast_label=f"Strenger Lockdown am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)} (3 Wochen lang)",
+    color="tab:green",
 )
 
 fig, axes = cov19.plot.timeseries_overview(
@@ -263,16 +263,16 @@ fig, axes = cov19.plot.timeseries_overview(
     tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Lockdown am {datetime.datetime(2020,11,1).strftime(cov19.plot.rcParams.date_format)} (3 Wochen lang)",
+    forecast_label=f"Milder Lockdown am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)} (3 Wochen lang)",
     forecast_heading=r"$\bf Szenarien\!:$",
     add_more_later=True,
-    color="tab:green",
+    color="tab:orange",
     start=datetime.datetime(2020, 10, 1),
     end=datetime.datetime(2020, 12, 31),
 )
 
 axes[0].set_ylim(-0.07, 0.2)
-axes[1].set_ylim(0, 140_000)
+axes[1].set_ylim(0, 75_000)
 axes[2].set_ylim(0, 220_000)
 
 axes[1].set_ylabel("Täglich neue Fallzahlen")
