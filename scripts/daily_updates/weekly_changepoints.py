@@ -188,7 +188,7 @@ for line in axes[1].lines:
 ax = axins
 
 new_cases_inset = rki.get_new(
-    country="Germany", data_begin=datetime.datetime(2020, 4, 2), data_end=data_end
+    "confirmed",data_begin=datetime.datetime(2020, 4, 2), data_end=data_end
 )
 
 # model fit
