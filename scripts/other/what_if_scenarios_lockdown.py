@@ -48,9 +48,7 @@ change_points = [
 ]
 log.info(f"Adding possible change points at:")
 for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
-    if day.weekday() == 0 and day < datetime.datetime.now() - datetime.timedelta(
-        days=10
-    ):
+    if day.weekday() == 0 and day < datetime.datetime(2020, 10, 1):
         log.info(f"\t{day}")
 
         # Prior factor to previous
@@ -72,9 +70,9 @@ import copy
 cp_a = copy.copy(change_points)
 cp_b = copy.copy(change_points)
 cp_c = copy.copy(change_points)
+cp_d = copy.copy(change_points)
 
-
-cp_a.append(  # Lockdown mild
+cp_a.append(  # Lockdown streng
     dict(
         pr_mean_date_transient=datetime.datetime(2020, 11, 2)
         + datetime.timedelta(days=1),  # shift to offset transient length
@@ -83,6 +81,7 @@ cp_a.append(  # Lockdown mild
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
+""" no end
 cp_a.append(  # Lockdown end in two weeks
     dict(
         pr_mean_date_transient=datetime.datetime(2020, 11, 23),
@@ -91,12 +90,13 @@ cp_a.append(  # Lockdown end in two weeks
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
+"""
 log.info(
     f"Szenario 1: Lockdown from {cp_a[-2]['pr_mean_date_transient']} to {cp_a[-1]['pr_mean_date_transient']}"
 )
 
 
-cp_b.append(  # Lockdown streng
+cp_b.append(  # Lockdown streng 2.nov
     dict(
         pr_mean_date_transient=datetime.datetime(2020, 11, 2)
         + datetime.timedelta(days=1),  # shift to offset transient length
@@ -105,6 +105,17 @@ cp_b.append(  # Lockdown streng
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
+
+cp_d.append(  # Lockdown streng 16.nov
+    dict(
+        pr_mean_date_transient=datetime.datetime(2020, 11, 16)
+        + datetime.timedelta(days=1),  # shift to offset transient length
+        pr_sigma_date_transient=2,
+        pr_median_lambda=0.075,
+        pr_sigma_lambda=0.02,  # No wiggle
+    )
+)
+"""
 cp_b.append(  # Lockdown start in 2 weeks
     dict(
         pr_mean_date_transient=datetime.datetime(2020, 11, 23),
@@ -113,6 +124,7 @@ cp_b.append(  # Lockdown start in 2 weeks
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
+"""
 log.info(
     f"Szenario 2: Lockdown from {cp_b[-2]['pr_mean_date_transient']} to {cp_b[-1]['pr_mean_date_transient']}"
 )
@@ -194,23 +206,25 @@ params_model = dict(
 mod_a = create_model(cp_a, params_model)
 mod_b = create_model(cp_b, params_model)
 mod_c = create_model(cp_c, params_model)
+mod_d = create_model(cp_d, params_model)
 
 """ ## MCMC sampling
 """
 tr_a = pm.sample(model=mod_a, tune=100, draws=100, init="advi+adapt_diag")
 tr_b = pm.sample(model=mod_b, tune=100, draws=100, init="advi+adapt_diag")
 tr_c = pm.sample(model=mod_c, tune=100, draws=100, init="advi+adapt_diag")
+tr_d = pm.sample(model=mod_d, tune=100, draws=100, init="advi+adapt_diag")
 
 import pickle
 
 pickle.dump(
-    [(mod_a, mod_b, mod_c), (tr_a, tr_b, tr_c)],
+    [(mod_a, mod_b, mod_c, mod_d), (tr_a, tr_b, tr_c, tr_d)],
     open("./data/what_if_lockdown.pickled", "wb"),
 )
 
 """
 with open("./data/what_if_lockdown.pickled", "rb") as f:
-    [(mod_a, mod_b, mod_c), (tr_a, tr_b, tr_c)] = pickle.load(f)
+    [(mod_a, mod_b, mod_c, mod_d), (tr_a, tr_b, tr_c, tr_d)] = pickle.load(f)
 """
 
 """ ## Plotting
@@ -232,9 +246,9 @@ except:
 
 cov19.plot.set_rcparams(cov19.plot.get_rcparams_default())
 cov19.plot.rcParams.draw_ci_50 = False
-cov19.plot.rcParams.draw_ci_75 = False
+cov19.plot.rcParams.draw_ci_75 = True
 cov19.plot.rcParams.draw_ci_95 = True
-cov19.plot.rcParams.locale = "de_DE"
+# cov19.plot.rcParams.locale = "de_DE"
 cov19.plot.rcParams.date_format = "%d. %b"
 cov19.plot.rcParams.fcast_ls = "-"
 
@@ -247,16 +261,18 @@ fig, axes = create_plot_scenarios(
     tr_c,
     offset=total_cases_obs[0],
     forecast_label="Kein Lockdown",
-    color="tab:red",
+    color="#c81c3f",
 )
 
 fig, axes = create_plot_scenarios(
-    mod_b,
-    tr_b,
+    mod_d,
+    tr_d,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Strenger Lockdown am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)} (3 Wochen lang)",
-    color="tab:green",
+    forecast_label=f"Strenger Lockdown am {datetime.datetime(2020,11,16).strftime(cov19.plot.rcParams.date_format)}",
+    forecast_heading=r"$\bf Szenarien\!:$",
+    add_more_later=True,
+    color="#f39c2b",
 )
 
 fig, axes = create_plot_scenarios(
@@ -264,15 +280,26 @@ fig, axes = create_plot_scenarios(
     tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Milder Lockdown am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)} (3 Wochen lang)",
+    forecast_label=f"Milder Lockdown am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)}",
     forecast_heading=r"$\bf Szenarien\!:$",
     add_more_later=True,
-    color="tab:orange",
+    color="#fdd432",
+)
+
+fig, axes = create_plot_scenarios(  # Strenger 2.nov
+    mod_b,
+    tr_b,
+    axes=axes,
+    offset=total_cases_obs[0],
+    forecast_label=f"Strenger Lockdown am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)}",
+    color="#62b366",
     start=datetime.datetime(2020, 10, 1),
     end=datetime.datetime(2020, 12, 31),
 )
 
+
 axes[0].set_ylim(-0.07, 0.2)
+axes[0].set_ylabel("Effektive\nWachstumsrate")
 axes[1].set_ylim(0, 2000)
 axes[2].set_ylim(0, 220_000)
 
