@@ -26,15 +26,19 @@ except ModuleNotFoundError:
 
 """ ## Data retrieval
 """
-rki = cov19.data_retrieval.RKI()
-rki.download_all_available_data(force_download=True)
+owd = cov19.data_retrieval.OWD()
+owd.download_all_available_data(force_download=True)
 data_begin = datetime.datetime(2020, 7, 13)
 data_end = datetime.datetime.today() - datetime.timedelta(
     days=4
 )  # Last rki datapoints are wrong most of the time
 
-new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)
-total_cases_obs = rki.get_total("confirmed", data_begin=data_begin, data_end=data_end)
+new_cases_obs = owd.get_new(
+    "confirmed", country="Germany", data_begin=data_begin, data_end=data_end
+)
+total_cases_obs = owd.get_total(
+    "confirmed", country="Germany", data_begin=data_begin, data_end=data_end
+)
 
 """ ## Create weekly changepoints
 
