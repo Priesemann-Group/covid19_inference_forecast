@@ -40,6 +40,19 @@ The following scenarios are run daily and should use up to date data from the Ro
                                                              
 * Daily updated nowcasting data is available at the [Robert Koch Institute](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx), but is delayed by four days to one week.
 
+#### What-if scenarios lockdown
+
+With a second lockdown present in Germany from the 2nd November onwards, we try to model three different 
+lockdown scenarios.
+
+<p float="left">
+  <img src="scripts/other/figures/what_if_lockdown_german_ts.png" height="450" />
+</p>
+
+The model forecast is smoothed with a moving average and normalized by 1.000.000 inhibitans.
+This format matches the our world in data representation.
+
+
 ### Alternative forecast scenarios, projecting the relaxation of restrictions on May 11
 
 <p float="left">
