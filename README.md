@@ -23,16 +23,15 @@ Our aim is to quantify the effects of intervention policies on the spread of COV
 
 
 ### Daily updated scenarios
-The following scenarios are run daily and should use up to date data from the Robert Koch Institute.
-#### Scenario using weekly changepoints and reporting date data
+#### Scenario using weekly changepoints and reporting date data (OWD)
 <p float="left">
   <img src="figures/weekly_cps_ts.png" height="450" />
   <img src="figures/weekly_cps_dist.png" height="450" />
 </p>
 
-* Daily updated cases by reporting date are retrieved from the [arcgis](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0) dashboard.
+* Daily updated cases by reporting date are retrieved from [Our World in Data](https://ourworldindata.org/).
 
-#### Scenario using weekly changepoints and nowcasting data
+#### Scenario using weekly changepoints and nowcasting data (RKI)
 <p float="left">
   <img src="figures/weekly_cps_nowcast_ts.png" height="450" />
   <img src="figures/weekly_cps_nowcast_dist.png" height="450" />
