@@ -29,10 +29,7 @@ except ModuleNotFoundError:
 owd = cov19.data_retrieval.OWD()
 owd.download_all_available_data(force_download=True)
 data_begin = datetime.datetime(2020, 7, 13)
-data_end = datetime.datetime.today() - datetime.timedelta(
-    days=4
-)  # Last rki datapoints are wrong most of the time
-
+data_end = datetime.datetime.today()
 new_cases_obs = owd.get_new(
     "confirmed", country="Germany", data_begin=data_begin, data_end=data_end
 )
@@ -193,7 +190,7 @@ for line in axes[1].lines:
 
 ax = axins
 
-new_cases_inset = rki.get_new(
+new_cases_inset = owd.get_new(
     "confirmed", data_begin=datetime.datetime(2020, 4, 2), data_end=data_end
 )
 
