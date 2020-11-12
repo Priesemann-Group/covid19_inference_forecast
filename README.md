@@ -48,7 +48,7 @@ lockdown scenarios.
   <img src="scripts/other/figures/what_if_lockdown_german_ts.png" height="450" />
 </p>
 
-The model forecast is smoothed with a moving average and normalized by 1.000.000 inhibitans.
+The model forecast is smoothed with a moving average and normalized by 1.000.000 inhabitants.
 This format matches the our world in data representation.
 
 
