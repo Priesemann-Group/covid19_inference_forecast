@@ -336,6 +336,8 @@ for i in rows:
             this_model, trace, f"transient_len_{i-2}", axes[-i + num_rows + 1, 2]
         )
         axes[-i + num_rows + 1, 2].set_xlabel("")
+    if i == 2:
+        axes[i, 2].set_xlim(18, 40)
 
 # Add ylabel for the first axes
 axes[0, 0].set_ylabel("Density")
