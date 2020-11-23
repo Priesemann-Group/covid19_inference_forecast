@@ -28,8 +28,8 @@ log = logging.getLogger(__name__)
 
 """ ## Data retrieval
 """
-data_begin = datetime.datetime(2020, 9, 1)
-data_end = datetime.datetime.now() - datetime.timedelta(days=4)
+data_begin = datetime.datetime(2020, 8, 1)
+data_end = datetime.datetime(2020, 11, 1)
 rki = cov19.data_retrieval.RKI(True)
 rki.download_all_available_data(force_download=True)
 new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)
@@ -38,17 +38,19 @@ total_cases_obs = rki.get_total("confirmed", data_begin=data_begin, data_end=dat
 
 """ ## Create weekly changepoints up to the 12. Oktober
 """
+# Structures change points in a dict. Variables not passed will assume default values.
 change_points = [
-    dict(  # one possible change point every sunday
-        pr_mean_date_transient=data_begin - datetime.timedelta(days=3),
+    dict(
+        pr_mean_date_transient=data_begin - datetime.timedelta(days=1),
         pr_sigma_date_transient=1.5,
         pr_median_lambda=0.12,
-        pr_sigma_lambda=0.5,  # No wiggle
-    )
+        pr_sigma_lambda=0.5,
+        pr_sigma_transient_len=0.5,
+    ),
 ]
 log.info(f"Adding possible change points at:")
 for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
-    if day.weekday() == 0 and day < datetime.datetime(2020, 10, 1):
+    if day.weekday() == 0 and day < datetime.datetime(2020, 11, 1):
         log.info(f"\t{day}")
 
         # Prior factor to previous
@@ -70,64 +72,29 @@ import copy
 cp_a = copy.copy(change_points)
 cp_b = copy.copy(change_points)
 cp_c = copy.copy(change_points)
-cp_d = copy.copy(change_points)
 
 cp_a.append(  # Lockdown streng
     dict(
         pr_mean_date_transient=datetime.datetime(2020, 11, 2)
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
-        pr_median_lambda=1 / 8,
+        pr_median_lambda=0.04,
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
-""" no end
-cp_a.append(  # Lockdown end in two weeks
-    dict(
-        pr_mean_date_transient=datetime.datetime(2020, 11, 23),
-        pr_sigma_date_transient=5,
-        pr_median_lambda=1 / 8,
-        pr_sigma_lambda=0.02,  # No wiggle
-    )
-)
-"""
-log.info(
-    f"Szenario 1: Lockdown from {cp_a[-2]['pr_mean_date_transient']} to {cp_a[-1]['pr_mean_date_transient']}"
-)
 
-
-cp_b.append(  # Lockdown streng 2.nov
+cp_b.append(  # Lockdown mild 2.nov
     dict(
         pr_mean_date_transient=datetime.datetime(2020, 11, 2)
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
-        pr_median_lambda=0.075,
-        pr_sigma_lambda=0.02,  # No wiggle
-    )
-)
-
-cp_d.append(  # Lockdown streng 16.nov
-    dict(
-        pr_mean_date_transient=datetime.datetime(2020, 11, 16)
-        + datetime.timedelta(days=1),  # shift to offset transient length
-        pr_sigma_date_transient=2,
-        pr_median_lambda=0.075,
-        pr_sigma_lambda=0.02,  # No wiggle
-    )
-)
-"""
-cp_b.append(  # Lockdown start in 2 weeks
-    dict(
-        pr_mean_date_transient=datetime.datetime(2020, 11, 23),
-        pr_sigma_date_transient=5,
         pr_median_lambda=1 / 8,
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
-"""
-log.info(
-    f"Szenario 2: Lockdown from {cp_b[-2]['pr_mean_date_transient']} to {cp_b[-1]['pr_mean_date_transient']}"
-)
+# cp_c no lockdown
+
+
 """ ## Put the model together
 """
 
@@ -206,19 +173,17 @@ params_model = dict(
 mod_a = create_model(cp_a, params_model)
 mod_b = create_model(cp_b, params_model)
 mod_c = create_model(cp_c, params_model)
-mod_d = create_model(cp_d, params_model)
 
 """ ## MCMC sampling
 """
-tr_a = pm.sample(model=mod_a, tune=100, draws=100, init="advi+adapt_diag")
-tr_b = pm.sample(model=mod_b, tune=100, draws=100, init="advi+adapt_diag")
-tr_c = pm.sample(model=mod_c, tune=100, draws=100, init="advi+adapt_diag")
-tr_d = pm.sample(model=mod_d, tune=100, draws=100, init="advi+adapt_diag")
+tr_a = pm.sample(model=mod_a, tune=1000, draws=1000, init="advi+adapt_diag")
+tr_b = pm.sample(model=mod_b, tune=1000, draws=1000, init="advi+adapt_diag")
+tr_c = pm.sample(model=mod_c, tune=1000, draws=1000, init="advi+adapt_diag")
 
 import pickle
 
 pickle.dump(
-    [(mod_a, mod_b, mod_c, mod_d), (tr_a, tr_b, tr_c, tr_d)],
+    [(mod_a, mod_b, mod_c), (tr_a, tr_b, tr_c)],
     open("./data/what_if_lockdown.pickled", "wb"),
 )
 
@@ -247,7 +212,7 @@ except:
 cov19.plot.set_rcparams(cov19.plot.get_rcparams_default())
 cov19.plot.rcParams.draw_ci_50 = False
 cov19.plot.rcParams.draw_ci_75 = True
-cov19.plot.rcParams.draw_ci_95 = True
+cov19.plot.rcParams.draw_ci_95 = False
 # cov19.plot.rcParams.locale = "de_DE"
 cov19.plot.rcParams.date_format = "%d. %b"
 cov19.plot.rcParams.fcast_ls = "-"
@@ -264,15 +229,15 @@ fig, axes = create_plot_scenarios(
     color="#c81c3f",
 )
 
-fig, axes = create_plot_scenarios(
-    mod_d,
-    tr_d,
+fig, axes = create_plot_scenarios(  # Strenger 2.nov
+    mod_b,
+    tr_b,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Strenger Lockdown am {datetime.datetime(2020,11,16).strftime(cov19.plot.rcParams.date_format)}",
-    forecast_heading=r"$\bf Szenarien\!:$",
-    add_more_later=True,
-    color="#f39c2b",
+    forecast_label=f"Milder Lockdown am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)}",
+    color="#fdd432",
+    start=datetime.datetime(2020, 10, 1),
+    end=datetime.datetime(2020, 12, 31),
 )
 
 fig, axes = create_plot_scenarios(
@@ -280,28 +245,18 @@ fig, axes = create_plot_scenarios(
     tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Milder Lockdown am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)}",
-    forecast_heading=r"$\bf Szenarien\!:$",
-    add_more_later=True,
-    color="#fdd432",
-)
-
-fig, axes = create_plot_scenarios(  # Strenger 2.nov
-    mod_b,
-    tr_b,
-    axes=axes,
-    offset=total_cases_obs[0],
     forecast_label=f"Strenger Lockdown am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)}",
     color="#62b366",
-    start=datetime.datetime(2020, 10, 1),
-    end=datetime.datetime(2020, 12, 31),
+    forecast_heading=r"$\bf Szenarien\!:$",
+    add_more_later=True,
 )
 
-
-axes[0].set_ylim(-0.07, 0.2)
+for ax in axes:
+    ax.set_xlim(datetime.datetime(2020, 10, 1), datetime.datetime(2020, 12, 1))
+axes[0].set_ylim(-0.15, 0.15)
 axes[0].set_ylabel("Effektive\nWachstumsrate")
-axes[1].set_ylim(0, 2000)
-axes[2].set_ylim(0, 220_000)
+axes[1].set_ylim(0, 500)
+axes[2].set_ylim(0, 0)
 
 axes[1].set_ylabel("Fallzahlen\n pro 1.000.000EW")
 axes[1].set_xlabel("Datum")
@@ -312,9 +267,21 @@ axes[2].get_yaxis().set_visible(False)
 axes[2].spines["bottom"].set_visible(False)
 axes[2].spines["left"].set_visible(False)
 axes[2].texts[0].set_visible(False)  # Remove C letter
+
+
+# R lines
+axes[0].axhline((1.3) ** (1 / 4) - 1.0, ls=":", color="tab:red", zorder=0)
+axes[0].axhline((0.7) ** (1 / 4) - 1.0, ls=":", color="tab:green", zorder=0)
+
+
+# Forecast lines
+axes[0].axvline(datetime.datetime(2020, 11, 2), ls=":", color="tab:gray", zorder=0)
+axes[1].axvline(datetime.datetime(2020, 11, 2), ls=":", color="tab:gray", zorder=0)
+
+
 legend = axes[2].get_legend()
 legend._loc = 10  # center legend
-legend.get_texts()[0].set_text("Daten (RKI Meldedatum)")  # Add to Data legend
+legend.get_texts()[0].set_text("Daten (RKI Meldedatum) geglättet")  # Add to Data legend
 
 # Change size of plot
 fig.set_size_inches(5, 5)
@@ -322,8 +289,26 @@ fig.set_size_inches(5, 5)
 fig._gridspecs[0].set_height_ratios([1, 3.5, 1.5])
 
 
+# Plot total new cases
+new_cases_obs = (
+    (
+        rki.get_new(
+            "confirmed",
+            data_begin=data_begin,
+            data_end=datetime.datetime.now() - datetime.timedelta(days=2),
+        )
+        / 83.02e6
+        * 1e6
+    )
+    .rolling(7)
+    .mean()
+)
+cov19.plot._timeseries(
+    x=new_cases_obs.index, y=new_cases_obs, ax=axes[1], what="data", zorder=0,
+)
+
 fig.savefig(
-    save_to + "german_ts.svg",
+    save_to + "german_ts.pdf",
     dpi=300,
     bbox_inches="tight",
     pad_inches=0.05,
@@ -433,7 +418,7 @@ for this_model, trace, change_points, color, name in zip(
 
     # Save to file
     fig.savefig(
-        save_to + "dist_" + name + ".svg",
+        save_to + "dist_" + name + ".pdf",
         dpi=300,
         bbox_inches="tight",
         pad_inches=0.05,

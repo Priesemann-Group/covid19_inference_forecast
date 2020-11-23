@@ -158,7 +158,7 @@ def create_plot_scenarios(
     # data points and annotations, draw only once
     if not axes_provided:
         ax.text(s="B", transform=ax.transAxes, **letter_kwargs)
-        cov19.plot._timeseries(
+        """cov19.plot._timeseries(
             x=x_data,
             y=y_data,
             ax=ax,
@@ -166,7 +166,7 @@ def create_plot_scenarios(
             color=color_data,
             zorder=5,
             label=label_leg_data,
-        )
+        )"""
         # model fit
         cov19.plot._timeseries(
             x=x_past, y=y_past, ax=ax, what="model", color=color_past,  # label="Fit",

@@ -28,7 +28,7 @@ except ModuleNotFoundError:
 """
 owd = cov19.data_retrieval.OWD()
 owd.download_all_available_data(force_download=True)
-data_begin = datetime.datetime(2020, 6, 13)
+data_begin = datetime.datetime.today() - datetime.timedelta(days=31 * 4)
 data_end = datetime.datetime.today()
 new_cases_obs = owd.get_new(
     "confirmed", country="Germany", data_begin=data_begin, data_end=data_end
@@ -155,8 +155,8 @@ trace = pm.sample(model=this_model, init="advi", tune=1000, draws=1000)
 
 import pickle
 
-with open(f"./traces/weekly_cp.pickle", "wb") as f:
-    pickle.dump((model, trace), f)
+with open(f"./weekly_cp.pickle", "wb") as f:
+    pickle.dump((this_model, trace), f)
 
 
 """ ## Plotting
