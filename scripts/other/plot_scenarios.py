@@ -46,7 +46,7 @@ def create_plot_scenarios(
     # Get rcParams
     rcParams = cov19.plot.rcParams
     figsize = (6, 6)
-    ylim_lam = [-0.15, 0.45]
+    ylim_lam = [-0.15, 0.15]
 
     label_y_new = f"Daily new\nreported cases"
     label_y_cum = f"Total\nreported cases"
@@ -314,7 +314,9 @@ def create_plot_scenarios(
     #         # tel.set_fontweight("bold")
 
     if annotate_watermark:
-        cov19.plot._add_watermark(axes[1])
+        cov19.plot._add_watermark(
+            axes[1], mark="Model nach Dehning et al. 10.1126/science.abb9789"
+        )
 
     fig.suptitle(
         # using script run time. could use last data point though.
