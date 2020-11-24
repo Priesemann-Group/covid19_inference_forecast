@@ -18,9 +18,6 @@ It runs e.g. in Google Colab. Requirement is PyMC3 >= 3.7.
 * __Please take notice of our [disclaimer](disclaimer.md).__
 
 
-
-
-https://semohr.github.io/risikogebiete_deutschland/
 ## Daily updated scenarios
 
 With a second wave hitting Germany and an ordered lockdown on the 2nd November, case number are more interesting than ever before. In the following we show a list of **daily** updated figures using different data sources and the same modeling approach as in our [paper](https://arxiv.org/abs/2004.01105).
