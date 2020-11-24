@@ -17,13 +17,17 @@ It runs e.g. in Google Colab. Requirement is PyMC3 >= 3.7.
 
 * __Please take notice of our [disclaimer](disclaimer.md).__
 
-## Modeling forecast scenarios in Germany (updated figures of the [paper](https://arxiv.org/abs/2004.01105))
-
-Our aim is to quantify the effects of intervention policies on the spread of COVID-19. To that end, we built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. While the first two change points were not sufficient to switch from growth of novel cases to a decline, the third change point (the strict contact ban initiated around March 23) brought this crucial reversal. - Now, a number of stores have been opened and policies have been loosened on the one hand, which may lead to increased spreading (increased ![$\lambda^\ast$](https://render.githubusercontent.com/render/math?math=%24%5Clambda%5E%5Cast%24)). On the other hand, masks are now widely used and contact tracing might start to show effect, which both may reduce the spread of the virus (decrease ![$\lambda^\ast$](https://render.githubusercontent.com/render/math?math=%24%5Clambda%5E%5Cast%24)). We will only start to see the joint effects of the novel govenrmental policies and collective behavior with a delay of 2-3 weeks. Therefore, we show alternative future scenarios here.
 
 
-### Daily updated scenarios
-#### Scenario using weekly changepoints and reporting date data (OWD)
+
+https://semohr.github.io/risikogebiete_deutschland/
+## Daily updated scenarios
+
+With a second wave hitting Germany and an ordered lockdown on the 2nd November, case number are more interesting than ever before. In the following we show a list of **daily** updated figures using different data sources and the same modeling approach as in our [paper](https://arxiv.org/abs/2004.01105).
+
+Additionally there is a lightweight website developed by us to show the age dependent incidence across different regions in Germany (updates every 6 hours). The website can be access [here](https://semohr.github.io/risikogebiete_deutschland/) and was created for our [aerzteblatt paper](https://www.aerzteblatt.de/int/archive/article/216646).
+
+### Scenario using weekly changepoints and reporting date data (OWD)
 <p float="left">
   <img src="figures/weekly_cps_ts.png" height="450" />
   <img src="figures/weekly_cps_dist.png" height="450" />
@@ -31,7 +35,7 @@ Our aim is to quantify the effects of intervention policies on the spread of COV
 
 * Daily updated cases by reporting date are retrieved from [Our World in Data](https://ourworldindata.org/).
 
-#### Scenario using weekly changepoints and nowcasting data (RKI)
+### Scenario using weekly changepoints and nowcasting data (RKI)
 <p float="left">
   <img src="figures/weekly_cps_nowcast_ts.png" height="450" />
   <img src="figures/weekly_cps_nowcast_dist.png" height="450" />
@@ -39,18 +43,33 @@ Our aim is to quantify the effects of intervention policies on the spread of COV
                                                              
 * Daily updated nowcasting data is available at the [Robert Koch Institute](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx), but is delayed by four days to one week.
 
-#### What-if scenarios lockdown
+### What-if scenarios lockdown
 
-With a second lockdown present in Germany from the 2nd November onwards, we try to model three different 
-lockdown scenarios.
+With a second lockdown present in Germany from the 2nd November onwards, we try to model three different lockdown scenarios.
 
 <p float="left">
   <img src="scripts/other/figures/what_if_lockdown_german_ts.png" height="450" />
 </p>
 
-The model forecast is smoothed with a moving average and normalized by 1.000.000 inhabitants.
-This format matches the our world in data representation.
+Until Nov. 1, the R-value was about 1.3.
+In order for the case numbers to decrease rapidly, it must be lowered to R=0.7.
 
+
+We extrapolate three scenarios:
+(Red) The lockdown on November 2 has no effect.
+(Orange) A mild lockdown, with a resulting reproduction number of 1.0 and
+(green) a strict lockdown with a resulting reproduction number of 0.7, thus as effective as in spring.
+The current development (blue data points) suggests that the lockdown is "mild", i.e. not sufficient to reduce the case numbers.
+To reduce the case numbers, not only does an R below 1 need to be achieved, but the R must be well below 1, for example at 0.7 as in spring. Otherwise, the case numbers decrease only very slowly.
+
+
+The discrepancy between data (blue) and prediction (yellow) may be due to (a) the application of stricter test criteria (there are not enough tests for all suspect cases), and (b) the fact that the change in behavior was implemented before November 1. The lockdown was probably already partially implemented before it was prescribed.
+
+
+
+## Modeling forecast scenarios in Germany (updated figures of the [paper](https://arxiv.org/abs/2004.01105))
+
+Our aim is to quantify the effects of intervention policies on the spread of COVID-19. To that end, we built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. While the first two change points were not sufficient to switch from growth of novel cases to a decline, the third change point (the strict contact ban initiated around March 23) brought this crucial reversal. - Now, a number of stores have been opened and policies have been loosened on the one hand, which may lead to increased spreading (increased ![$\lambda^\ast$](https://render.githubusercontent.com/render/math?math=%24%5Clambda%5E%5Cast%24)). On the other hand, masks are now widely used and contact tracing might start to show effect, which both may reduce the spread of the virus (decrease ![$\lambda^\ast$](https://render.githubusercontent.com/render/math?math=%24%5Clambda%5E%5Cast%24)). We will only start to see the joint effects of the novel govenrmental policies and collective behavior with a delay of 2-3 weeks. Therefore, we show alternative future scenarios here.
 
 ### Alternative forecast scenarios, projecting the relaxation of restrictions on May 11
 
@@ -83,10 +102,7 @@ The current scenarios are based on the model that incorporates weekly reporting 
   <img src="figures/Fig_distr_sine_weekend.png" height="450">
 </p>
 
-
-
-## What-if scenarios
-
+### What if
 What if the growth would have continued with less change points?
 
 <img src="figures/what_if_forecast.png" width="500">
