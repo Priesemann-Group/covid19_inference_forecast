@@ -33,6 +33,7 @@ Additionally there is a lightweight website developed by us to show the age depe
 * Daily updated cases by reporting date are retrieved from [Our World in Data](https://ourworldindata.org/).
 
 ### Scenario using weekly changepoints and nowcasting data (RKI)
+We recommend using plot based on reporting date above. The nowcast imputation step of the RKI doesn't take into account varying reporting delays and weekly variations in the percentage of people which report the begin of the symptoms. Both effects lead to biases in recent case numbers (see also [twitter:StefFun](https://twitter.com/StefFun/status/1325938584344555522))
 <p float="left">
   <img src="figures/weekly_cps_nowcast_ts.png" height="450" />
   <img src="figures/weekly_cps_nowcast_dist.png" height="450" />
