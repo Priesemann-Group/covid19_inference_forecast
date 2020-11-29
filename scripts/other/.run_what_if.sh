@@ -11,7 +11,7 @@ which python
 # Pull from git
 git pull
 # Run the two scripts
-/home/smohr/anaconda3/bin/python3.7 what_if_scenarios_lockdown.py
+/home/smohr/anaconda3/bin/python3.7 /home/smohr/Repositories/covid19_inference_forecast/scripts/other/update_scenario.py
 # Commit figures
 git add "./figures/*"
 git commit -m "automatic figures update"

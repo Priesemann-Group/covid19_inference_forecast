@@ -34,17 +34,17 @@ new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_en
 total_cases_obs = rki.get_total("confirmed", data_begin=data_begin, data_end=data_end)
 
 
-with open("./data/what_if_lockdown.pickled", "rb") as f:
+with open("/home/smohr/Repositories/covid19_inference_forecast/scripts/other/data/what_if_lockdown.pickled", "rb") as f:
     [(mod_a, mod_b, mod_c), (tr_a, tr_b, tr_c)] = pickle.load(f)
 
 
 try:
     # only works when called from python, not reliable in interactive ipython etc.
     os.chdir(os.path.dirname(__file__))
-    save_to = "./figures/what_if_lockdown_"
+    save_to = "home/smohr/Repositories/covid19_inference_forecast/scripts/other/figures/what_if_lockdown_"
 except:
     # assume base directory
-    save_to = "./figures/what_if_lockdown_"
+    save_to = "home/smohr/Repositories/covid19_inference_forecast/scripts/other/figures/what_if_lockdown_"
 
 """ ### Timeseries
     Timeseries overview, for now needs an offset variable to get cumulative cases
