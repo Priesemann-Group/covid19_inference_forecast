@@ -19,7 +19,6 @@ git pull
 # Run the two scripts
 /home/smohr/anaconda3/bin/python3.7 weekly_changepoints.py
 /home/smohr/anaconda3/bin/python3.7 weekly_changepoints_with_Rki_Nowcast.py
-/home/smohr/anaconda3/bin/python3.7 ../other/update_scenario.py
 
 # Commit figures
 git add "../../figures/*"
