@@ -70,7 +70,7 @@ fig, axes = create_plot_scenarios(
     mod_c,
     tr_c,
     offset=total_cases_obs[0],
-    forecast_label="Kein Lockdown",
+    forecast_label="Keine Verschärfungen",
     color="#c81c3f",
     forecast_heading=r"$\bf Szenarien\!:$",
     add_more_later=True,
@@ -81,7 +81,7 @@ fig, axes = create_plot_scenarios(  # Strenger 2.nov
     tr_b,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Milder Lockdown am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)}",
+    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)}",
     color="#fdd432",
     start=datetime.datetime(2020, 10, 1),
     end=datetime.datetime(2020, 12, 31),
@@ -92,7 +92,7 @@ fig, axes = create_plot_scenarios(
     tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Strenger Lockdown am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)}",
+    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020,11,2).strftime(cov19.plot.rcParams.date_format)}",
     color="#62b366",
 )
 
