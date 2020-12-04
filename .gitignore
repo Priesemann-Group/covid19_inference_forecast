@@ -87,3 +87,7 @@ target/
 
 # Daily downloaded nowcasting data xlsx
 *.xlsx
+
+# Pickled data
+*.pickle
+*.pickled
