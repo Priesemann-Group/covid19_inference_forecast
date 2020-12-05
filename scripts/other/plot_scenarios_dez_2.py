@@ -70,7 +70,7 @@ fig, axes = create_plot_scenarios(
     mod_c,
     tr_c,
     offset=total_cases_obs[0],
-    forecast_label="Keine Verschärfungen",
+    forecast_label="Keine Änderung der sozialen Kontakte",
     color="#c81c3f",
     forecast_heading=r"$\bf Szenarien\!:$",
     add_more_later=True,
@@ -92,13 +92,13 @@ fig, axes = create_plot_scenarios(
     tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020, 12, 25).strftime(cov19.plot.rcParams.date_format)}",
+    forecast_label=f"Vermehrte soziale Kontakte zu Weihnachten",
     color="#62b366",
 )
 
 # Set limit for x axes
 for ax in axes:
-    ax.set_xlim(datetime.datetime(2020, 10, 22), datetime.datetime(2021, 2, 1))
+    ax.set_xlim(datetime.datetime(2020, 11, 10), datetime.datetime(2021, 2, 1))
 
 # Set lambda labels and limit
 axes[0].set_ylim(-0.15, 0.15)
@@ -127,7 +127,10 @@ axes[0].axhline((0.7) ** (1 / 4) - 1.0, ls=":", color="tab:green", zorder=0)
 # Annotations forecast/prognose lines
 date_ld = datetime.datetime(2020, 12, 25)
 axes[0].axvline(
-    date_ld - datetime.timedelta(days=9), ls=":", color="tab:gray", zorder=0,
+    date_ld - datetime.timedelta(days=9),
+    ls=":",
+    color="tab:gray",
+    zorder=0,
 )
 axes[1].axvline(date_ld, ls=":", color="tab:gray", zorder=0)
 axes[0].text(
@@ -178,7 +181,9 @@ fig._gridspecs[0].set_height_ratios([1, 3.5, 1.5])
 new_cases_obs = (
     (
         rki.get_new(
-            "confirmed", data_begin=data_begin, data_end=datetime.datetime.now(),
+            "confirmed",
+            data_begin=data_begin,
+            data_end=datetime.datetime.now(),
         )
         / 83.02e6
         * 1e6
@@ -187,7 +192,11 @@ new_cases_obs = (
     .mean()
 )
 cov19.plot._timeseries(
-    x=new_cases_obs.index, y=new_cases_obs, ax=axes[1], what="data", zorder=0,
+    x=new_cases_obs.index,
+    y=new_cases_obs,
+    ax=axes[1],
+    what="data",
+    zorder=0,
 )
 
 fig.savefig(
