@@ -88,7 +88,7 @@ cp_b.append(  # Lockdown mild 2.nov
         pr_mean_date_transient=datetime.datetime(2020, 12, 25)
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
-        pr_median_lambda=0.08,  # to R = 0.85
+        pr_median_lambda=0.17,  # to R = 1.2
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
