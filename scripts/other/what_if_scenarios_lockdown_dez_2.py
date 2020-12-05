@@ -52,7 +52,7 @@ change_points = [
 ]
 log.info(f"Adding possible change points at:")
 for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
-    if day.weekday() == 0 and day < datetime.datetime(2020, 12, 14):
+    if day.weekday() == 0 and day < datetime.datetime(2020, 12, 25):
         log.info(f"\t{day.strftime('%d.%m.%y')}")
 
         # Prior factor to previous
@@ -75,7 +75,7 @@ cp_c = copy(change_points)
 
 cp_a.append(  # Lockdown streng
     dict(
-        pr_mean_date_transient=datetime.datetime(2020, 12, 14)
+        pr_mean_date_transient=datetime.datetime(2020, 12, 25)
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
         pr_median_lambda=0.04,  # to R = 0.7
@@ -85,7 +85,7 @@ cp_a.append(  # Lockdown streng
 
 cp_b.append(  # Lockdown mild 2.nov
     dict(
-        pr_mean_date_transient=datetime.datetime(2020, 12, 14)
+        pr_mean_date_transient=datetime.datetime(2020, 12, 25)
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
         pr_median_lambda=0.08,  # to R = 0.85
@@ -185,7 +185,7 @@ import pickle
 
 pickle.dump(
     [(mod_a, mod_b, mod_c), (tr_a, tr_b, tr_c)],
-    open("./data/what_if_lockdown_dez.pickled", "wb"),
+    open("./data/what_if_lockdown_dez_2.pickled", "wb"),
 )
 
 # For plotting see update_scenarios!

@@ -30,24 +30,24 @@ from plot import create_plot_scenarios
 """ ## Load data (revise once we reach Dez 14th)
 """
 data_begin = datetime.datetime(2020, 8, 1)
-data_end = datetime.datetime(2020, 12, 14)
+data_end = datetime.datetime(2020, 12, 25)
 rki = cov19.data_retrieval.RKI(True)
 rki.download_all_available_data(force_download=True)
 new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)
 total_cases_obs = rki.get_total("confirmed", data_begin=data_begin, data_end=data_end)
 
 
-with open("./data/what_if_lockdown_dez.pickled", "rb") as f:
+with open("./data/what_if_lockdown_dez_2.pickled", "rb") as f:
     [(mod_a, mod_b, mod_c), (tr_a, tr_b, tr_c)] = pickle.load(f)
 
 
 try:
     # only works when called from python, not reliable in interactive ipython etc.
     os.chdir(os.path.dirname(__file__))
-    save_to = "./figures/what_if_lockdown_"
+    save_to = "./figures/what_if_lockdown_25dez_"
 except:
     # assume base directory
-    save_to = "./figures/what_if_lockdown_"
+    save_to = "./figures/what_if_lockdown_25dez"
 
 """ ### Timeseries
     Timeseries overview, for now needs an offset variable to get cumulative cases
@@ -81,7 +81,7 @@ fig, axes = create_plot_scenarios(  # Strenger 2.nov
     tr_b,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020,12,14).strftime(cov19.plot.rcParams.date_format)}",
+    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020, 12, 25).strftime(cov19.plot.rcParams.date_format)}",
     color="#fdd432",
     start=datetime.datetime(2020, 10, 1),
     end=datetime.datetime(2020, 12, 31),
@@ -92,7 +92,7 @@ fig, axes = create_plot_scenarios(
     tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020,11,14).strftime(cov19.plot.rcParams.date_format)}",
+    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020, 12, 25).strftime(cov19.plot.rcParams.date_format)}",
     color="#62b366",
 )
 
@@ -125,7 +125,7 @@ axes[0].axhline((0.7) ** (1 / 4) - 1.0, ls=":", color="tab:green", zorder=0)
 
 
 # Annotations forecast/prognose lines
-date_ld = datetime.datetime(2020, 12, 14)
+date_ld = datetime.datetime(2020, 12, 25)
 axes[0].axvline(
     date_ld - datetime.timedelta(days=9), ls=":", color="tab:gray", zorder=0,
 )
@@ -160,30 +160,6 @@ axes[1].text(
     "Prognose",
     ha="left",
     color="tab:gray",
-    size=8,
-)
-
-
-# Annotations first ld lines
-date_first_ld = datetime.datetime(2020, 11, 2)
-axes[0].axvline(date_first_ld, ls=":", color="tab:orange", zorder=0)
-axes[1].axvline(
-    date_first_ld + datetime.timedelta(days=9), ls=":", color="tab:orange", zorder=0,
-)
-axes[0].text(
-    date_first_ld - datetime.timedelta(hours=12),
-    0.12,
-    "Ld light",
-    ha="right",
-    color="tab:orange",
-    size=8,
-)
-axes[1].text(
-    date_first_ld + datetime.timedelta(days=8, hours=12),
-    490,
-    "Ld light",
-    ha="right",
-    color="tab:orange",
     size=8,
 )
 
