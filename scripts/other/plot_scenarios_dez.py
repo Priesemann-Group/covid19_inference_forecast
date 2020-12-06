@@ -81,7 +81,7 @@ fig, axes = create_plot_scenarios(  # Strenger 2.nov
     tr_b,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020,12,14).strftime(cov19.plot.rcParams.date_format)}",
+    forecast_label=f"Milde Verschärfungen am {datetime.datetime(2020,12,14).strftime(cov19.plot.rcParams.date_format)}",
     color="#fdd432",
     start=datetime.datetime(2020, 10, 1),
     end=datetime.datetime(2020, 12, 31),
@@ -92,13 +92,13 @@ fig, axes = create_plot_scenarios(
     tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020,11,14).strftime(cov19.plot.rcParams.date_format)}",
+    forecast_label=f"Strenge Verschärfungen am {datetime.datetime(2020,11,14).strftime(cov19.plot.rcParams.date_format)}",
     color="#62b366",
 )
 
 # Set limit for x axes
 for ax in axes:
-    ax.set_xlim(datetime.datetime(2020, 10, 22), datetime.datetime(2021, 2, 1))
+    ax.set_xlim(datetime.datetime(2020, 11, 10), datetime.datetime(2021, 2, 1))
 
 # Set lambda labels and limit
 axes[0].set_ylim(-0.15, 0.15)
@@ -165,6 +165,7 @@ axes[1].text(
 
 
 # Annotations first ld lines
+"""
 date_first_ld = datetime.datetime(2020, 11, 2)
 axes[0].axvline(date_first_ld, ls=":", color="tab:orange", zorder=0)
 axes[1].axvline(
@@ -186,6 +187,7 @@ axes[1].text(
     color="tab:orange",
     size=8,
 )
+"""
 
 
 legend = axes[2].get_legend()

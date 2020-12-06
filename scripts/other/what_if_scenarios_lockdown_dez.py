@@ -36,7 +36,7 @@ rki = cov19.data_retrieval.RKI(True)
 # rki.download_all_available_data(force_download=True)
 new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)
 total_cases_obs = rki.get_total("confirmed", data_begin=data_begin, data_end=data_end)
-
+date_ld = datetime.datetime(2020, 12, 14)
 
 """ ## Create weekly changepoints up to the 14. Dezember
 """
@@ -52,7 +52,7 @@ change_points = [
 ]
 log.info(f"Adding possible change points at:")
 for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
-    if day.weekday() == 0 and day < datetime.datetime(2020, 12, 14):
+    if day.weekday() == 0 and day < date_ld:
         log.info(f"\t{day.strftime('%d.%m.%y')}")
 
         # Prior factor to previous
@@ -75,7 +75,7 @@ cp_c = copy(change_points)
 
 cp_a.append(  # Lockdown streng
     dict(
-        pr_mean_date_transient=datetime.datetime(2020, 12, 14)
+        pr_mean_date_transient=date_ld
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
         pr_median_lambda=0.04,  # to R = 0.7
@@ -85,7 +85,7 @@ cp_a.append(  # Lockdown streng
 
 cp_b.append(  # Lockdown mild 2.nov
     dict(
-        pr_mean_date_transient=datetime.datetime(2020, 12, 14)
+        pr_mean_date_transient=date_ld
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
         pr_median_lambda=0.08,  # to R = 0.85
@@ -93,7 +93,16 @@ cp_b.append(  # Lockdown mild 2.nov
     )
 )
 
-# cp_c no lockdown
+# cp_c no lockdown i.e. R= 1
+cp_c.append(  # Lockdown mild 2.nov
+    dict(
+        pr_mean_date_transient=date_ld
+        + datetime.timedelta(days=1),  # shift to offset transient length
+        pr_sigma_date_transient=2,
+        pr_median_lambda=1 / 8,  # to R = 1.0
+        pr_sigma_lambda=0.02,  # No wiggle
+    )
+)
 
 
 """ ## Put the model together
