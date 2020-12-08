@@ -46,7 +46,7 @@ We recommend using plot based on reporting date above. The nowcast imputation st
 With a second lockdown present in Germany from the 2nd November onwards, we try to model three different lockdown scenarios.
 
 <p float="left">
-  <img src="scripts/other/figures/what_if_lockdown_german_ts.png" height="450" />
+  <img src="scripts/other/figures/what_if_lockdown_german_ts_old.png" height="450" />
 </p>
 
 Until Nov. 1, the R-value was about 1.3.
