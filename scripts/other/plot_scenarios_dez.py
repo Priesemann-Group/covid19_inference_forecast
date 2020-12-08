@@ -14,6 +14,7 @@ import theano
 import theano.tensor as tt
 import pymc3 as pm
 import pickle
+import matplotlib.dates as mdates
 
 try:
     import covid19_inference_new as cov19
@@ -32,7 +33,7 @@ from plot import create_plot_scenarios
 data_begin = datetime.datetime(2020, 8, 1)
 data_end = datetime.datetime(2020, 12, 14)
 rki = cov19.data_retrieval.RKI(True)
-rki.download_all_available_data(force_download=True)
+rki.download_all_available_data(force_download=False)
 new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)
 total_cases_obs = rki.get_total("confirmed", data_begin=data_begin, data_end=data_end)
 
@@ -71,7 +72,7 @@ fig, axes = create_plot_scenarios(
     tr_c,
     offset=total_cases_obs[0],
     forecast_label="Keine Verschärfungen",
-    color="#c81c3f",
+    color="#225ea8",
     forecast_heading=r"$\bf Szenarien\!:$",
     add_more_later=True,
 )
@@ -82,9 +83,7 @@ fig, axes = create_plot_scenarios(  # Strenger 2.nov
     axes=axes,
     offset=total_cases_obs[0],
     forecast_label=f"Milde Verschärfungen am {datetime.datetime(2020,12,14).strftime(cov19.plot.rcParams.date_format)}",
-    color="#fdd432",
-    start=datetime.datetime(2020, 10, 1),
-    end=datetime.datetime(2020, 12, 31),
+    color="#41b6c4",
 )
 
 fig, axes = create_plot_scenarios(
@@ -92,13 +91,9 @@ fig, axes = create_plot_scenarios(
     tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Strenge Verschärfungen am {datetime.datetime(2020,11,14).strftime(cov19.plot.rcParams.date_format)}",
-    color="#62b366",
+    forecast_label=f"Strenge Verschärfungen am {datetime.datetime(2020,12,14).strftime(cov19.plot.rcParams.date_format)}",
+    color="tab:green",
 )
-
-# Set limit for x axes
-for ax in axes:
-    ax.set_xlim(datetime.datetime(2020, 11, 10), datetime.datetime(2021, 2, 1))
 
 # Set lambda labels and limit
 axes[0].set_ylim(-0.15, 0.15)
@@ -108,7 +103,7 @@ axes[0].set_ylabel("Effektive\nWachstumsrate")
 # Set new cases limit and labels
 axes[1].set_ylabel("Fallzahlen\npro 1.000.000 EW")
 axes[1].set_xlabel("Datum")
-axes[1].set_ylim(0, 500)
+axes[1].set_ylim(0, 300)
 
 # Disable total cases axes visuals
 axes[2].set_ylim(0, 0)
@@ -120,12 +115,12 @@ axes[2].texts[0].set_visible(False)  # Remove C letter
 
 
 # R lines
-axes[0].axhline((1.3) ** (1 / 4) - 1.0, ls=":", color="tab:red", zorder=0)
-axes[0].axhline((0.7) ** (1 / 4) - 1.0, ls=":", color="tab:green", zorder=0)
+axes[0].axhline((1.3) ** (1 / 4) - 1.0, ls=":", color="#000000", zorder=0)
+axes[0].axhline((0.7) ** (1 / 4) - 1.0, ls=":", color="#969696", zorder=0)
 
 
 # Annotations forecast/prognose lines
-date_ld = datetime.datetime(2020, 12, 14)
+date_ld = new_cases_obs.index[-1]
 axes[0].axvline(
     date_ld - datetime.timedelta(days=9), ls=":", color="tab:gray", zorder=0,
 )
@@ -148,7 +143,7 @@ axes[0].text(
 )
 axes[1].text(
     date_ld - datetime.timedelta(hours=12),
-    490,
+    290,
     "Inferenz",
     ha="right",
     color="tab:gray",
@@ -156,11 +151,19 @@ axes[1].text(
 )
 axes[1].text(
     date_ld + datetime.timedelta(hours=12),
-    490,
+    290,
     "Prognose",
     ha="left",
     color="tab:gray",
     size=8,
+)
+
+# Annotations ld_date
+axes[0].axvline(
+    datetime.datetime(2020, 12, 14), ls="-.", color="#99bbff", zorder=0,
+)
+axes[1].axvline(
+    datetime.datetime(2020, 12, 14), ls="-.", color="#99bbff", zorder=0,
 )
 
 
@@ -215,6 +218,17 @@ new_cases_obs = (
 cov19.plot._timeseries(
     x=new_cases_obs.index, y=new_cases_obs, ax=axes[1], what="data", zorder=0,
 )
+
+
+# Set limit for x axes
+for ax in axes:
+    ax.set_xlim(datetime.datetime(2020, 10, 15), datetime.datetime(2021, 1, 15))
+    # Lets try this
+    locator = mdates.MonthLocator()
+    formatter = mdates.DateFormatter("%d. %b")
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
+
 
 fig.savefig(
     save_to + "german_ts.pdf",

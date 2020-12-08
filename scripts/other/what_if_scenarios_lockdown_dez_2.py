@@ -53,7 +53,9 @@ change_points = [
 ]
 log.info(f"Adding possible change points at:")
 for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
-    if day.weekday() == 0 and day < date_ld:
+    if day.weekday() == 0 and day < new_cases_obs.index[-1] - datetime.timedelta(
+        days=5
+    ):
         log.info(f"\t{day.strftime('%d.%m.%y')}")
 
         # Prior factor to previous
@@ -68,11 +70,24 @@ for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
         )
 
 
+change_points.append(  # Lockdown streng
+    dict(
+        pr_mean_date_transient=new_cases_obs.index[-1]
+        + datetime.timedelta(days=1)
+        + datetime.timedelta(days=4),  # shift to offset transient length
+        pr_sigma_date_transient=8,
+        pr_median_lambda=1 / 8,  # to R = 0.7
+        pr_sigma_lambda=0.02,  # No wiggle
+    )
+)
+
+
 """ ## Manual add last cps i.e. scenarios!
 """
 cp_a = copy(change_points)
 cp_b = copy(change_points)
 cp_c = copy(change_points)
+
 
 cp_a.append(  # Lockdown streng
     dict(
@@ -95,15 +110,6 @@ cp_b.append(  # Lockdown mild 2.nov
 )
 
 # cp_c no lockdown i.e. R= 1
-cp_c.append(  # Lockdown mild 2.nov
-    dict(
-        pr_mean_date_transient=date_ld
-        + datetime.timedelta(days=1),  # shift to offset transient length
-        pr_sigma_date_transient=2,
-        pr_median_lambda=1 / 8,  # to R = 1.0
-        pr_sigma_lambda=0.02,  # No wiggle
-    )
-)
 
 
 """ ## Put the model together

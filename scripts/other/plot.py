@@ -288,9 +288,6 @@ def create_plot_scenarios(
         cov19.plot._format_date_xticks(ax)
 
         # biweekly, remove every second element
-        if not axes_provided:
-            for label in ax.xaxis.get_ticklabels()[1::2]:
-                label.set_visible(False)
 
     for ax in insets:
         ax.set_xlim(start, model.data_end)
