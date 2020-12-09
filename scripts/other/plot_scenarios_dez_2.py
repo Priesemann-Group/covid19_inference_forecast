@@ -14,6 +14,7 @@ import theano
 import theano.tensor as tt
 import pymc3 as pm
 import pickle
+import matplotlib.dates as mdates
 
 try:
     import covid19_inference_new as cov19
@@ -31,7 +32,7 @@ from plot import create_plot_scenarios
 """
 data_begin = datetime.datetime(2020, 8, 1)
 data_end = datetime.datetime(2020, 12, 25)
-rki = cov19.data_retrieval.RKI(True)
+rki = cov19.data_retrieval.RKI()
 rki.download_all_available_data(force_download=True)
 new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)
 total_cases_obs = rki.get_total("confirmed", data_begin=data_begin, data_end=data_end)
@@ -67,39 +68,36 @@ mpl.rcParams["font.family"] = "sans-serif"
 
 # Create plots
 fig, axes = create_plot_scenarios(
-    mod_c,
-    tr_c,
+    mod_b,
+    tr_b,
     offset=total_cases_obs[0],
-    forecast_label="Keine Änderung der sozialen Kontakte",
-    color="#c81c3f",
+    forecast_label=f"Vermehrte soziale Kontakte zu Weihnachten",
+    color="#071d58",
     forecast_heading=r"$\bf Szenarien\!:$",
     add_more_later=True,
 )
 
-fig, axes = create_plot_scenarios(  # Strenger 2.nov
-    mod_b,
-    tr_b,
+fig, axes = create_plot_scenarios(
+    mod_c,
+    tr_c,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020, 12, 25).strftime(cov19.plot.rcParams.date_format)}",
-    color="#fdd432",
-    start=datetime.datetime(2020, 10, 1),
-    end=datetime.datetime(2020, 12, 31),
+    forecast_label="Keine Änderung der sozialen Kontakte",
+    color="#225ea8",
 )
 
-fig, axes = create_plot_scenarios(
+fig, axes = create_plot_scenarios(  # Strenger 2.nov
     mod_a,
     tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Vermehrte soziale Kontakte zu Weihnachten",
-    color="#62b366",
+    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020, 12, 25).strftime(cov19.plot.rcParams.date_format)}",
+    color="tab:green",
 )
 
 # Set limit for x axes
 for ax in axes:
-    ax.set_xlim(datetime.datetime(2020, 11, 10), datetime.datetime(2021, 2, 1))
-
+    ax.set_xlim(datetime.datetime(2020, 9, 1), datetime.datetime(2021, 2, 1))
 # Set lambda labels and limit
 axes[0].set_ylim(-0.15, 0.15)
 axes[0].set_ylabel("Effektive\nWachstumsrate")
@@ -108,7 +106,7 @@ axes[0].set_ylabel("Effektive\nWachstumsrate")
 # Set new cases limit and labels
 axes[1].set_ylabel("Fallzahlen\npro 1.000.000 EW")
 axes[1].set_xlabel("Datum")
-axes[1].set_ylim(0, 500)
+axes[1].set_ylim(0, 300)
 
 # Disable total cases axes visuals
 axes[2].set_ylim(0, 0)
@@ -120,17 +118,14 @@ axes[2].texts[0].set_visible(False)  # Remove C letter
 
 
 # R lines
-axes[0].axhline((1.3) ** (1 / 4) - 1.0, ls=":", color="tab:red", zorder=0)
-axes[0].axhline((0.7) ** (1 / 4) - 1.0, ls=":", color="tab:green", zorder=0)
+axes[0].axhline((1.3) ** (1 / 4) - 1.0, ls=":", color="#000000", zorder=0)
+axes[0].axhline((0.7) ** (1 / 4) - 1.0, ls=":", color="#969696", zorder=0)
 
 
 # Annotations forecast/prognose lines
-date_ld = datetime.datetime(2020, 12, 25)
+date_ld = new_cases_obs.index[-1]
 axes[0].axvline(
-    date_ld - datetime.timedelta(days=9),
-    ls=":",
-    color="tab:gray",
-    zorder=0,
+    date_ld - datetime.timedelta(days=9), ls=":", color="tab:gray", zorder=0,
 )
 axes[1].axvline(date_ld, ls=":", color="tab:gray", zorder=0)
 axes[0].text(
@@ -151,7 +146,7 @@ axes[0].text(
 )
 axes[1].text(
     date_ld - datetime.timedelta(hours=12),
-    490,
+    290,
     "Inferenz",
     ha="right",
     color="tab:gray",
@@ -159,11 +154,20 @@ axes[1].text(
 )
 axes[1].text(
     date_ld + datetime.timedelta(hours=12),
-    490,
+    290,
     "Prognose",
     ha="left",
     color="tab:gray",
     size=8,
+)
+
+
+# Annotations ld_date
+axes[0].axvline(
+    datetime.datetime(2020, 12, 24), ls="-.", color="#99bbff", zorder=0,
+)
+axes[1].axvline(
+    datetime.datetime(2020, 12, 24), ls="-.", color="#99bbff", zorder=0,
 )
 
 
@@ -181,9 +185,7 @@ fig._gridspecs[0].set_height_ratios([1, 3.5, 1.5])
 new_cases_obs = (
     (
         rki.get_new(
-            "confirmed",
-            data_begin=data_begin,
-            data_end=datetime.datetime.now(),
+            "confirmed", data_begin=data_begin, data_end=datetime.datetime.now(),
         )
         / 83.02e6
         * 1e6
@@ -192,12 +194,21 @@ new_cases_obs = (
     .mean()
 )
 cov19.plot._timeseries(
-    x=new_cases_obs.index,
-    y=new_cases_obs,
-    ax=axes[1],
-    what="data",
-    zorder=0,
+    x=new_cases_obs.index, y=new_cases_obs, ax=axes[1], what="data", zorder=0,
 )
+
+# Set limit for x axes
+for ax in axes:
+    ax.set_xlim(datetime.datetime(2020, 10, 15), datetime.datetime(2021, 1, 15))
+    # Lets try this
+    locator = mdates.MonthLocator()
+    formatter = mdates.DateFormatter("%d. %b")
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
+
+from matplotlib.ticker import FormatStrFormatter
+
+axes[1].yaxis.set_major_formatter(FormatStrFormatter("%g"))
 
 fig.savefig(
     save_to + "german_ts.pdf",

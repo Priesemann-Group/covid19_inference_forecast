@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 """ ## Load data (revise once we reach Dez 14th)
 """
 data_begin = datetime.datetime(2020, 8, 1)
-data_end = datetime.datetime.now() - datetime.timedelta(days=4)
+data_end = datetime.datetime.now() - datetime.timedelta(days=2)
 rki = cov19.data_retrieval.RKI(True)
 # rki.download_all_available_data(force_download=True)
 new_cases_obs = rki.get_new("confirmed", data_begin=data_begin, data_end=data_end)
@@ -52,7 +52,9 @@ change_points = [
 ]
 log.info(f"Adding possible change points at:")
 for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
-    if day.weekday() == 0 and day < date_ld:
+    if day.weekday() == 0 and day < new_cases_obs.index[-1] - datetime.timedelta(
+        days=5
+    ):
         log.info(f"\t{day.strftime('%d.%m.%y')}")
 
         # Prior factor to previous
@@ -66,6 +68,16 @@ for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
             )
         )
 
+change_points.append(  # Lockdown streng
+    dict(
+        pr_mean_date_transient=new_cases_obs.index[-1]
+        + datetime.timedelta(days=1)
+        + datetime.timedelta(days=4),  # shift to offset transient length
+        pr_sigma_date_transient=8,
+        pr_median_lambda=1 / 8,  # to R = 0.7
+        pr_sigma_lambda=0.02,  # No wiggle
+    )
+)
 
 """ ## Manual add last cps i.e. scenarios!
 """
@@ -88,7 +100,7 @@ cp_b.append(  # Lockdown mild 2.nov
         pr_mean_date_transient=date_ld
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
-        pr_median_lambda=0.08,  # to R = 0.85
+        pr_median_lambda=0.099,  # to R = 0.9
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
