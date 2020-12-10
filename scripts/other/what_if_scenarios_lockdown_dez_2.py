@@ -54,7 +54,7 @@ change_points = [
 log.info(f"Adding possible change points at:")
 for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
     if day.weekday() == 0 and day < new_cases_obs.index[-1] - datetime.timedelta(
-        days=5
+        days=7
     ):
         log.info(f"\t{day.strftime('%d.%m.%y')}")
 
@@ -73,9 +73,9 @@ for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
 change_points.append(  # Lockdown streng
     dict(
         pr_mean_date_transient=new_cases_obs.index[-1]
-        + datetime.timedelta(days=1)
-        + datetime.timedelta(days=4),  # shift to offset transient length
-        pr_sigma_date_transient=8,
+        - datetime.timedelta(days=2)
+        + datetime.timedelta(days=1),  # shift to offset transient length
+        pr_sigma_date_transient=2,
         pr_median_lambda=1 / 8,  # to R = 0.7
         pr_sigma_lambda=0.02,  # No wiggle
     )
@@ -193,9 +193,9 @@ mod_c = create_model(cp_c, params_model)
 
 """ ## MCMC sampling
 """
-tr_a = pm.sample(model=mod_a, tune=100, draws=100, init="advi+adapt_diag")
-tr_b = pm.sample(model=mod_b, tune=100, draws=100, init="advi+adapt_diag")
-tr_c = pm.sample(model=mod_c, tune=100, draws=100, init="advi+adapt_diag")
+tr_a = pm.sample(model=mod_a, tune=500, draws=500, init="advi+adapt_diag")
+tr_b = pm.sample(model=mod_b, tune=500, draws=500, init="advi+adapt_diag")
+tr_c = pm.sample(model=mod_c, tune=500, draws=500, init="advi+adapt_diag")
 
 import pickle
 
