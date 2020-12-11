@@ -105,7 +105,7 @@ params_model = dict(
     N_population=83e6,
 )
 # Median of the prior for the delay in case reporting, we assume 10 days
-pr_delay = 10
+pr_delay = 4
 with cov19.model.Cov19Model(**params_model) as this_model:
     # Create the an array of the time dependent infection rate lambda
     lambda_t_log = cov19.model.lambda_t_with_sigmoids(
