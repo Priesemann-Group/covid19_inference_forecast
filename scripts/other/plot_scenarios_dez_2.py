@@ -71,7 +71,7 @@ fig, axes = create_plot_scenarios(
     mod_b,
     tr_b,
     offset=total_cases_obs[0],
-    forecast_label=f"Vermehrte soziale Kontakte zu Weihnachten",
+    forecast_label=f"Increased social contacts starting Christmas",
     color="#071d58",
     forecast_heading=r"$\bf Szenarien\!:$",
     add_more_later=True,
@@ -82,7 +82,7 @@ fig, axes = create_plot_scenarios(
     tr_c,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label="Keine Änderung der sozialen Kontakte",
+    forecast_label="No change in social contacts",
     color="#225ea8",
 )
 
@@ -91,7 +91,7 @@ fig, axes = create_plot_scenarios(  # Strenger 2.nov
     tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Lockdown Verschärfungen am {datetime.datetime(2020, 12, 25).strftime(cov19.plot.rcParams.date_format)}",
+    forecast_label=f"Strong contact reduction starting Dec 25th",
     color="tab:green",
 )
 
@@ -100,12 +100,12 @@ for ax in axes:
     ax.set_xlim(datetime.datetime(2020, 9, 1), datetime.datetime(2021, 2, 1))
 # Set lambda labels and limit
 axes[0].set_ylim(-0.15, 0.15)
-axes[0].set_ylabel("Effektive\nWachstumsrate")
+axes[0].set_ylabel("Effective\ngrowth rate")
 
 
 # Set new cases limit and labels
-axes[1].set_ylabel("Fallzahlen\npro 1.000.000 EW")
-axes[1].set_xlabel("Datum")
+axes[1].set_ylabel("New cases per\n 1.000.000 inhabitants")
+axes[1].set_xlabel("Date")
 axes[1].set_ylim(0, 300)
 
 # Disable total cases axes visuals
@@ -131,7 +131,7 @@ axes[1].axvline(date_ld, ls=":", color="tab:gray", zorder=0)
 axes[0].text(
     date_ld - datetime.timedelta(days=9, hours=12),
     0.12,
-    "Inferenz",
+    "Inference",
     ha="right",
     color="tab:gray",
     size=8,
@@ -139,7 +139,7 @@ axes[0].text(
 axes[0].text(
     date_ld - datetime.timedelta(days=8, hours=12),
     0.12,
-    "Prognose",
+    "Forecast",
     ha="left",
     color="tab:gray",
     size=8,
@@ -147,7 +147,7 @@ axes[0].text(
 axes[1].text(
     date_ld - datetime.timedelta(hours=12),
     290,
-    "Inferenz",
+    "Inference",
     ha="right",
     color="tab:gray",
     size=8,
@@ -155,7 +155,7 @@ axes[1].text(
 axes[1].text(
     date_ld + datetime.timedelta(hours=12),
     290,
-    "Prognose",
+    "Forecast",
     ha="left",
     color="tab:gray",
     size=8,
@@ -173,7 +173,7 @@ axes[1].axvline(
 
 legend = axes[2].get_legend()
 legend._loc = 10  # center legend
-legend.get_texts()[0].set_text("Daten (RKI Meldedatum) geglättet")  # Add to Data legend
+legend.get_texts()[0].set_text("Data (RKI Meldedatum) smoothed")  # Add to Data legend
 
 # Change size of plot
 fig.set_size_inches(5, 5)
@@ -211,14 +211,14 @@ from matplotlib.ticker import FormatStrFormatter
 axes[1].yaxis.set_major_formatter(FormatStrFormatter("%g"))
 
 fig.savefig(
-    save_to + "german_ts.pdf",
+    save_to + "english_ts.pdf",
     dpi=300,
     bbox_inches="tight",
     pad_inches=0.05,
     transparent=True,
 )
 fig.savefig(
-    save_to + "german_ts.png",
+    save_to + "english_ts.png",
     dpi=300,
     bbox_inches="tight",
     pad_inches=0.05,

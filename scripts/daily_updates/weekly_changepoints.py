@@ -190,7 +190,7 @@ axes[1].set_ylim(0, new_cases_obs.max() + 5000)
 # Add inset for march to juli
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
 
-axins = axes[1].inset_axes(bounds=[0.1, 0.5, 0.4, 0.4])
+axins = axes[1].inset_axes(width="40%", height="30%", loc=4)
 for line in axes[1].lines:
     axins.lines.append(line)
 
