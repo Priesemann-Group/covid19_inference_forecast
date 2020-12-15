@@ -202,9 +202,10 @@ axes[1].set_ylim(0, new_cases_obs.max() + 5000)
 # inset new cases
 # --------------------------------------------------------------------------- #
 # Add inset for march to juli
+"""
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
 
-axins = axes[1].inset_axes(width="40%", height="30%", loc=4)
+axins = axes[1].inset_axes(bounds=[0.1, 0.5, 0.4, 0.4])
 for line in axes[1].lines:
     axins.lines.append(line)
 
@@ -212,7 +213,11 @@ ax = axins
 
 # model fit
 cov19.plot._timeseries(
-    x=new_cases_obs.index, y=new_cases_obs, ax=ax, what="model", color="tab:orange",
+    x=new_cases_obs.index,
+    y=new_cases_obs,
+    ax=ax,
+    what="model",
+    color="tab:orange",
 )
 prec = 1.0 / (np.log10(ax.get_ylim()[1]) - 2.5)
 if prec < 2.0 and prec >= 0:
@@ -221,7 +226,7 @@ if prec < 2.0 and prec >= 0:
     )
     ticks = ax.get_xticks()
     ax.set_xticks(ticks=[new_cases_obs.index.min(), new_cases_obs.index.max()])
-
+"""
 
 # Set y lim for effective growth rate
 axes[0].set_ylim(-0.1, 0.2)
@@ -256,6 +261,7 @@ axes[0].fill_between(
 axes[0].legend(loc="upper right")
 axes[0].get_legend().get_frame().set_linewidth(0.0)
 axes[0].get_legend().get_frame().set_facecolor("#F0F0F0")
+
 
 # Add vline for today
 # axes[0].axvline(datetime.datetime.today(), ls=":", color="tab:gray")

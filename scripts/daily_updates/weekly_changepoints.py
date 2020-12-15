@@ -188,9 +188,10 @@ axes[1].set_ylim(0, new_cases_obs.max() + 5000)
 # inset new cases
 # --------------------------------------------------------------------------- #
 # Add inset for march to juli
+"""
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
 
-axins = axes[1].inset_axes(width="40%", height="30%", loc=4)
+axins = axes[1].inset_axes(bounds=[0.1, 0.5, 0.4, 0.4])
 for line in axes[1].lines:
     axins.lines.append(line)
 
@@ -215,7 +216,7 @@ if prec < 2.0 and prec >= 0:
     ticks = ax.get_xticks()
     ax.set_xticks(ticks=[new_cases_inset.index.min(), new_cases_inset.index.max()])
 
-
+"""
 # save: ts for timeseries
 plt.savefig(
     save_to + "ts.pdf", dpi=300, bbox_inches="tight", pad_inches=0.05,
