@@ -49,8 +49,8 @@ We recommend using plot based on reporting date above. The nowcast imputation st
       <td><h4>25th December</h4></td>
   </tr>
   <tr>
-    <td><img src="scripts/other/figures/what_if_lockdown_german_ts.png" height="450"/></td>
-    <td><img src="scripts/other/figures/what_if_lockdown_25dezgerman_ts.png" height="450"/></td>
+    <td><img src="scripts/other/figures/what_if_lockdown_english_ts.png" height="450"/></td>
+    <td><img src="scripts/other/figures/what_if_lockdown_25dezenglish_ts.png" height="450"/></td>
   </tr>
 </table>
 
