@@ -55,6 +55,15 @@ data_end = df["new_cases"].index[-1]
 new_cases_obs = df["new_cases"]
 total_cases_obs = df["total_cases"]
 
+
+## Additionally we are loading the normal data to plot the last 4 days without inputation
+
+rki = cov19.data_retrieval.RKI(True)
+new_cases_obs_raw = rki.get_new(
+    value="confirmed", data_begin=data_end, data_end=datetime.datetime.today()
+)
+
+
 """ ## Create weekly changepoints
 
     TODO:
@@ -171,7 +180,7 @@ with cov19.model.Cov19Model(**params_model) as this_model:
 """ ## MCMC sampling
 """
 
-trace = pm.sample(model=this_model, init="advi", tune=100, draws=100)
+trace = pm.sample(model=this_model, init="advi", tune=10, draws=10)
 
 
 """ ## Plotting
@@ -256,6 +265,25 @@ axes[0].fill_between(
     alpha=0.1,
     lw=0,
     color="tab:purple",
+)
+
+
+# Plot the raw data
+cov19.plot._timeseries(
+    x=new_cases_obs_raw.index,
+    y=new_cases_obs_raw,
+    ax=axes[1],
+    color="tab:red",
+    label=r"Data (no imputation)",
+    what="data",
+)
+axes[1].legend()
+axes[1].get_legend().get_frame().set_linewidth(0.0)
+axes[1].get_legend().get_frame().set_facecolor("#F0F0F0")
+handles, labels = axes[1].get_legend_handles_labels()
+order = [0, 2, 1]
+axes[1].legend(
+    [handles[idx] for idx in order], [labels[idx] for idx in order], loc="lower left"
 )
 
 axes[0].legend(loc="upper right")
