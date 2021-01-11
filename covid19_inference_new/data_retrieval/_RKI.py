@@ -365,11 +365,11 @@ class RKI(Retrieval):
             raise ValueError("bundesland and landkreis cannot be simultaneously set.")
 
         if data_begin is None:
-            data_begin = self.data[date_type].iloc[0]
+            data_begin = self.data[date_type].max()
         if data_end is None:
-            data_end = self.data[date_type].iloc[-1]
+            data_end = self.data[date_type].min()
 
-        if data_begin == self.data[date_type].iloc[0]:
+        if data_begin == self.data[date_type].max():
             raise ValueError(
                 "Date has to be after the first dataset entry. Set a data_begin date!"
             )
