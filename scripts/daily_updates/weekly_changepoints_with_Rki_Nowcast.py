@@ -58,7 +58,8 @@ total_cases_obs = df["total_cases"]
 
 ## Additionally we are loading the normal data to plot the last 4 days without inputation
 
-rki = cov19.data_retrieval.RKI(True)
+rki = cov19.data_retrieval.RKI(False)
+rki.download_all_available_data(force_download=True)
 new_cases_obs_raw = rki.get_new(
     value="confirmed", data_begin=data_end, data_end=datetime.datetime.today()
 )
@@ -180,7 +181,7 @@ with cov19.model.Cov19Model(**params_model) as this_model:
 """ ## MCMC sampling
 """
 
-trace = pm.sample(model=this_model, init="advi", tune=10, draws=10)
+trace = pm.sample(model=this_model, init="advi", tune=100, draws=100)
 
 
 """ ## Plotting
