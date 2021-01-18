@@ -50,19 +50,19 @@ We propose three different scenarios starting today (see last updated). One with
   <img src="scripts/other/figures/what_if_jan_english_ts.png" height="450" />
 </p>
 
-#### 25th December
+#### Data until 25th December
 Instead of further thougher restrictions around the 14th of December we proposed a lockdown right after Christmas on the 25th November.
 <p float="left">
   <img src="scripts/other/figures/what_if_lockdown_25dezenglish_ts.png" height="450" />
 </p>
 
-#### 14th December
+#### Data until 14th December
 On December 14, further thougher restrictions were adopted because the earlier lockdown failed to reduce casenumbers far enough.
 <p float="left">
   <img src="scripts/other/figures/what_if_lockdown_english_ts.png" height="450" />
 </p>
 
-#### 2nd November
+#### Data until 2nd November
 With a second lockdown (light) present in Germany from the 2nd November onwards, we try to model three different lockdown scenarios.
 
 <p float="left">
