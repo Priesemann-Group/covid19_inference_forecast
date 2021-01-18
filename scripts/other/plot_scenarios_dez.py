@@ -73,7 +73,7 @@ fig, axes = create_plot_scenarios(
     offset=total_cases_obs[0],
     forecast_label="No contact reduction",
     color="#225ea8",
-    forecast_heading=r"$\bf Szenarien\!:$",
+    forecast_heading=r"$\bf Scenarios\!:$",
     add_more_later=True,
 )
 

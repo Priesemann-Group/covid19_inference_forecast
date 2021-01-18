@@ -43,6 +43,13 @@ We recommend using plot based on reporting date above. The nowcast imputation st
 
 ### What-if scenarios lockdown
 
+
+### General
+We propose three different scenarios starting today (see last updated). One with further restriction from today, a second one with deteriorating restrictions and thridly a scenario where the underling reproduction number does not change from the current numbers.
+<p float="left">
+  <img src="scripts/other/figures/what_if_jan_english_ts.png" height="450" />
+</p>
+
 #### 25th December
 Instead of further thougher restrictions around the 14th of December we proposed a lockdown right after Christmas on the 25th November.
 <p float="left">
