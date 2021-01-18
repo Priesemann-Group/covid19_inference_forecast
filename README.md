@@ -45,7 +45,7 @@ We recommend using plot based on reporting date above. The nowcast imputation st
 
 
 ### General
-We propose three different scenarios starting today (see last updated). One with further restriction from today, a second one with deteriorating restrictions and thridly a scenario where the underling reproduction number does not change from the current number.
+We propose three different scenarios starting today (see last updated). One with further restriction from today (R=0.7), a second one with deteriorating restrictions (R=1.2) and thridly a scenario where the underling reproduction number does not change from the current number.
 <p float="left">
   <img src="scripts/other/figures/what_if_jan_english_ts.png" height="450" />
 </p>
