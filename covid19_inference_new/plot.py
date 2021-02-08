@@ -1071,14 +1071,16 @@ def _add_mpl_rect_around_text(text_list, ax, x_padding=0.05, y_padding=0.05, **k
     y_gmax = np.clip(y_gmax + y_padding, 0, 1)
     x_gmin = np.clip(x_gmin - x_padding, 0, 1)
     x_gmax = np.clip(x_gmax + x_padding, 0, 1)
-
-    rect = mpl.patches.Rectangle(
+    rect = mpl.patches.FancyBboxPatch(
         (x_gmin, y_gmin),
-        x_gmax - x_gmin,
-        y_gmax - y_gmin,
+        (x_gmax - x_gmin),
+        (y_gmax - y_gmin),
         transform=ax.transAxes,
+        boxstyle="round,pad=0,rounding_size=0.02",
+        lw=0,
         **kwargs,
     )
+
 
     ax.add_patch(rect)
 
