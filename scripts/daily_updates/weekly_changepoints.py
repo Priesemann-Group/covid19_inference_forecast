@@ -151,7 +151,7 @@ with cov19.model.Cov19Model(**params_model) as this_model:
 """ ## MCMC sampling
 """
 
-trace = pm.sample(model=this_model, init="advi", tune=1000, draws=1000)
+trace = pm.sample(model=this_model, init="advi", tune=500, draws=500)
 
 import pickle
 
@@ -183,6 +183,47 @@ for ax in axes:
 axes[0].set_ylim(-0.1, 0.2)
 axes[1].set_ylim(0, new_cases_obs.max() + 5000)
 # Add vline for today
+
+""" Add text for current reproduction number
+"""
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0 * np.array(data)
+    n = len(a)
+    m, se = np.mean(a), scipy.stats.sem(a)
+    h = se * scipy.stats.t.ppf((1 + confidence) / 2., n-1)
+    return m, m-h, m+h
+f_trunc = lambda number, precision: "{{:.{}f}}".format(precision).format(number)
+num_rows = len(change_points) + 1 + 1
+last = num_rows - 2
+current_R = (trace[f"lambda_{last}"] - trace["mu"] + 1)**4
+from covid19_inference_new.plot import _get_mpl_text_coordinates,_add_mpl_rect_around_text
+med, perc1, perc2 = mean_confidence_interval(current_R)
+text_md = f"{f_trunc(med,3)}"
+text_ci = f"[{f_trunc(perc1,3)}, {f_trunc(perc2,3)}]"
+tel_md = axes[0].text(
+    0.8,
+    0.9, # let's have a ten percent margin or so
+    r"Current $R_{RKI} \simeq " + text_md + r"$",
+    fontsize=10,
+    transform=axes[0].transAxes,
+    verticalalignment="top",
+    horizontalalignment="center",
+    zorder=100,
+)
+x_min, x_max, y_min, y_max = _get_mpl_text_coordinates(tel_md, axes[0])
+tel_ci = axes[0].text(
+    0.8,
+    y_min * 0.9,  # let's have a ten percent margin or so
+    text_ci,
+    fontsize=8,
+    transform=axes[0].transAxes,
+    verticalalignment="top",
+    horizontalalignment="center",
+    zorder=101,
+)
+_add_mpl_rect_around_text(
+    [tel_md, tel_ci], axes[0], facecolor="#F0F0F0", alpha=0.5, zorder=99,
+)
 
 # --------------------------------------------------------------------------- #
 # inset new cases
