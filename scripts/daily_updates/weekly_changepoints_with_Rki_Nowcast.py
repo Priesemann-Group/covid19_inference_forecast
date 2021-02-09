@@ -239,7 +239,7 @@ if prec < 2.0 and prec >= 0:
 """
 
 # Set y lim for effective growth rate
-axes[0].set_ylim(-0.1, 0.2)
+axes[0].set_ylim(-0.08, 0.1)
 
 mu = np.mean(trace["mu"])
 cov19.plot._timeseries(
@@ -291,8 +291,8 @@ axes[0].legend(loc="upper left")
 axes[0].get_legend().get_frame().set_linewidth(0.0)
 axes[0].get_legend().get_frame().set_facecolor("#F0F0F0")
 
-""" Add text for current reproduction number
-"""
+r""" Add text for current reproduction number
+
 def mean_confidence_interval(data, confidence=0.95):
     a = 1.0 * np.array(data)
     n = len(a)
@@ -331,7 +331,7 @@ tel_ci = axes[0].text(
 _add_mpl_rect_around_text(
     [tel_md, tel_ci], axes[0], facecolor="#F0F0F0", alpha=0.5, zorder=99,
 )
-
+"""
 # Add vline for today
 # axes[0].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
 # axes[1].axvline(datetime.datetime.today(), ls=":", color="tab:gray")

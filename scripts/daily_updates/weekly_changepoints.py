@@ -180,7 +180,7 @@ fig, axes = cov19.plot.timeseries_overview(this_model, trace, offset=total_cases
 for ax in axes:
     ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=4 * 17))
 # Set y lim for effective growth rate
-axes[0].set_ylim(-0.1, 0.2)
+axes[0].set_ylim(-0.08, 0.1)
 axes[1].set_ylim(0, new_cases_obs.max() + 5000)
 # Add vline for today
 
