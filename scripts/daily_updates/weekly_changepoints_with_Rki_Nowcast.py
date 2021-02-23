@@ -45,6 +45,7 @@ df = pd.read_excel(
 
 df["date"] = pd.to_datetime(df["Datum des Erkrankungsbeginns"])
 df = df.set_index(df["date"])
+
 df["new_cases"] = df["Punktschätzer der Anzahl Neuerkrankungen (ohne Glättung)"]
 df["total_cases"] = df["new_cases"].cumsum(axis=0)
 
@@ -54,7 +55,20 @@ data_end = df["new_cases"].index[-1]
 
 new_cases_obs = df["new_cases"]
 total_cases_obs = df["total_cases"]
-
+df = df[data_begin : (data_end - datetime.timedelta(days=1))]
+df["Punktschätzer des 7-Tage-R Wertes"] = (
+    df["Punktschätzer des 7-Tage-R Wertes"].str.replace(",", ".").astype(float)
+)
+df["Untere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"] = (
+    df["Untere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"]
+    .str.replace(",", ".")
+    .astype(float)
+)
+df["Obere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"] = (
+    df["Obere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"]
+    .str.replace(",", ".")
+    .astype(float)
+)
 
 ## Additionally we are loading the normal data to plot the last 4 days without inputation
 
