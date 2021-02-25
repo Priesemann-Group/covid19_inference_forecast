@@ -38,12 +38,17 @@ open(
     "Nowcasting_data_" + datetime.datetime.today().strftime("%Y_%m_%d") + ".xlsx", "wb"
 ).write(myfile.content)
 
-df = pd.read_excel(
+df_a = pd.read_excel(
     "Nowcasting_data_" + datetime.datetime.today().strftime("%Y_%m_%d") + ".xlsx",
     sheet_name="Nowcast_R",
 )
+df = pd.read_excel(
+    "Nowcasting_data_" + datetime.datetime.today().strftime("%Y_%m_%d") + ".xlsx",
+    sheet_name="Nowcast_R",
+    thousands=".",
+)
 
-df["date"] = pd.to_datetime(df["Datum des Erkrankungsbeginns"])
+df["date"] = pd.to_datetime(df_a["Datum des Erkrankungsbeginns"])
 df = df.set_index(df["date"])
 
 df["new_cases"] = df["Punktschätzer der Anzahl Neuerkrankungen (ohne Glättung)"]
