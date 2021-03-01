@@ -48,7 +48,7 @@ df = pd.read_excel(
     thousands=".",
 )
 
-df["date"] = pd.to_datetime(df_a["Datum des Erkrankungsbeginns"])
+df["date"] = pd.to_datetime(df_a["Datum des Erkrankungsbeginns"], format="%d.%m.%Y")
 df = df.set_index(df["date"])
 
 df["new_cases"] = df["Punktschätzer der Anzahl Neuerkrankungen (ohne Glättung)"]
