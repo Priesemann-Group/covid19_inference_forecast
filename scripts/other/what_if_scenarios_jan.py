@@ -30,7 +30,7 @@ log = logging.getLogger(__name__)
 
 """ ## Load data (revise once we reach Dez 14th)
 """
-data_begin = datetime.datetime(2020, 8, 1)
+data_begin = datetime.datetime(2020, 12, 10)
 data_end = datetime.datetime.now() - datetime.timedelta(days=2)
 rki = cov19.data_retrieval.RKI(True)
 # rki.download_all_available_data(force_download=True)
