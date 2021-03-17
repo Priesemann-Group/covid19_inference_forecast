@@ -197,7 +197,7 @@ cov19.plot._timeseries(
 
 # Set limit for x axes
 for ax in axes:
-    ax.set_xlim(datetime.datetime(2020, 12, 1), datetime.datetime(2021, 3, 15))
+    ax.set_xlim(data_end - datetime.timedelta(weeks=8) , data_end + datetime.timedelta(weeks=8))
     # Lets try this
     locator = mdates.MonthLocator()
     formatter = mdates.DateFormatter("%d. %b")
