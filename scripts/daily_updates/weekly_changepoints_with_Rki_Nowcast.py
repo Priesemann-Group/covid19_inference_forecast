@@ -62,16 +62,16 @@ new_cases_obs = df["new_cases"]
 total_cases_obs = df["total_cases"]
 df = df[data_begin : (data_end - datetime.timedelta(days=1))]
 df["Punktschätzer des 7-Tage-R Wertes"] = (
-    df["Punktschätzer des 7-Tage-R Wertes"].str.replace(",", ".").astype(float)
+    df["Punktschätzer des 7-Tage-R Wertes"].replace(",", ".").astype(float)
 )
 df["Untere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"] = (
     df["Untere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"]
-    .str.replace(",", ".")
+    .replace(",", ".")
     .astype(float)
 )
 df["Obere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"] = (
     df["Obere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"]
-    .str.replace(",", ".")
+    .replace(",", ".")
     .astype(float)
 )
 
