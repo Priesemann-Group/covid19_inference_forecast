@@ -53,7 +53,7 @@ We propose three different scenarios starting today (see last updated). One with
 #### Data until 2nd February
 Around chirstmas and new year one can clearly see that the reporting was not working as effectifly as before or afterwards. Our model is able to bridge this behaviour if enought data before and afterwards is given.
 <p float="left">
-  <img src="scripts/other/figures/what_if_jan_english_ts_02_04.pdf" height="450" />
+  <img src="scripts/other/figures/what_if_jan_english_ts_02_04.png" height="450" />
 </p>
 
 
