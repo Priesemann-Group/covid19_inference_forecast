@@ -27,34 +27,16 @@ except ModuleNotFoundError:
 """ ## Data retrieval
 """
 
-# Retrieve nowcasting data from rki source using cloudscraper .... because new cloudflare protection wow
-
-url = "https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen.xlsx?__blob=publicationFile"
-import cloudscraper
-
-scraper = cloudscraper.create_scraper()
-myfile = scraper.get(url)
-open(
-    "Nowcasting_data_" + datetime.datetime.today().strftime("%Y_%m_%d") + ".xlsx", "wb"
-).write(myfile.content)
-
-df_a = pd.read_excel(
-    "Nowcasting_data_" + datetime.datetime.today().strftime("%Y_%m_%d") + ".xlsx",
-    sheet_name="Nowcast_R",
-)
-df = pd.read_excel(
-    "Nowcasting_data_" + datetime.datetime.today().strftime("%Y_%m_%d") + ".xlsx",
-    sheet_name="Nowcast_R",
-    thousands=".",
-)
-
-df["date"] = pd.to_datetime(df_a["Datum des Erkrankungsbeginns"], format="%d.%m.%Y")
+# Get nowcasting data: they have a github repo now... wow
+url = "https://raw.githubusercontent.com/robert-koch-institut/SARS-CoV-2-Nowcasting_und_-R-Schaetzung/main/Nowcast_R_aktuell.csv"
+df = pd.read_csv(url)
+df["date"] = pd.to_datetime(df["Datum"], format="%Y-%m-%d")
 df = df.set_index(df["date"])
 
-df["new_cases"] = df["Punktschätzer der Anzahl Neuerkrankungen (ohne Glättung)"]
+df["new_cases"] = df["PS_COVID_Faelle"]
 df["total_cases"] = df["new_cases"].cumsum(axis=0)
 
-data_begin = datetime.datetime(2020, 7, 13)
+data_begin = datetime.datetime.today() - datetime.timedelta(days=30 * 3)
 data_end = df["new_cases"].index[-1]
 
 
@@ -62,21 +44,13 @@ new_cases_obs = df["new_cases"]
 total_cases_obs = df["total_cases"]
 df = df[data_begin : (data_end - datetime.timedelta(days=1))]
 df["Punktschätzer des 7-Tage-R Wertes"] = (
-    df["Punktschätzer des 7-Tage-R Wertes"].astype(str).str.replace(",", ".").astype(float)
+    df["PS_7_Tage_R_Wert"].astype(str).str.replace(",", ".").astype(float)
 )
 df["Untere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"] = (
-    df["Untere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"]
-    .astype(str)
-    .str
-    .replace(",", ".")
-    .astype(float)
+    df["PS_7_Tage_R_Wert"].astype(str).str.replace(",", ".").astype(float)
 )
 df["Obere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"] = (
-    df["Obere Grenze des 95%-Prädiktionsintervalls des 7-Tage-R Wertes"]
-    .astype(str)
-    .str
-    .replace(",", ".")
-    .astype(float)
+    df["OG_PI_7_Tage_R_Wert"].astype(str).str.replace(",", ".").astype(float)
 )
 
 ## Additionally we are loading the normal data to plot the last 4 days without inputation
@@ -361,7 +335,11 @@ x_min, x_max, y_min, y_max = _get_mpl_text_coordinates(tel_md, axes[0])
 )
 """
 _add_mpl_rect_around_text(
-    [tel_md], axes[0], facecolor="#F0F0F0", alpha=0.5, zorder=99,
+    [tel_md],
+    axes[0],
+    facecolor="#F0F0F0",
+    alpha=0.5,
+    zorder=99,
 )
 
 # Add vline for today
@@ -370,10 +348,16 @@ _add_mpl_rect_around_text(
 # axes[2].axvline(datetime.datetime.today(), ls=":", color="tab:gray")
 # ts for timeseries
 plt.savefig(
-    save_to + "ts.pdf", dpi=300, bbox_inches="tight", pad_inches=0.05,
+    save_to + "ts.pdf",
+    dpi=300,
+    bbox_inches="tight",
+    pad_inches=0.05,
 )
 plt.savefig(
-    save_to + "ts.png", dpi=300, bbox_inches="tight", pad_inches=0.05,
+    save_to + "ts.png",
+    dpi=300,
+    bbox_inches="tight",
+    pad_inches=0.05,
 )
 """ ### Distributions
 """
