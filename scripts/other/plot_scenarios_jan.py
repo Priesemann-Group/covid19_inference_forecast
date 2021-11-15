@@ -28,9 +28,9 @@ log = logging.getLogger(__name__)
 ## Plotting file
 from plot import create_plot_scenarios
 
-""" ## Load data (revise once we reach Dez 14th)
+""" ## Load data 
 """
-data_begin = datetime.datetime(2020, 8, 1)
+data_begin = datetime.datetime.now() - datetime.timedelta(days=7 * 12)
 data_end = datetime.datetime.now() - datetime.timedelta(days=2)
 rki = cov19.data_retrieval.RKI(True)
 rki.download_all_available_data(force_download=False)
@@ -103,7 +103,7 @@ axes[0].set_ylabel("Effective\ngrowth rate")
 # Set new cases limit and labels
 axes[1].set_ylabel("New cases per\n 1.000.000 inhabitants")
 axes[1].set_xlabel("Date")
-axes[1].set_ylim(0, 400)
+axes[1].set_ylim(0, 600)
 
 # Disable total cases axes visuals
 axes[2].set_ylim(0, 0)
@@ -197,7 +197,9 @@ cov19.plot._timeseries(
 
 # Set limit for x axes
 for ax in axes:
-    ax.set_xlim(data_end - datetime.timedelta(weeks=8) , data_end + datetime.timedelta(weeks=8))
+    ax.set_xlim(
+        data_end - datetime.timedelta(weeks=8), data_end + datetime.timedelta(weeks=8)
+    )
     # Lets try this
     locator = mdates.MonthLocator()
     formatter = mdates.DateFormatter("%d. %b")

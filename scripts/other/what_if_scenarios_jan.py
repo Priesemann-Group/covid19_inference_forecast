@@ -28,9 +28,9 @@ import logging
 log = logging.getLogger(__name__)
 
 
-""" ## Load data (revise once we reach Dez 14th)
+""" ## Load data
 """
-data_begin = datetime.datetime(2020, 12, 10)
+data_begin = datetime.datetime.now() - datetime.timedelta(days=7 * 12)
 data_end = datetime.datetime.now() - datetime.timedelta(days=2)
 rki = cov19.data_retrieval.RKI(True)
 # rki.download_all_available_data(force_download=True)
