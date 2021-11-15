@@ -143,19 +143,21 @@ axes[0].text(
 )
 axes[1].text(
     date_ld - datetime.timedelta(hours=12),
-    390,
+    590,
     "Inference",
     ha="right",
     color="tab:gray",
     size=8,
+    zorder=0,
 )
 axes[1].text(
     date_ld + datetime.timedelta(hours=12),
-    390,
+    590,
     "Forecast",
     ha="left",
     color="tab:gray",
     size=8,
+    zorder=0,
 )
 
 # Annotations ld_date
