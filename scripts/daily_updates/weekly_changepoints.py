@@ -181,7 +181,7 @@ for ax in axes:
     ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=4 * 17))
 # Set y lim for effective growth rate
 axes[0].set_ylim(-0.08, 0.1)
-axes[1].set_ylim(0, 40000)
+axes[1].set_ylim(0, 63000)
 # Add vline for today
 
 """ Add text for current reproduction number
