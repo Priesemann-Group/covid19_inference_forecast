@@ -39,7 +39,7 @@ total_cases_obs = rki.get_total("confirmed", data_begin=data_begin, data_end=dat
 
 
 with open("./data/what_if_lockdown_jan.pickled", "rb") as f:
-    [(mod_a, mod_b, mod_c), (tr_a, tr_b, tr_c)] = pickle.load(f)
+    [(mod_a, mod_b, mod_c, mod_d), (tr_a, tr_b, tr_c, tr_d)] = pickle.load(f)
 
 
 try:
@@ -95,6 +95,18 @@ fig, axes = create_plot_scenarios(
     color="tab:green",
 )
 
+# Create plots
+fig, axes = create_plot_scenarios(
+    mod_d,
+    tr_d,
+    offset=total_cases_obs[0],
+    forecast_label="Omikron gets dominant",
+    color="#225ea8",
+    forecast_heading=r"$\bf Scenarios\!:$",
+    add_more_later=True,
+)
+
+
 # Set lambda labels and limit
 axes[0].set_ylim(-0.08, 0.1)
 axes[0].set_ylabel("Effective\ngrowth rate")
@@ -122,7 +134,10 @@ axes[0].axhline((0.7) ** (1 / 4) - 1.0, ls=":", color="#969696", zorder=0)
 # Annotations forecast/prognose lines
 date_ld = new_cases_obs.index[-1]
 axes[0].axvline(
-    date_ld - datetime.timedelta(days=9), ls=":", color="tab:gray", zorder=0,
+    date_ld - datetime.timedelta(days=9),
+    ls=":",
+    color="tab:gray",
+    zorder=0,
 )
 axes[1].axvline(date_ld, ls=":", color="tab:gray", zorder=0)
 axes[0].text(
@@ -143,7 +158,7 @@ axes[0].text(
 )
 axes[1].text(
     date_ld - datetime.timedelta(hours=12),
-    590,
+    990,
     "Inference",
     ha="right",
     color="tab:gray",
@@ -152,7 +167,7 @@ axes[1].text(
 )
 axes[1].text(
     date_ld + datetime.timedelta(hours=12),
-    590,
+    990,
     "Forecast",
     ha="left",
     color="tab:gray",
@@ -184,7 +199,9 @@ fig._gridspecs[0].set_height_ratios([1, 3.5, 1.5])
 new_cases_obs = (
     (
         rki.get_new(
-            "confirmed", data_begin=data_begin, data_end=datetime.datetime.now(),
+            "confirmed",
+            data_begin=data_begin,
+            data_end=datetime.datetime.now(),
         )
         / 83.02e6
         * 1e6
@@ -193,7 +210,11 @@ new_cases_obs = (
     .mean()
 )
 cov19.plot._timeseries(
-    x=new_cases_obs.index, y=new_cases_obs, ax=axes[1], what="data", zorder=0,
+    x=new_cases_obs.index,
+    y=new_cases_obs,
+    ax=axes[1],
+    what="data",
+    zorder=0,
 )
 
 
@@ -269,7 +290,11 @@ x_min, x_max, y_min, y_max = _get_mpl_text_coordinates(tel_md, axes[0])
 )
 """
 _add_mpl_rect_around_text(
-    [tel_md], axes[0], facecolor="#F0F0F0", alpha=0.5, zorder=99,
+    [tel_md],
+    axes[0],
+    facecolor="#F0F0F0",
+    alpha=0.5,
+    zorder=99,
 )
 
 

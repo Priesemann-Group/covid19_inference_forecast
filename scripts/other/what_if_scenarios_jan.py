@@ -75,7 +75,7 @@ for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
 cp_a = copy(change_points)
 cp_b = copy(change_points)
 cp_c = copy(change_points)
-
+cp_d = copy(change_points)
 
 cp_a.append(  # Lockdown streng
     dict(
@@ -93,6 +93,16 @@ cp_b.append(  # Up again
         + datetime.timedelta(days=1),  # shift to offset transient length
         pr_sigma_date_transient=2,
         pr_median_lambda=0.17,  # to R = 1.2
+        pr_sigma_lambda=0.02,  # No wiggle
+    )
+)
+
+cp_d.append(  # Omikron
+    dict(
+        pr_mean_date_transient=date_ld
+        + datetime.timedelta(days=2.5),  # shift to offset transient length
+        pr_sigma_date_transient=5,
+        pr_median_lambda=0.3142,
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
@@ -152,7 +162,8 @@ def create_model(change_points, params_model):
         # Modulate the inferred cases by a abs(sin(x)) function, to account for weekend effects
         # Also adds the "new_cases" variable to the trace that has all model features.
         new_cases = cov19.model.week_modulation(
-            cases=new_cases, name_cases="new_cases",
+            cases=new_cases,
+            name_cases="new_cases",
         )
 
         # Define the likelihood, uses the new_cases_obs set as model parameter
@@ -178,17 +189,20 @@ params_model = dict(
 mod_a = create_model(cp_a, params_model)
 mod_b = create_model(cp_b, params_model)
 mod_c = create_model(cp_c, params_model)
+mod_d = create_model(cp_c, params_model)
 
 """ ## MCMC sampling
 """
 tr_a = pm.sample(model=mod_a, tune=500, draws=500, init="advi+adapt_diag")
 tr_b = pm.sample(model=mod_b, tune=500, draws=500, init="advi+adapt_diag")
 tr_c = pm.sample(model=mod_c, tune=500, draws=500, init="advi+adapt_diag")
+tr_d = pm.sample(model=mod_c, tune=500, draws=500, init="advi+adapt_diag")
+
 
 import pickle
 
 pickle.dump(
-    [(mod_a, mod_b, mod_c), (tr_a, tr_b, tr_c)],
+    [(mod_a, mod_b, mod_c, mod_d), (tr_a, tr_b, tr_c, tr_d)],
     open("./data/what_if_lockdown_jan.pickled", "wb"),
 )
 
