@@ -99,16 +99,16 @@ fig, axes = create_plot_scenarios(
 fig, axes = create_plot_scenarios(
     mod_d,
     tr_d,
+    axes=axes,
     offset=total_cases_obs[0],
     forecast_label="Omikron gets dominant",
-    color="#225ea8",
-    forecast_heading=r"$\bf Scenarios\!:$",
+    color="tab:purple",
     add_more_later=True,
 )
 
 
 # Set lambda labels and limit
-axes[0].set_ylim(-0.08, 0.1)
+axes[0].set_ylim(-0.12, 0.22)
 axes[0].set_ylabel("Effective\ngrowth rate")
 
 
@@ -141,24 +141,24 @@ axes[0].axvline(
 )
 axes[1].axvline(date_ld, ls=":", color="tab:gray", zorder=0)
 axes[0].text(
-    date_ld - datetime.timedelta(days=9, hours=12),
-    0.12,
+    date_ld - datetime.timedelta(days=9, hours=20),
+    0.25,
     "Inference",
     ha="right",
     color="tab:gray",
     size=8,
 )
 axes[0].text(
-    date_ld - datetime.timedelta(days=8, hours=12),
-    0.12,
+    date_ld - datetime.timedelta(days=8, hours=20),
+    0.25,
     "Forecast",
     ha="left",
     color="tab:gray",
     size=8,
 )
 axes[1].text(
-    date_ld - datetime.timedelta(hours=12),
-    990,
+    date_ld - datetime.timedelta(hours=20),
+    970,
     "Inference",
     ha="right",
     color="tab:gray",
@@ -166,8 +166,8 @@ axes[1].text(
     zorder=0,
 )
 axes[1].text(
-    date_ld + datetime.timedelta(hours=12),
-    990,
+    date_ld + datetime.timedelta(hours=20),
+    970,
     "Forecast",
     ha="left",
     color="tab:gray",

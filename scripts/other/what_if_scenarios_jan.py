@@ -100,8 +100,8 @@ cp_b.append(  # Up again
 cp_d.append(  # Omikron
     dict(
         pr_mean_date_transient=date_ld
-        + datetime.timedelta(days=2.5),  # shift to offset transient length
-        pr_sigma_date_transient=5,
+        + datetime.timedelta(days=3.5),  # shift to offset transient length
+        pr_sigma_date_transient=7,
         pr_median_lambda=0.3142,
         pr_sigma_lambda=0.02,  # No wiggle
     )
@@ -189,14 +189,14 @@ params_model = dict(
 mod_a = create_model(cp_a, params_model)
 mod_b = create_model(cp_b, params_model)
 mod_c = create_model(cp_c, params_model)
-mod_d = create_model(cp_c, params_model)
+mod_d = create_model(cp_d, params_model)
 
 """ ## MCMC sampling
 """
 tr_a = pm.sample(model=mod_a, tune=500, draws=500, init="advi+adapt_diag")
 tr_b = pm.sample(model=mod_b, tune=500, draws=500, init="advi+adapt_diag")
 tr_c = pm.sample(model=mod_c, tune=500, draws=500, init="advi+adapt_diag")
-tr_d = pm.sample(model=mod_c, tune=500, draws=500, init="advi+adapt_diag")
+tr_d = pm.sample(model=mod_d, tune=500, draws=500, init="advi+adapt_diag")
 
 
 import pickle
