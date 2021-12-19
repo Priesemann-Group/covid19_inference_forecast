@@ -100,7 +100,7 @@ cp_b.append(  # Up again
 
 cp_d.append(  # Omikron
     dict(
-        pr_mean_date_transient=date_ld
+        pr_mean_date_transient=datetime.datetime(2021,12,17)
         + datetime.timedelta(days=21/2),  # shift to offset transient length
         pr_median_transient_len=21,
         pr_sigma_date_transient=0.02,
