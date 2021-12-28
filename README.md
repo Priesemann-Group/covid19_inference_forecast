@@ -56,7 +56,7 @@ the current estimate (dark blue), a third one with a reproduction number of R=1.
 
 ### Legacy
 
-#### Data until 2nd February 2020
+#### Data until 2nd February 2021
 Around Christmas and new year one can clearly see that the reporting was not working as effectifly as before or afterwards. Our model is able to bridge this behaviour if enought data before and afterwards is given.
 <p float="left">
   <img src="scripts/other/figures/what_if_jan_english_ts_02_04.png" height="450" />
