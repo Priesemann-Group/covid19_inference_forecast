@@ -77,12 +77,12 @@ fig, axes = create_plot_scenarios(
     add_more_later=True,
 )
 
-fig, axes = create_plot_scenarios(  # Strenger 2.nov
+fig, axes = create_plot_scenarios(
     mod_b,
     tr_b,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Deteriorating restrictions",
+    forecast_label=f"Omicron gets dominant (optimistic)",
     color="#41b6c4",
 )
 
@@ -101,7 +101,7 @@ fig, axes = create_plot_scenarios(
     tr_d,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label="Omikron gets dominant",
+    forecast_label="Omicron gets dominant (pessimistic)",
     color="tab:purple",
     add_more_later=True,
 )

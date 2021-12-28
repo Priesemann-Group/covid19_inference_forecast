@@ -48,26 +48,29 @@ We recommend using plot based on reporting date above. The nowcast imputation st
 We show four different scenarios starting today (see date of latest updated). One
 with a very low reproduction number R starting today (R=0.7; green), a second
 one, where the underling reproduction number does not change from
-the current estimate (dark blue), a third one with a reproduction number of R=1.2 (light blue), representing an optimistic scenario for Omicron taking over; and fourth one with a pessimistic scenario for Omicron, where R is about 2 (purple). Currently (December 2021), we consider a continutation with an R lower than one unrealistic due to the increase of Omicron-related case numbers. Moreover, underreporting between Christimas and New Year of about 30 % (in the last year) has its impact. Hence, please take the numbers as rough orientation only.
+the current estimate (dark blue), a third one with a reproduction number of R=1.2 (light blue), representing an optimistic scenario for Omicron taking over; and fourth one with a pessimistic scenario for Omicron, where R is about 2 (purple). Currently (December 2021), we consider a continuation with an R lower than one unrealistic due to the increase of Omicron-related case numbers. Moreover, underreporting between Christmas and New Year of about 30 % (in the last year, see below) has its impact. Hence, please take the numbers as rough orientation only.
 <p float="left">
   <img src="scripts/other/figures/what_if_jan_english_ts.png" height="450" />
 </p>
 
-#### Data until 2nd February
-Around chirstmas and new year one can clearly see that the reporting was not working as effectifly as before or afterwards. Our model is able to bridge this behaviour if enought data before and afterwards is given.
+
+### Legacy
+
+#### Data until 2nd February 2020
+Around Christmas and new year one can clearly see that the reporting was not working as effectifly as before or afterwards. Our model is able to bridge this behaviour if enought data before and afterwards is given.
 <p float="left">
   <img src="scripts/other/figures/what_if_jan_english_ts_02_04.png" height="450" />
 </p>
 
 
-#### Data until 25th December
+#### Data until 25th December 2020
 Instead of further thougher restrictions around the 14th of December we proposed a lockdown right after Christmas on the 25th November.
 <p float="left">
   <img src="scripts/other/figures/what_if_lockdown_25dezenglish_ts.png" height="450" />
 </p>
 
 
-#### Data until 2nd November
+#### Data until 2nd November 2020
 With a second lockdown (light) present in Germany from the 2nd November onwards, we try to model three different lockdown scenarios.
 
 <p float="left">
@@ -94,7 +97,7 @@ The discrepancy between data (blue) and prediction (yellow) may be due to (a) th
 
 Our aim is to quantify the effects of intervention policies on the spread of COVID-19. To that end, we built a Bayesian SIR model where we can incorporate our prior knowledge of the time points of governmental policy changes. While the first two change points were not sufficient to switch from growth of novel cases to a decline, the third change point (the strict contact ban initiated around March 23) brought this crucial reversal. - Now, a number of stores have been opened and policies have been loosened on the one hand, which may lead to increased spreading (increased ![$\lambda^\ast$](https://render.githubusercontent.com/render/math?math=%24%5Clambda%5E%5Cast%24)). On the other hand, masks are now widely used and contact tracing might start to show effect, which both may reduce the spread of the virus (decrease ![$\lambda^\ast$](https://render.githubusercontent.com/render/math?math=%24%5Clambda%5E%5Cast%24)). We will only start to see the joint effects of the novel govenrmental policies and collective behavior with a delay of 2-3 weeks. Therefore, we show alternative future scenarios here.
 
-### Alternative forecast scenarios, projecting the relaxation of restrictions on May 11
+### Alternative forecast scenarios, projecting the relaxation of restrictions on May 11 2020
 
 <p float="left">
   <img src="figures/what_if_english_ts.png" height="450"/>

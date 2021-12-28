@@ -88,23 +88,23 @@ cp_a.append(  # Lockdown streng
     )
 )
 
-cp_b.append(  # Up again
+cp_b.append(  # Omicron (optimistic)
     dict(
-        pr_mean_date_transient=date_ld
-        + datetime.timedelta(days=1),  # shift to offset transient length
+        pr_mean_date_transient=datetime.datetime(2021, 12, 17)
+        + datetime.timedelta(days=21 / 2),  # shift to offset transient length,
         pr_sigma_date_transient=2,
         pr_median_lambda=0.17,  # to R = 1.2
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
 
-cp_d.append(  # Omikron
+cp_d.append(  # Omicron (pessimistic)
     dict(
-        pr_mean_date_transient=datetime.datetime(2021,12,17)
-        + datetime.timedelta(days=21/2),  # shift to offset transient length
+        pr_mean_date_transient=datetime.datetime(2021, 12, 17)
+        + datetime.timedelta(days=21 / 2),  # shift to offset transient length
         pr_median_transient_len=21,
         pr_sigma_date_transient=0.02,
-        pr_median_lambda=0.3142,
+        pr_median_lambda=0.3142,  # to R = 2
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
