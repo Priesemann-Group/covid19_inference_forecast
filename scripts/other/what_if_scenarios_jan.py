@@ -92,7 +92,7 @@ cp_b.append(  # Omicron (optimistic)
     dict(
         pr_mean_date_transient=datetime.datetime(2021, 12, 17)
         + datetime.timedelta(days=21 / 2),  # shift to offset transient length,
-        pr_sigma_date_transient=2,
+        pr_sigma_date_transient=21,
         pr_median_lambda=0.17,  # to R = 1.2
         pr_sigma_lambda=0.02,  # No wiggle
     )
