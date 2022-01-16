@@ -76,10 +76,10 @@ def construct_cps(begin,end,cp_list=[]):
 
 """ ## Manual add last cps i.e. scenarios!
 """
-cp_a = copy(construct_cps(change_points,data_begin,data_end))
-cp_b = copy(construct_cps(change_points,data_begin,datetime.datetime(2021, 12, 17)))
-cp_d = copy(construct_cps(change_points,data_begin,datetime.datetime(2021, 12, 17)))
-cp_d = copy(construct_cps(change_points,data_begin,data_end))
+cp_a = construct_cps(copy(change_points),data_begin,data_end)
+cp_b = construct_cps(copy(change_points),data_begin,datetime.datetime(2021, 12, 17))
+cp_d = construct_cps(copy(change_points),data_begin,datetime.datetime(2021, 12, 17))
+cp_d = construct_cps(copy(change_points),data_begin,data_end)
 
 cp_a.append(  # Lockdown streng
     dict(
@@ -96,7 +96,7 @@ cp_b.append(  # Omicron (optimistic)
         pr_mean_date_transient=datetime.datetime(2021, 12, 17)
         + datetime.timedelta(days=21 / 2),  # shift to offset transient length,
         pr_sigma_date_transient=21,
-        pr_median_lambda=0.17,  # to R = 1
+        pr_median_lambda=0.125,  # to R = 1
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
@@ -107,7 +107,7 @@ cp_d.append(  # Omicron (pessimistic)
         + datetime.timedelta(days=21 / 2),  # shift to offset transient length
         pr_median_transient_len=21,
         pr_sigma_date_transient=0.02,
-        pr_median_lambda=0.3142,  # to R = 1.5
+        pr_median_lambda=(1.5)**0.25-1+1/8,  # to R = 1.5
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
