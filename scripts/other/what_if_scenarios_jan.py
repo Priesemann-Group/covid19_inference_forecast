@@ -53,30 +53,33 @@ change_points = [
     ),
 ]
 log.info(f"Adding possible change points at:")
-for i, day in enumerate(pd.date_range(start=data_begin, end=data_end)):
-    if day.weekday() == 0 and day < new_cases_obs.index[-1] - datetime.timedelta(
-        days=7
-    ):
-        log.info(f"\t{day.strftime('%d.%m.%y')}")
 
-        # Prior factor to previous
-        change_points.append(
-            dict(  # one possible change point every sunday
-                pr_mean_date_transient=day,
-                pr_sigma_date_transient=1.5,
-                pr_sigma_lambda=0.2,  # wiggle compared to previous point
-                relative_to_previous=True,
-                pr_factor_to_previous=1,
+def construct_cps(begin,end,cp_list=[]):
+    for i, day in enumerate(pd.date_range(start=begin, end=end)):
+        if day.weekday() == 0 and day < new_cases_obs.index[-1] - datetime.timedelta(
+            days=7
+        ):
+            log.info(f"\t{day.strftime('%d.%m.%y')}")
+
+            # Prior factor to previous
+            cp_list.append(
+                dict(  # one possible change point every sunday
+                    pr_mean_date_transient=day,
+                    pr_sigma_date_transient=1.5,
+                    pr_sigma_lambda=0.2,  # wiggle compared to previous point
+                    relative_to_previous=True,
+                    pr_factor_to_previous=1,
+                )
             )
-        )
+    return cp_list
 
 
 """ ## Manual add last cps i.e. scenarios!
 """
-cp_a = copy(change_points)
-cp_b = copy(change_points)
-cp_c = copy(change_points)
-cp_d = copy(change_points)
+cp_a = copy(construct_cps(change_points,data_begin,data_end))
+cp_b = copy(construct_cps(change_points,data_begin,datetime.datetime(2021, 12, 17)))
+cp_d = copy(construct_cps(change_points,data_begin,datetime.datetime(2021, 12, 17)))
+cp_d = copy(construct_cps(change_points,data_begin,data_end))
 
 cp_a.append(  # Lockdown streng
     dict(
@@ -93,7 +96,7 @@ cp_b.append(  # Omicron (optimistic)
         pr_mean_date_transient=datetime.datetime(2021, 12, 17)
         + datetime.timedelta(days=21 / 2),  # shift to offset transient length,
         pr_sigma_date_transient=21,
-        pr_median_lambda=0.17,  # to R = 1.2
+        pr_median_lambda=0.17,  # to R = 1
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
@@ -104,7 +107,7 @@ cp_d.append(  # Omicron (pessimistic)
         + datetime.timedelta(days=21 / 2),  # shift to offset transient length
         pr_median_transient_len=21,
         pr_sigma_date_transient=0.02,
-        pr_median_lambda=0.3142,  # to R = 2
+        pr_median_lambda=0.3142,  # to R = 1.5
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
