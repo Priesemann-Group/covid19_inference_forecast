@@ -76,10 +76,10 @@ def construct_cps(begin,end,cp_list=[]):
 
 """ ## Manual add last cps i.e. scenarios!
 """
-cp_a = construct_cps(copy(change_points),data_begin,data_end)
-cp_b = construct_cps(copy(change_points),data_begin,datetime.datetime(2021, 12, 17))
-cp_d = construct_cps(copy(change_points),data_begin,datetime.datetime(2021, 12, 17))
-cp_d = construct_cps(copy(change_points),data_begin,data_end)
+cp_a = construct_cps(data_begin,data_end,copy(change_points))
+cp_b = construct_cps(data_begin,datetime.datetime(2021, 12, 16),copy(change_points))
+cp_d = construct_cps(data_begin,datetime.datetime(2021, 12, 16),copy(change_points))
+cp_c = construct_cps(data_begin,data_end,copy(change_points))
 
 cp_a.append(  # Lockdown streng
     dict(
