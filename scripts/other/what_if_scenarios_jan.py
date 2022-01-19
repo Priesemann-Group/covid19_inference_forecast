@@ -77,8 +77,8 @@ def construct_cps(begin,end,cp_list=[]):
 """ ## Manual add last cps i.e. scenarios!
 """
 cp_a = construct_cps(data_begin,data_end,copy(change_points))
-cp_b = construct_cps(data_begin,datetime.datetime(2021, 12, 16),copy(change_points))
-cp_d = construct_cps(data_begin,datetime.datetime(2021, 12, 16),copy(change_points))
+cp_b = construct_cps(data_begin,data_end,copy(change_points))
+cp_d = construct_cps(data_begin,data_end,copy(change_points))
 cp_c = construct_cps(data_begin,data_end,copy(change_points))
 
 cp_a.append(  # Lockdown streng
@@ -93,9 +93,9 @@ cp_a.append(  # Lockdown streng
 
 cp_b.append(  # Omicron (optimistic)
     dict(
-        pr_mean_date_transient=datetime.datetime(2021, 12, 17)
-        + datetime.timedelta(days=21 / 2),  # shift to offset transient length,
-        pr_sigma_date_transient=21,
+        pr_mean_date_transient=date_ld
+        + datetime.timedelta(days=7 / 2),  # shift to offset transient length,
+        pr_sigma_date_transient=7,
         pr_median_lambda=0.125,  # to R = 1
         pr_sigma_lambda=0.02,  # No wiggle
     )
@@ -103,9 +103,9 @@ cp_b.append(  # Omicron (optimistic)
 
 cp_d.append(  # Omicron (pessimistic)
     dict(
-        pr_mean_date_transient=datetime.datetime(2021, 12, 17)
-        + datetime.timedelta(days=21 / 2),  # shift to offset transient length
-        pr_median_transient_len=21,
+        pr_mean_date_transient=date_ld
+        + datetime.timedelta(days=7 / 2),  # shift to offset transient length
+        pr_median_transient_len=7,
         pr_sigma_date_transient=0.02,
         pr_median_lambda=(1.5)**0.25-1+1/8,  # to R = 1.5
         pr_sigma_lambda=0.02,  # No wiggle

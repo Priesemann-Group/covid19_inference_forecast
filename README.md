@@ -48,7 +48,7 @@ We recommend using plot based on reporting date above. The nowcast imputation st
 We show four different scenarios starting today (see date of latest updated). One
 with a very low reproduction number R starting today (R=0.7; green), a second
 one, where the underling reproduction number does not change from
-the current estimate (dark blue), a third one with a reproduction number of R=1.2 (light blue), representing an optimistic scenario for Omicron taking over; and fourth one with a pessimistic scenario for Omicron, where R is about 2 (purple). Currently (December 2021), we consider a continuation with an R lower than one unrealistic due to the increase of Omicron-related case numbers. Moreover, underreporting between Christmas and New Year of about 30 % (in the last year, see below) has its impact. Hence, please take the numbers as rough orientation only.
+the current estimate (dark blue), a third one with a reproduction number of R=1 (light blue), representing an optimistic scenario for Omicron taking over; and fourth one with a pessimistic scenario for Omicron, where R is about 1.5 (purple). Currently (December 2021), we consider a continuation with an R lower than one unrealistic due to the increase of Omicron-related case numbers. Moreover, underreporting between Christmas and New Year of about 30 % (in the last year, see below) has its impact. Hence, please take the numbers as rough orientation only.
 <p float="left">
   <img src="scripts/other/figures/what_if_jan_english_ts.png" height="450" />
 </p>

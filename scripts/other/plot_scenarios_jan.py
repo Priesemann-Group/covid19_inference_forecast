@@ -115,7 +115,8 @@ axes[0].set_ylabel("Effective\ngrowth rate")
 # Set new cases limit and labels
 axes[1].set_ylabel("New cases per\n 1.000.000 inhabitants")
 axes[1].set_xlabel("Date")
-axes[1].set_ylim(0, 1000)
+ylim = (0,1800)
+axes[1].set_ylim(ylim)
 
 # Disable total cases axes visuals
 axes[2].set_ylim(0, 0)
@@ -158,7 +159,7 @@ axes[0].text(
 )
 axes[1].text(
     date_ld - datetime.timedelta(hours=20),
-    970,
+    ylim[1]-30,
     "Inference",
     ha="right",
     color="tab:gray",
@@ -167,7 +168,7 @@ axes[1].text(
 )
 axes[1].text(
     date_ld + datetime.timedelta(hours=20),
-    970,
+    ylim[1]-30,
     "Forecast",
     ha="left",
     color="tab:gray",
