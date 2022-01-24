@@ -203,7 +203,7 @@ for ax in axes:
     ax.set_xlim(datetime.datetime.now() - datetime.timedelta(days=4 * 17))
 
 # Set ylim for new cases
-axes[1].set_ylim(0, new_cases_obs.max() + 5000)
+axes[1].set_ylim(0, new_cases_obs.max() + 10000)
 
 # --------------------------------------------------------------------------- #
 # inset new cases

@@ -115,7 +115,7 @@ axes[0].set_ylabel("Effective\ngrowth rate")
 # Set new cases limit and labels
 axes[1].set_ylabel("New cases per\n 1.000.000 inhabitants")
 axes[1].set_xlabel("Date")
-ylim = (0,1800)
+ylim = (0,2000)
 axes[1].set_ylim(ylim)
 
 # Disable total cases axes visuals
