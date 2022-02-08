@@ -78,15 +78,14 @@ def construct_cps(begin,end,cp_list=[]):
 """
 cp_a = construct_cps(data_begin,data_end,copy(change_points))
 cp_b = construct_cps(data_begin,data_end,copy(change_points))
-cp_d = construct_cps(data_begin,data_end,copy(change_points))
 cp_c = construct_cps(data_begin,data_end,copy(change_points))
 
 cp_a.append(  # Lockdown streng
     dict(
         pr_mean_date_transient=date_ld
-        + datetime.timedelta(days=1),  # shift to offset transient length
-        pr_sigma_date_transient=2,
-        pr_median_lambda=0.04,  # to R = 0.7
+        + datetime.timedelta(days=7/2),  # shift to offset transient length
+        pr_sigma_date_transient=7,
+        pr_median_lambda=(0.7)**0.25-1+1/8,  # to R = 1.5
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
@@ -94,20 +93,9 @@ cp_a.append(  # Lockdown streng
 cp_b.append(  # Omicron (optimistic)
     dict(
         pr_mean_date_transient=date_ld
-        + datetime.timedelta(days=7 / 2),  # shift to offset transient length,
+        + datetime.timedelta(days=7 / 2),
         pr_sigma_date_transient=7,
-        pr_median_lambda=0.125,  # to R = 1
-        pr_sigma_lambda=0.02,  # No wiggle
-    )
-)
-
-cp_d.append(  # Omicron (pessimistic)
-    dict(
-        pr_mean_date_transient=date_ld
-        + datetime.timedelta(days=7 / 2),  # shift to offset transient length
-        pr_median_transient_len=7,
-        pr_sigma_date_transient=0.02,
-        pr_median_lambda=(1.5)**0.25-1+1/8,  # to R = 1.5
+        pr_median_lambda=(1.3)**0.25-1+1/8,  # to R = 1.5
         pr_sigma_lambda=0.02,  # No wiggle
     )
 )
@@ -194,17 +182,15 @@ params_model = dict(
 mod_a = create_model(cp_a, params_model)
 mod_b = create_model(cp_b, params_model)
 mod_c = create_model(cp_c, params_model)
-mod_d = create_model(cp_d, params_model)
 
 """ ## MCMC sampling
 """
 tr_a = pm.sample(model=mod_a, tune=500, draws=500, init="advi+adapt_diag")
 tr_b = pm.sample(model=mod_b, tune=500, draws=500, init="advi+adapt_diag")
 tr_c = pm.sample(model=mod_c, tune=500, draws=500, init="advi+adapt_diag")
-tr_d = pm.sample(model=mod_d, tune=500, draws=500, init="advi+adapt_diag")
 
 pickle.dump(
-    [(mod_a, mod_b, mod_c, mod_d), (tr_a, tr_b, tr_c, tr_d)],
+    [(mod_a, mod_b, mod_c), (tr_a, tr_b, tr_c)],
     open("./data/what_if_lockdown_jan.pickled", "wb"),
 )
 

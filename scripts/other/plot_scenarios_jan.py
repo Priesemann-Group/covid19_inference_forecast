@@ -39,7 +39,7 @@ total_cases_obs = rki.get_total("confirmed", data_begin=data_begin, data_end=dat
 
 
 with open("./data/what_if_lockdown_jan.pickled", "rb") as f:
-    [(mod_a, mod_b, mod_c, mod_d), (tr_a, tr_b, tr_c, tr_d)] = pickle.load(f)
+    [(mod_a, mod_b, mod_c), (tr_a, tr_b, tr_c)] = pickle.load(f)
 
 
 try:
@@ -82,7 +82,7 @@ fig, axes = create_plot_scenarios(
     tr_b,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Omicron gets dominant (optimistic)",
+    forecast_label=f"$R=1.3$",
     color="#41b6c4",
 )
 
@@ -91,19 +91,8 @@ fig, axes = create_plot_scenarios(
     tr_a,
     axes=axes,
     offset=total_cases_obs[0],
-    forecast_label=f"Further restrictions",
+    forecast_label=f"R=0.7",
     color="tab:green",
-)
-
-# Create plots
-fig, axes = create_plot_scenarios(
-    mod_d,
-    tr_d,
-    axes=axes,
-    offset=total_cases_obs[0],
-    forecast_label="Omicron gets dominant (pessimistic)",
-    color="tab:purple",
-    add_more_later=True,
 )
 
 
