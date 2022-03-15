@@ -9,16 +9,16 @@ this_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cd $this_DIR
 # >>>  conda initialize >>>
-. /home/smohr/anaconda3/etc/profile.d/conda.sh
-conda activate base
+. /data.nst/smohr/anaconda3/etc/profile.d/conda.sh
+conda activate pymc3_new
 # >>>  conda initialize >>>
 
 which python
 # Pull from git
 git pull
 # Run the two scripts
-/home/smohr/anaconda3/bin/python3.7 weekly_changepoints.py
-/home/smohr/anaconda3/bin/python3.7 weekly_changepoints_with_Rki_Nowcast.py
+python weekly_changepoints.py
+python weekly_changepoints_with_Rki_Nowcast.py
 
 # Commit figures
 git add "../../figures/*"

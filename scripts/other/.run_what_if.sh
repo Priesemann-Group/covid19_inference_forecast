@@ -4,8 +4,8 @@ this_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cd $this_DIR
 # >>>  conda initialize >>>
-. /home/smohr/anaconda3/etc/profile.d/conda.sh
-conda activate base
+. /data.nst/smohr/anaconda3/etc/profile.d/conda.sh
+conda activate pymc3_new
 # >>>  conda initialize >>>
 
 which python
@@ -13,7 +13,7 @@ which python
 git pull
 # Run the two scripts in parrallel
 #/home/smohr/anaconda3/bin/python3.7 what_if_scenarios_lockdown_dez.py
-/home/smohr/anaconda3/bin/python3.7 what_if_scenarios_jan.py
+python what_if_scenarios_jan.py
 
 
 #/home/smohr/anaconda3/bin/python3.7 plot_scenarios_dez.py
