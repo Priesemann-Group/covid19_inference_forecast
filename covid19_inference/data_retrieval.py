@@ -85,6 +85,7 @@ def get_jhu_confirmed_cases():
             pandas table with confirmed cases
     """
     try:
+        1/0
         url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
         confirmed_cases = pd.read_csv(url, sep=",")
     except Exception as e:

@@ -1,0 +1,7 @@
+numpy==1.20.0
+scipy
+matplotlib
+pints
+pandas
+theano
+pymc3==3.7

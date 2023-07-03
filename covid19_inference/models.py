@@ -22,7 +22,8 @@ def SIR_with_change_points(
     N,
     priors_dict=None,
     weekends_modulated=False,
-    weekend_modulation_type = 'step'
+    weekend_modulation_type = 'step',
+    time_step=1
 ):
     """
         Parameters
@@ -244,9 +245,16 @@ def SIR_with_change_points(
         # -------------------------------------------------------------------------- #
 
         S_begin = N - I_begin
-        S, I, new_I = _SIR_model(
-            lambda_t=lambda_t, mu=mu, S_begin=S_begin, I_begin=I_begin, N=N
-        )
+        if time_step == 1:
+            S, I, new_I = _SIR_model(
+                lambda_t=lambda_t, mu=mu, S_begin=S_begin, I_begin=I_begin, N=N
+            )
+        elif time_step == 0.1:
+            S, I, new_I = _SIR_model_01(
+                lambda_t=lambda_t, mu=mu, S_begin=S_begin, I_begin=I_begin, N=N
+            )
+        else:
+            raise ValueError('time_step not recognized')
 
         new_cases_inferred = mh.delay_cases(
             new_I_t=new_I,
@@ -355,6 +363,38 @@ def _SIR_model(lambda_t, mu, S_begin, I_begin, N):
         non_sequences=[mu, N],
     )
     return outputs
+
+
+def _SIR_model_01(lambda_t, mu, S_begin, I_begin, N):
+    print('running with 0.1 timestep')
+    new_I_0 = tt.zeros_like(I_begin)
+
+    #repeat lambda
+    lambda_t = np.repeat(lambda_t, 10)
+
+    def next_day(lambda_t, S_t, I_t, _, mu, N):
+        new_I_t = lambda_t / N * I_t * S_t * 0.1
+        S_t = S_t - new_I_t
+        I_t = I_t + new_I_t - mu * I_t * 0.1
+        I_t = tt.clip(I_t, 0, N)  # for stability
+        return S_t, I_t, new_I_t
+
+    # theano scan returns two tuples, first one containing a time series of
+    # what we give in outputs_info : S, I, new_I
+    outputs, _ = theano.scan(
+        fn=next_day,
+        sequences=[lambda_t],
+        outputs_info=[S_begin, I_begin, new_I_0],
+        non_sequences=[mu, N],
+    )
+
+    S, I, new_I = outputs
+    # print(new_I)
+    # S = np.sum(np.reshape(S, (-1, 10)), axis=1)
+    # I = np.sum(np.reshape(I, (-1, 10)), axis=1)
+    new_I = tt.sum(tt.reshape(new_I, (-1, 10)), axis=1)
+
+    return S, I, new_I
 
 
 # ------------------------------------------------------------------------------ #
